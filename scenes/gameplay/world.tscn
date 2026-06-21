@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bdh6ogatogsa6"]
+
+[ext_resource type="Script" uid="uid://drr02rjnx7ft0" path="res://scenes/gameplay/world.gd" id="1_4np77"]
+[ext_resource type="Script" uid="uid://bd240dbppqbi6" path="res://networking/level_loader.gd" id="1_pvtv0"]
+[ext_resource type="Script" uid="uid://cd1b7rpxgj5d2" path="res://networking/player_spawner.gd" id="2_4np77"]
+
+[node name="World" type="Node" unique_id=43387356]
+script = ExtResource("1_4np77")
+
+[node name="LevelLoader" type="Node" parent="." unique_id=808154624]
+unique_name_in_owner = true
+script = ExtResource("1_pvtv0")
+
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="." unique_id=931290397]
+unique_name_in_owner = true
+_spawnable_scenes = PackedStringArray("uid://fff2awjtd2uk")
+spawn_path = NodePath(".")
+script = ExtResource("2_4np77")

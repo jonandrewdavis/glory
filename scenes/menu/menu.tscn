@@ -1,21 +1,20 @@
 [gd_scene format=3 uid="uid://c2gocuhw2o7py"]
 
+[ext_resource type="Theme" uid="uid://brfyamk8dn0ef" path="res://resources/theme/theme_casual_pop.tres" id="1_y1o0p"]
 [ext_resource type="PackedScene" uid="uid://c2jxemjmao00b" path="res://addons/ggt-core/settings/settings_menu.tscn" id="3_e0arn"]
-[ext_resource type="FontFile" uid="uid://da2t6lyf41wty" path="res://assets/fonts/open-sans/open-sans-bold.ttf" id="4"]
 [ext_resource type="Script" uid="uid://cvc42inud8fxx" path="res://scenes/menu/menu.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/menu/host_panel.tscn" id="host"]
+[ext_resource type="PackedScene" path="res://scenes/menu/join_panel.tscn" id="join"]
 
-[node name="Menu" type="Control" unique_id=1641158152 node_paths=PackedStringArray("play_button", "exit_button", "settings_menu", "margin_container")]
+[node name="Menu" type="Control" unique_id=1641158152]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_y1o0p")
 script = ExtResource("5")
-play_button = NodePath("MarginContainer/Control/VBoxContainer/PlayButton")
-exit_button = NodePath("MarginContainer/Control/VBoxContainer/ExitButton")
-settings_menu = NodePath("SettingsMenu")
-margin_container = NodePath("MarginContainer")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1540281165]
 layout_mode = 1
@@ -24,9 +23,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.224, 0.2709333, 0.4, 1)
+color = Color(0.0956487, 0.21971804, 0.36288694, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=494167775]
+[node name="MainContainer" type="MarginContainer" parent="." unique_id=494167775]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,105 +34,83 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Control" type="Control" parent="MarginContainer" unique_id=2015180303]
+[node name="Control" type="Control" parent="MainContainer" unique_id=2015180303]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/Control" unique_id=1435400836]
+[node name="CenterContainer" type="CenterContainer" parent="MainContainer/Control" unique_id=1435400836]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.3
 offset_left = -8.0
 offset_right = -8.0
-offset_bottom = -339.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Title" type="Label" parent="MarginContainer/Control/CenterContainer" unique_id=1695717094]
+[node name="Title" type="Label" parent="MainContainer/Control/CenterContainer" unique_id=1695717094]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("4")
 theme_override_font_sizes/font_size = 60
-text = "Godot Game Template"
-uppercase = true
+text = "Mouse Mage Arena"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control" unique_id=737419068]
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/Control" unique_id=737419068]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -104.0
-offset_top = -30.0
-offset_right = 96.0
+offset_left = -170.0
+offset_top = -160.0
+offset_right = 170.0
 offset_bottom = 134.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
 
-[node name="PlayButton" type="Button" parent="MarginContainer/Control/VBoxContainer" unique_id=282119598]
-custom_minimum_size = Vector2(200, 70)
+[node name="ServiceRow" type="HBoxContainer" parent="MainContainer/Control/VBoxContainer" unique_id=1290981585]
 layout_mode = 2
-focus_neighbor_bottom = NodePath("../ExitButton")
-focus_next = NodePath("../ExitButton")
-text = "START"
 
-[node name="SettingsButton" type="Button" parent="MarginContainer/Control/VBoxContainer" unique_id=879990348]
-custom_minimum_size = Vector2(200, 70)
+[node name="Label" type="Label" parent="MainContainer/Control/VBoxContainer/ServiceRow" unique_id=40573821]
 layout_mode = 2
-focus_neighbor_bottom = NodePath("../ExitButton")
-focus_next = NodePath("../ExitButton")
-text = "SETTINGS"
+text = "Service"
 
-[node name="ExitButton" type="Button" parent="MarginContainer/Control/VBoxContainer" unique_id=1212985906]
-custom_minimum_size = Vector2(200, 70)
+[node name="ServiceOption" type="OptionButton" parent="MainContainer/Control/VBoxContainer/ServiceRow" unique_id=1468253624]
+unique_name_in_owner = true
 layout_mode = 2
-focus_neighbor_top = NodePath("../PlayButton")
-focus_previous = NodePath("../PlayButton")
-text = "EXIT"
+size_flags_horizontal = 3
 
-[node name="Credits" type="VBoxContainer" parent="MarginContainer/Control" unique_id=1729305012]
-visible = false
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -86.0
-offset_top = -23.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="MadeByLabel" type="Label" parent="MarginContainer/Control/Credits" unique_id=704108959]
+[node name="StatusLabel" type="Label" parent="MainContainer/Control/VBoxContainer" unique_id=101626082]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme_type_variation = &"LabelSmall"
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "made by: "
+autowrap_mode = 2
 
-[node name="Developer1" type="Label" parent="MarginContainer/Control/Credits" unique_id=2143049063]
-auto_translate_mode = 2
+[node name="HostButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=1994618644]
+unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"LabelSmall"
-theme_override_colors/font_color = Color(0.92549, 0.92549, 0.92549, 1)
-text = "John Doe"
+theme_type_variation = &"PrimaryButton"
+text = "Host"
 
-[node name="Developer2" type="Label" parent="MarginContainer/Control/Credits" unique_id=1123998025]
-auto_translate_mode = 2
+[node name="JoinButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=1060398648]
+unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"LabelSmall"
-theme_override_colors/font_color = Color(0.886275, 0.87451, 0.87451, 1)
-text = "Mario Rossi"
+theme_type_variation = &"SuccessButton"
+text = "Join"
 
-[node name="Developer3" type="Label" parent="MarginContainer/Control/Credits" unique_id=867376137]
-auto_translate_mode = 2
-visible = false
+[node name="SettingsButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=487482265]
+unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"LabelSmall"
-theme_override_colors/font_color = Color(0.886275, 0.87451, 0.87451, 1)
-text = "Developer 3"
+text = "Settings"
+
+[node name="ExitButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=1450682031]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "Exit"
 
 [node name="SettingsMenu" parent="." unique_id=1313122932 instance=ExtResource("3_e0arn")]
+unique_name_in_owner = true
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -148,6 +126,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Help" type="PanelContainer" parent="." unique_id=891782893]
+unique_name_in_owner = true
 auto_translate_mode = 2
 layout_mode = 1
 anchors_preset = 4
@@ -165,19 +144,62 @@ layout_mode = 2
 [node name="RichTextLabel" type="RichTextLabel" parent="Help/MarginContainer" unique_id=1170172205]
 layout_mode = 2
 bbcode_enabled = true
-text = "Welcome to the [b]Godot Game Template[/b], [color=#7af]GGT[/color] in short!
+text = "Host a game for your friends, or join an existing lobby.
 
-Some debug shortcuts that you can use are:
+Choose LAN (ENet) for your local network or Online (NodeTunnel) to play over the relay.
 
-- [bgcolor=#333]F3[/bgcolor]: [color=gray]Show stats[/color]
-- [bgcolor=#333]F4[/bgcolor]: [color=gray]Increase stats size[/color]
+Hosts can share the address or room code from the pause menu.
 
-[color=#ffa]These are automatically removed in release builds.[/color]
+F3: cycle debug stats
+F4: change stats size"
 
-You can check the release type in the bottom left corner."
+[node name="HostPanel" parent="." unique_id=169543228 instance=ExtResource("host")]
+unique_name_in_owner = true
+visible = false
 
-[connection signal="pressed" from="MarginContainer/Control/VBoxContainer/PlayButton" to="." method="_on_PlayButton_pressed"]
-[connection signal="pressed" from="MarginContainer/Control/VBoxContainer/SettingsButton" to="." method="_on_settings_button_pressed"]
-[connection signal="pressed" from="MarginContainer/Control/VBoxContainer/ExitButton" to="." method="_on_ExitButton_pressed"]
-[connection signal="confirm_button_clicked" from="SettingsMenu" to="." method="_on_settings_menu_confirm_button_clicked"]
-[connection signal="visibility_changed" from="SettingsMenu" to="." method="_on_settings_menu_visibility_changed"]
+[node name="JoinPanel" parent="." unique_id=1628672145 instance=ExtResource("join")]
+unique_name_in_owner = true
+visible = false
+
+[node name="PendingOverlay" type="ColorRect" parent="." unique_id=503469952]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+color = Color(0.04, 0.06, 0.09, 0.97)
+
+[node name="CenterContainer" type="CenterContainer" parent="PendingOverlay" unique_id=106651208]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PendingOverlay/CenterContainer" unique_id=885496648]
+custom_minimum_size = Vector2(640, 0)
+layout_mode = 2
+
+[node name="PendingLabel" type="Label" parent="PendingOverlay/CenterContainer/VBoxContainer" unique_id=906595413]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Connecting..."
+horizontal_alignment = 1
+
+[node name="FailedLabel" type="Label" parent="PendingOverlay/CenterContainer/VBoxContainer" unique_id=1532521974]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="FailedButton" type="Button" parent="PendingOverlay/CenterContainer/VBoxContainer" unique_id=1526776256]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "CLOSE"

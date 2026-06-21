@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://d1xpycgi6qs7k"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_kaddv"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_kaddv"]
+size = Vector2(20000, 20000)
+
+[node name="LostMonuments" type="Node3D" unique_id=1685573245]
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=1396213789]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1087574089]
+shape = SubResource("WorldBoundaryShape3D_kaddv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1413130807]
+mesh = SubResource("PlaneMesh_kaddv")

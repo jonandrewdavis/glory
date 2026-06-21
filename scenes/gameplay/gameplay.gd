@@ -1,14 +1,27 @@
 extends Node
+class_name Gameplay # TODO: Change this to be one layer lower and use "UILayer?"
 
+const MENU_SCENE := "res://scenes/menu/menu.tscn"
+var exiting := false
 
 func _ready() -> void:
-	var scene_data = GGT.get_current_scene_data()
-	print("[GGT/Gameplay] scene params are ", scene_data.params)
-
-	if DebugMenu != null: # need to check as DebugMenu is not available on release builds
-		DebugMenu.update_settings_label() # this is just to show the correct 3D scaling option in the advanced section
-
-	if GGT.is_changing_scene(): # this will be false if starting the scene with "Run current scene" or F6 shortcut
+	MultiplayerService.game_exited.connect(_on_game_exited)
+	if DebugMenu != null:
+		DebugMenu.update_settings_label()
+	if GGT.is_changing_scene():
 		await GGT.scene_transition_finished
+		await get_tree().process_frame
+	if not MultiplayerService.in_lobby:
+		_on_game_exited()
+	elif not exiting:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-	print("[GGT/Gameplay] scene transition animation finished")
+func _on_game_exited() -> void:
+	if exiting:
+		return
+	exiting = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if GGT.is_changing_scene():
+		await GGT.scene_transition_finished
+		await get_tree().process_frame
+	GGT.change_scene(MENU_SCENE, {"show_progress_bar": false})

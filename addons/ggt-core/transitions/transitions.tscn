@@ -1,39 +1,9 @@
 [gd_scene format=3 uid="uid://82fiitkfc6wn"]
 
-[ext_resource type="FontFile" uid="uid://cawekr44fruhm" path="res://assets/fonts/open-sans/open-sans-regular.ttf" id="1"]
 [ext_resource type="Script" uid="uid://c8ru70vkpmvyy" path="res://addons/ggt-core/transitions/progress.gd" id="3"]
 [ext_resource type="Script" uid="uid://cqeuawll14hnl" path="res://addons/ggt-core/transitions/transitions.gd" id="4"]
 [ext_resource type="Script" uid="uid://dfnwymtygg1to" path="res://scenes/menu/game_version.gd" id="4_mcnah"]
 [ext_resource type="Script" uid="uid://baky6bgu7psf2" path="res://scenes/menu/godot_version.gd" id="5_03rgt"]
-
-[sub_resource type="FontFile" id="4"]
-fallbacks = Array[Font]([ExtResource("1")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/variation_coordinates = {}
-cache/0/face_index = 0
-cache/0/embolden = 0.0
-cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
-cache/0/spacing_top = 0
-cache/0/spacing_bottom = 0
-cache/0/spacing_space = 0
-cache/0/spacing_glyph = 0
-cache/0/baseline_offset = 0.0
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/28/0 = Vector2(0, 0)
-cache/0/28/0/ascent = 0.0
-cache/0/28/0/descent = 0.0
-cache/0/28/0/underline_position = 0.0
-cache/0/28/0/underline_thickness = 0.0
-cache/0/28/0/scale = 1.0
-cache/0/28/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/28/0/kerning_overrides/28/0 = Vector2(0, 0)
 
 [sub_resource type="Animation" id="10"]
 length = 0.001
@@ -258,7 +228,6 @@ offset_top = -27.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
-theme_override_fonts/font = SubResource("4")
 theme_override_font_sizes/font_size = 16
 max_value = 1.0
 

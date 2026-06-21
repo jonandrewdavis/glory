@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://bhslj1aklcv1q"]
+
+[ext_resource type="Texture2D" uid="uid://b5dvig6y2tt41" path="res://assets/01_PrototypeCheckerSmall_2048.png" id="1_s3j67"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aiulw"]
+albedo_texture = ExtResource("1_s3j67")
+uv1_triplanar = true
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6gkck"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_2jas5"]
+sky_material = SubResource("ProceduralSkyMaterial_6gkck")
+
+[sub_resource type="Environment" id="Environment_n51mc"]
+background_mode = 2
+sky = SubResource("Sky_2jas5")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" unique_id=169104357]
+material_overlay = SubResource("StandardMaterial3D_aiulw")
+use_collision = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1292072398]
+environment = SubResource("Environment_n51mc")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1450785161]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="AddBox" type="CSGBox3D" parent="." unique_id=39434125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
+size = Vector3(32, 9, 32)
+
+[node name="SubBox" type="CSGBox3D" parent="." unique_id=1228845272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+operation = 2
+size = Vector3(31, 8, 31)

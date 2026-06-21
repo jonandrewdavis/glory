@@ -1,0 +1,8 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://brfyamk8dn0ef"]
+
+[ext_resource type="Script" uid="uid://cq4ywa4fjd4rt" path="res://resources/theme/casual_pop_theme.gd" id="1"]
+
+[resource]
+resource_name = "Casual Pop"
+script = ExtResource("1")
+accent_color = Color(0.333333, 0.784314, 0.941176, 1)
