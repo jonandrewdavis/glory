@@ -1,5 +1,5 @@
 # ProtoController by Brackeys (CC0), adapted by SwAAn.
-class_name Player
+class_name PlayerProto
 extends CharacterBody3D
 @export var can_move : bool = true
 @export var has_gravity : bool = true

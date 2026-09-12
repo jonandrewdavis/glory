@@ -1,7 +1,7 @@
 class_name PlayerSpawner
 extends MultiplayerSpawner
 
-const PLAYER_SCENE: PackedScene = preload("res://player/proto_controller.tscn")
+const PLAYER_MAGE = preload("uid://yc8iw6ne6k06")
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -18,7 +18,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func spawn_player(id: int) -> void:
 	if has_node(str(id)):
 		return
-	var player: Player = PLAYER_SCENE.instantiate()
+	var player: CharacterBody3D = PLAYER_MAGE.instantiate()
 	player.name = str(id)
 	add_child(player)
 

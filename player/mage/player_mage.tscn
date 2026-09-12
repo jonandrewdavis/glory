@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://yc8iw6ne6k06"]
+
+[ext_resource type="Script" uid="uid://0q1kfwbxvljs" path="res://player/mage/player_mage.gd" id="1_61y20"]
+[ext_resource type="PackedScene" uid="uid://bxgf5rpc10cv0" path="res://assets/models/rat_scene.tscn" id="2_iud7l"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kaddv"]
+
+[node name="PlayerMage" type="CharacterBody3D" unique_id=1757496055]
+script = ExtResource("1_61y20")
+
+[node name="Rat" parent="." unique_id=1283492536 instance=ExtResource("2_iud7l")]
+unique_name_in_owner = true
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2038600600]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.38322413, 0)
+shape = SubResource("CapsuleShape3D_kaddv")

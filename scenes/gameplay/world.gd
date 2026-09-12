@@ -1,14 +1,22 @@
 extends Node
 
-const DEFAULT_LEVEL := "example"
+# Global class: World
+# TODO: Rename to Gameplay and let the UI be seperate.
+
+const DEFAULT_LEVEL := "LostMonuments"
+
 var session := 0
 @onready var level_loader: LevelLoader = %LevelLoader
 @onready var player_spawner: PlayerSpawner = %PlayerSpawner
+@onready var fly_cam: Node3D = %FlyCam
 
 func _ready() -> void:
+	if OS.is_debug_build() and get_tree().current_scene == self:
+		host_debug_world()
+		
 	MultiplayerService.lobby_joined.connect(_on_lobby_joined)
 	MultiplayerService.game_exited.connect(clear)
-
+		
 func _on_lobby_joined() -> void:
 	if not MultiplayerService.is_host():
 		return
@@ -28,3 +36,11 @@ func clear() -> void:
 func change_level(key: String) -> void:
 	if MultiplayerService.is_host() and LevelLoader.LEVEL_DICT.has(key):
 		level_loader.spawn_level.rpc(key)
+
+
+func host_debug_world():
+	var opt = HostOptions.new()
+	opt.max_players = 1
+	opt.lobby_name = 'test'
+	MultiplayerService.backend_changed.connect(func(_new): MultiplayerService.host_game(opt)) 
+	MultiplayerService.set_backend(MultiplayerService.BackendType.ENET)

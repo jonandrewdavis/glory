@@ -144,6 +144,44 @@ The server can:
 - Kick a player using `kick_peer(p_peer_id: int)`
 - Refuse new connections automatically by setting `refuse_new_connections = true`
 
+#### Public sessions (MQTT only)
+
+Public sessions need `mqtt_broker_url`. They do not work with trackers alone.
+These functions emit `error_raised` if the broker URL is empty.
+
+The server makes its session public with `publish_session(metadata)`. Call it again to update the metadata.
+Tube adds `peer_count`, the number of connected peers including the server, and keeps it current.
+`unpublish_session()` or `leave_session()` makes the session private again. If the server disconnects without leaving, the broker removes the session after its timeout.
+
+```GDScript
+func _on_create_button_pressed():
+    tube_client.create_session()
+    tube_client.publish_session({"name": "Andrew's game", "max_players": 4, "open": true})
+
+
+func _on_game_started():
+    tube_client.publish_session({"name": "Andrew's game", "max_players": 4, "open": false})
+```
+
+Any client can list public sessions with `list_sessions()`, with or without a session. This is the lobby list.
+`listing_started` is emitted when listing is ready, then `public_sessions_changed` each time the list changes.
+`get_public_sessions()` returns the sessions keyed by session ID. Call `stop_listing_sessions()` when done.
+
+```GDScript
+func _on_list_button_pressed():
+    tube_client.list_sessions()
+
+
+func _on_tube_client_public_sessions_changed():
+    for session_id in tube_client.get_public_sessions():
+        var metadata = tube_client.get_public_sessions()[session_id]
+        print(session_id, " ", metadata.get("name"), " ", metadata.peer_count, "/", metadata.get("max_players"))
+```
+
+`try_list_sessions()` is the `await` version of `list_sessions()`. It returns `false` on failure without emitting `error_raised`.
+
+Anyone who can reach the broker can publish sessions. Treat metadata as untrusted input.
+
 #### 4. Implementing Multiplayer Logic
 
 By default, `TubeClient` automatically configures Godot’s `MultiplayerAPI` and `MultiplayerPeer` on the SceneTree root node.
@@ -190,7 +228,7 @@ To use it, add the scene located at `/addons/tube/tube_inspector.tscn` to your p
 The most common reason a player cannot connect is a **symmetric NAT**.  
 A symmetric NAT is a router configuration that prevents NAT hole punching. This means that if both peers are behind a symmetric NAT, the connection will likely fail.
 
-You can check whether you are behind a symmetric NAT using the **NAT hole punching** field in `TubeInspector`. Multiple STUN servers with different addresses are required. If the result is `unknown`, try different STUN domains. This tool is not available on Web platform. You can also test here: [Symmetric NAT test](https://tomchen.github.io/symmetric-nat-test/), but note that false positives are common due to browser privacy behavior.
+You can check whether you are behind a symmetric NAT using the **NAT hole punching** field in `TubeInspector`. Multiple STUN servers with different addresses are required. If the result is `unknown`, try different STUN domains. This tool is not available on Web platform. You can also test here: [Symmetric NAT test](https://tomchen.github.io/symmetric-nat-test/), but note that false positives are common due to session_list privacy behavior.
 
 If **NAT hole punching** shows `likely to fail` for two players, then a direct Internet connection is likely impossible without a relay server. You can easily add a TURN server. See: [Using your own servers](#using-your-own-servers).
 
@@ -253,7 +291,7 @@ You can deploy your own WebTorrent tracker using the [Official WebTorrent Tracke
 
 Make sure to configure it with WebSocket support, available on Internet and set its URL in your TubeContext.
 
-It is strongly recommended to use secure WebSockets (WSS/TLS) for to ensure reliable and encrypted communication and some browser will block non-secure communication.
+It is strongly recommended to use secure WebSockets (WSS/TLS) for to ensure reliable and encrypted communication and some session_list will block non-secure communication.
 
 Host your own TypeScript port on a Cloudflare worker via: https://github.com/jonandrewdavis/ws-tracker-server
 

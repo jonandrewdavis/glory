@@ -2,28 +2,31 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cqibqku84s77x"
-path="res://.godot/imported/tube_context.svg-febea6fb8bda9c0e97caaf283ec71d2f.ctex"
+uid="uid://y572y5viuqq7"
+path.s3tc="res://.godot/imported/grass11.png-e88a0ee953f7ad60643045fe20f59fe7.s3tc.ctex"
+path.etc2="res://.godot/imported/grass11.png-e88a0ee953f7ad60643045fe20f59fe7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://addons/tube/icons/tube_context.svg"
-dest_files=["res://.godot/imported/tube_context.svg-febea6fb8bda9c0e97caaf283ec71d2f.ctex"]
+source_file="res://assets/textures/grass11.png"
+dest_files=["res://.godot/imported/grass11.png-e88a0ee953f7ad60643045fe20f59fe7.s3tc.ctex", "res://.godot/imported/grass11.png-e88a0ee953f7ad60643045fe20f59fe7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
+compress/high_quality_mode=0
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -37,7 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
+detect_3d/compress_to=0

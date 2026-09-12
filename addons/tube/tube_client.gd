@@ -53,6 +53,15 @@ signal peer_stabilized(peer_id: int)
 ## Emitted when an error occurs during session. [code]message[/code] is a human-readable description of the error.
 signal error_raised(code: SessionError, message: String)
 
+## Emitted when listing is ready. Public sessions then arrive through [signal public_sessions_changed].
+signal listing_started
+
+## Emitted when listing stops, after [method stop_listing_sessions] or when the connection is lost.
+signal listing_stopped
+
+## Emitted when the public sessions change. See [method get_public_sessions].
+signal public_sessions_changed
+
 
 signal _session_initiated
 signal _local_signaling_peer_initiated(signaling_peer: TubeLocalSignalingPeer)
@@ -60,6 +69,7 @@ signal _tracker_initiated(tracker: TubeTracker)
 signal _peer_initiated(peer: TubePeer)
 signal _session_join_finished(success: bool)
 signal _session_create_finished(success: bool)
+signal _list_sessions_finished(success: bool)
 
 
 enum State {
@@ -105,6 +115,12 @@ enum SessionError {
 	## [br][br]
 	## Local signaling is not available on Web platform, meaing if online signaling failed on Web platform there is no other way for player to join the session. [signal error_raised] will be emitted once with [enum SessionError.ONLINE_SIGNALING_FAILED] and a second time with [enum SessionError.SIGNALING_FAILED].
 	ONLINE_SIGNALING_FAILED, 
+	
+	## Failed to list sessions, or listing was lost. Needs [member TubeContext.mqtt_broker_url].
+	LIST_SESSIONS_FAILED,
+	
+	## Failed to publish the session, or the publishing connection was lost. Needs [member TubeContext.mqtt_broker_url].
+	PUBLISH_SESSION_FAILED,
 }
 
 const _SERVER_PEER_ID: int = 1
@@ -167,6 +183,11 @@ var _local_signaling_peer: TubeLocalSignalingPeer
 var _trackers: Array[TubeTracker] = []
 var _peers: Dictionary[int, TubePeer] = {}
 var _closing_trackers: Array[TubeTracker] = []
+var _session_list: TubeMqttSessionBoard
+var _listing := false
+var _publisher: TubeMqttSessionBoard
+var _published_metadata := {}
+var _closing_boards: Array[TubeMqttSessionBoard] = []
 
 
 func _raise_error(p_code: int, p_message: String):
@@ -190,6 +211,8 @@ func _ready() -> void:
 		multiplayer_api.peer_disconnected.connect(
 			peer_disconnected.emit
 		)
+		peer_connected.connect(_publish_metadata.unbind(1))
+		peer_disconnected.connect(_publish_metadata.unbind(1))
 
 
 # API ###
@@ -253,6 +276,81 @@ func kick_peer(p_peer_id: int) -> void:
 func leave_session() -> void:
 	session_left.emit()
 	_terminate_session()
+
+
+## Makes the current session public with [param p_metadata]. Call again to update the metadata. Only for server.
+## Tube adds [code]peer_count[/code], the number of connected peers including the server, and keeps it current.
+## Emits [signal error_raised] with [code]SessionError.PUBLISH_SESSION_FAILED[/code] if failed. Needs [member TubeContext.mqtt_broker_url].
+func publish_session(p_metadata: Dictionary = {}) -> void:
+	if State.IDLE == state or not is_server:
+		_raise_error(SessionError.PUBLISH_SESSION_FAILED, "Publish session failed, not server")
+		return
+	
+	if context.mqtt_broker_url.is_empty():
+		_raise_error(SessionError.PUBLISH_SESSION_FAILED, "Publish session failed, context has no MQTT broker URL")
+		return
+	
+	_published_metadata = p_metadata.duplicate(true)
+	if null == _publisher:
+		var publisher := TubeMqttSessionBoard.new(context.app_id, session_id)
+		publisher.connect_timeout = tracker_connect_timeout
+		publisher.connected.connect(_publish_metadata)
+		publisher.failed.connect(_on_publisher_failed.bind(publisher))
+		_publisher = publisher
+		publisher.connect_to_url(context.mqtt_broker_url)
+		return
+	
+	_publish_metadata()
+
+
+## Makes the current session private again. Also done when leaving the session.
+func unpublish_session() -> void:
+	if null == _publisher:
+		return
+	
+	_close_board(_publisher)
+	_publisher = null
+
+
+## Starts listing the public sessions of [member context] app ID.
+## Emits [signal listing_started] if successful, or [signal error_raised] with [code]SessionError.LIST_SESSIONS_FAILED[/code] if failed. Needs [member TubeContext.mqtt_broker_url].
+## See [method TubeClient.try_list_sessions].
+func list_sessions() -> void:
+	_initiate_listing()
+
+
+## Starts listing the public sessions of [member context] app ID.
+## This method is a coroutine and requires the use of the [code]await[/code] keyword to get the returned value.
+## Returns [code]true[/code] if successful, or [code]false[/code] if failed.
+## Emits [signal listing_started] if successful, but will [b]not[/b] emit [signal error_raised] if failed.
+## See [method TubeClient.list_sessions].
+func try_list_sessions() -> bool:
+	if not _initiate_listing(false):
+		return false
+	
+	return await _list_sessions_finished
+
+
+## Stops listing public sessions. Emits [signal listing_stopped].
+func stop_listing_sessions() -> void:
+	if null == _session_list:
+		return
+	
+	_close_board(_session_list)
+	_session_list = null
+	if not _listing:
+		_list_sessions_finished.emit(false)
+	_listing = false
+	listing_stopped.emit()
+
+
+## Returns the public sessions, keyed by session ID. Values are the metadata each server set with [method publish_session].
+## Empty until [signal listing_started].
+func get_public_sessions() -> Dictionary[String, Dictionary]:
+	if null == _session_list:
+		return {}
+	
+	return _session_list.sessions.duplicate(true)
 
 
 func _initiate_create_session(p_emit_error := true) -> bool:
@@ -392,6 +490,7 @@ func _terminate_session():
 	state = State.IDLE
 
 	_terminate_signaling()
+	unpublish_session()
 	
 	for i_peer: TubePeer in _peers.values():
 		i_peer.close() # will be clean collected
@@ -853,10 +952,112 @@ func _on_peer_closed(p_peer: TubePeer):
 		_terminate_session()
 
 
+# PUBLIC SESSIONS ###
+
+func _initiate_listing(p_emit_error := true) -> bool:
+	if null != _session_list:
+		if p_emit_error:
+			_raise_error(SessionError.LIST_SESSIONS_FAILED, "Listing sessions failed, already listing")
+		return false
+	
+	if null == context:
+		if p_emit_error:
+			_raise_error(SessionError.LIST_SESSIONS_FAILED, "Listing sessions failed, context is missing")
+		return false
+	
+	if not context.is_valid():
+		if p_emit_error:
+			_raise_error(SessionError.LIST_SESSIONS_FAILED, "Listing sessions failed, context is invalid")
+		return false
+	
+	if context.mqtt_broker_url.is_empty():
+		if p_emit_error:
+			_raise_error(SessionError.LIST_SESSIONS_FAILED, "Listing sessions failed, context has no MQTT broker URL")
+		return false
+	
+	var session_list := TubeMqttSessionBoard.new(context.app_id)
+	session_list.connect_timeout = tracker_connect_timeout
+	session_list.connected.connect(_on_session_list_connected.bind(session_list))
+	session_list.failed.connect(_on_session_list_failed.bind(session_list, p_emit_error))
+	session_list.sessions_changed.connect(_on_session_list_changed.bind(session_list))
+	_session_list = session_list
+	_listing = false
+	session_list.connect_to_url(context.mqtt_broker_url)
+	return _session_list == session_list
+
+
+func _close_board(p_board: TubeMqttSessionBoard) -> void:
+	p_board.close()
+	_closing_boards.append(p_board)
+
+
+func _on_session_list_connected(p_board: TubeMqttSessionBoard) -> void:
+	if p_board != _session_list:
+		return
+	
+	_listing = true
+	_list_sessions_finished.emit(true)
+	listing_started.emit()
+
+
+func _on_session_list_failed(p_board: TubeMqttSessionBoard, p_emit_error: bool) -> void:
+	if p_board != _session_list:
+		return
+	
+	_session_list = null
+	_closing_boards.append(p_board)
+	
+	if _listing:
+		_listing = false
+		_raise_error(SessionError.LIST_SESSIONS_FAILED, "Listing sessions stopped: " + p_board.error_message)
+		listing_stopped.emit()
+		return
+	
+	_list_sessions_finished.emit(false)
+	if p_emit_error:
+		_raise_error(SessionError.LIST_SESSIONS_FAILED, "Listing sessions failed: " + p_board.error_message)
+
+
+func _on_session_list_changed(p_board: TubeMqttSessionBoard) -> void:
+	if p_board == _session_list:
+		public_sessions_changed.emit()
+
+
+func _publish_metadata() -> void:
+	if null == _publisher or not _publisher.is_open():
+		return
+	
+	var data := _published_metadata.duplicate(true)
+	data["peer_count"] = multiplayer_api.get_peers().size() + 1
+	var error := _publisher.publish_session_metadata(data)
+	if error:
+		_raise_error(SessionError.PUBLISH_SESSION_FAILED, "Publish session failed, cannot publish metadata: " + error_string(error))
+
+
+func _on_publisher_failed(p_board: TubeMqttSessionBoard) -> void:
+	if p_board != _publisher:
+		return
+	
+	_publisher = null
+	_closing_boards.append(p_board)
+	_raise_error(SessionError.PUBLISH_SESSION_FAILED, "Publish session failed: " + p_board.error_message)
+
+
 # PROCESS ###
 
 func _process(delta):
 
+	for board in _closing_boards.duplicate():
+		board._process(delta)
+		if board.is_close():
+			_closing_boards.erase(board)
+	
+	if _session_list:
+		_session_list._process(delta)
+	
+	if _publisher:
+		_publisher._process(delta)
+	
 	for tracker in _closing_trackers.duplicate():
 		tracker._process(delta)
 		if tracker.is_close():

@@ -1,9 +1,68 @@
 [gd_scene format=3 uid="uid://d1xpycgi6qs7k"]
 
+[ext_resource type="Shader" uid="uid://cicdbv5ptkanf" path="res://resources/shaders/seamless.gdshader" id="1_432bt"]
+[ext_resource type="Texture2D" uid="uid://y572y5viuqq7" path="res://assets/textures/grass11.png" id="1_sqw3n"]
+[ext_resource type="Shader" uid="uid://cjpig6pptg3jv" path="res://resources/shaders/sky_test_1.gdshader" id="1_xepkr"]
+
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_kaddv"]
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_t0rxd"]
+noise_type = 2
+frequency = 0.0219
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_432bt"]
+noise = SubResource("FastNoiseLite_t0rxd")
+normalize = false
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sqw3n"]
+render_priority = 0
+shader = ExtResource("1_432bt")
+shader_parameter/albedo = ExtResource("1_sqw3n")
+shader_parameter/tile_noise = SubResource("NoiseTexture2D_432bt")
+shader_parameter/uv_scale = Vector2(100, 100)
+shader_parameter/tile_offset = 1.0
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_kaddv"]
-size = Vector2(20000, 20000)
+material = SubResource("ShaderMaterial_sqw3n")
+size = Vector2(100000, 100000)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xepkr"]
+shader = ExtResource("1_xepkr")
+shader_parameter/day_top_color = Color(0.1, 0.6, 1, 1)
+shader_parameter/day_bottom_color = Color(0.4, 0.8, 1, 1)
+shader_parameter/sunset_top_color = Color(0.7, 0.75, 1, 1)
+shader_parameter/sunset_bottom_color = Color(1, 0.5, 0.7, 1)
+shader_parameter/night_top_color = Color(0.02, 0, 0.04, 1)
+shader_parameter/night_bottom_color = Color(0.1, 0, 0.2, 1)
+shader_parameter/horizon_color = Color(0.02874431, 0.046752162, 0.028747441, 1)
+shader_parameter/horizon_blur = 0.05
+shader_parameter/sun_color = Color(10, 8, 1, 1)
+shader_parameter/sun_sunset_color = Color(10, 0, 0, 1)
+shader_parameter/sun_size = 0.2
+shader_parameter/sun_blur = 10.0
+shader_parameter/moon_color = Color(1, 0.95, 0.7, 1)
+shader_parameter/moon_size = 0.06
+shader_parameter/moon_blur = 0.1
+shader_parameter/clouds_edge_color = Color(0.8, 0.8, 0.98, 1)
+shader_parameter/clouds_top_color = Color(1, 1, 1, 1)
+shader_parameter/clouds_middle_color = Color(0.92, 0.92, 0.98, 1)
+shader_parameter/clouds_bottom_color = Color(0.83, 0.83, 0.94, 1)
+shader_parameter/clouds_speed = 2.0
+shader_parameter/clouds_direction = 0.2
+shader_parameter/clouds_scale = 1.0
+shader_parameter/clouds_cutoff = 0.3
+shader_parameter/clouds_fuzziness = 0.5
+shader_parameter/clouds_weight = 0.0
+shader_parameter/clouds_blur = 0.25
+shader_parameter/stars_speed = 1.0
+shader_parameter/overwritten_time = 0.0
+
+[sub_resource type="Sky" id="Sky_xepkr"]
+sky_material = SubResource("ShaderMaterial_xepkr")
+
+[sub_resource type="Environment" id="Environment_jj1jk"]
+background_mode = 2
+sky = SubResource("Sky_xepkr")
 
 [node name="LostMonuments" type="Node3D" unique_id=1685573245]
 
@@ -12,5 +71,15 @@ size = Vector2(20000, 20000)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1087574089]
 shape = SubResource("WorldBoundaryShape3D_kaddv")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1413130807]
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1413130807]
 mesh = SubResource("PlaneMesh_kaddv")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1349177196]
+environment = SubResource("Environment_jj1jk")
+
+[node name="Camera3D" type="Camera3D" parent="WorldEnvironment" unique_id=1328955949]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11, 26)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=672230233]
+transform = Transform3D(1, 0, 0, 0, 0.98739207, 0.15829375, 0, -0.15829375, 0.98739207, 0, 0, 0)
+light_energy = 0.423
