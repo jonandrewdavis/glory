@@ -39,6 +39,14 @@ func _notification(what: int) -> void:
 		_mqtt.free()
 
 
+## Sets the MQTT username and password sent with CONNECT. Must be called before [method connect_to_url].
+func set_credentials(p_username: String, p_password: String) -> void:
+	if p_username.is_empty():
+		_mqtt.set_user_pass(null, null)
+	else:
+		_mqtt.set_user_pass(p_username, p_password)
+
+
 func connect_to_url(p_url: String) -> Error:
 	_url = p_url
 	state = WebSocketPeer.STATE_CONNECTING

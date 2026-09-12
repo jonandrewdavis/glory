@@ -297,6 +297,7 @@ func publish_session(p_metadata: Dictionary = {}) -> void:
 		publisher.connected.connect(_publish_metadata)
 		publisher.failed.connect(_on_publisher_failed.bind(publisher))
 		_publisher = publisher
+		publisher.set_credentials(context.mqtt_username, context.mqtt_password)
 		publisher.connect_to_url(context.mqtt_broker_url)
 		return
 	
@@ -561,13 +562,12 @@ func _initiate_online_signaling() -> void:
 		_initiate_tracker(url)
 	
 	if not context.mqtt_broker_url.is_empty():
-		_initiate_tracker(
-			context.mqtt_broker_url,
-			TubeMqttTracker.new(
-				context.get_info_hash(session_id),
-				context.get_peer_id_hash(peer_id)
-			)
+		var mqtt_tracker := TubeMqttTracker.new(
+			context.get_info_hash(session_id),
+			context.get_peer_id_hash(peer_id)
 		)
+		mqtt_tracker.set_credentials(context.mqtt_username, context.mqtt_password)
+		_initiate_tracker(context.mqtt_broker_url, mqtt_tracker)
 
 
 func _on_tracker_connected(p_tracker: TubeTracker): 
@@ -982,6 +982,7 @@ func _initiate_listing(p_emit_error := true) -> bool:
 	session_list.sessions_changed.connect(_on_session_list_changed.bind(session_list))
 	_session_list = session_list
 	_listing = false
+	session_list.set_credentials(context.mqtt_username, context.mqtt_password)
 	session_list.connect_to_url(context.mqtt_broker_url)
 	return _session_list == session_list
 

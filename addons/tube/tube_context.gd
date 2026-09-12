@@ -27,6 +27,12 @@ const _APP_ID_CHARACTER_SET := "!#$%&()*+,-./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 ## Optional MQTT WebSocket URL, used alongside tracker URLs.
 @export var mqtt_broker_url: String = ""
 
+## Optional MQTT username, sent with the CONNECT packet when not empty.
+@export var mqtt_username: String = ""
+
+## Optional MQTT password, sent with the CONNECT packet when [member mqtt_username] is not empty.
+@export var mqtt_password: String = ""
+
 ## List of STUN server URLs used for WebRTC ICE candidate resolution.
 @export var stun_servers_urls: Array[String] = []
 
