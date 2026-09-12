@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://d2uep34eadcd4" path="res://assets/models/floating_island_1/floating_island.glb" id="4_t0rxd"]
 [ext_resource type="PackedScene" uid="uid://b00ahjjrx76fm" path="res://assets/models/polygonal_venus_statue_-_low_poly/scene.gltf" id="5_db25b"]
 [ext_resource type="PackedScene" uid="uid://c7616uqmxo3td" path="res://scenes/gameplay/ring.tscn" id="6_w7p1f"]
+[ext_resource type="PackedScene" uid="uid://c4tt8q1m2vx0n" path="res://scenes/gameplay/test_target/test_target.tscn" id="7_ttgt"]
+[ext_resource type="Script" path="res://scenes/gameplay/test_target/target_spawner.gd" id="8_tspn"]
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_kaddv"]
 
@@ -148,5 +150,9 @@ transform = Transform3D(12.306391, 1.055766, -4.0543895, -1.3479874, 12.909299, 
 mesh = SubResource("ArrayMesh_w7p1f")
 
 [node name="Ring" parent="." unique_id=1864204148 instance=ExtResource("6_w7p1f")]
+
+[node name="TargetSpawner" type="Node3D" parent="."]
+script = ExtResource("8_tspn")
+target_scene = ExtResource("7_ttgt")
 
 [editable path="Sketchfab_Scene6"]

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b83omkj4aqsph" path="res://scenes/gameplay/ui/ui_layer.gd" id="1_oq6q8"]
 [ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="2_1aqtp"]
 [ext_resource type="PackedScene" uid="uid://barl4q1kugrmm" path="res://scenes/gameplay/ui/pause-layer/pause-layer.tscn" id="3_n2icj"]
+[ext_resource type="Script" path="res://scenes/gameplay/ui/target_hud.gd" id="4_thud"]
 
 [sub_resource type="Gradient" id="Gradient_oq6q8"]
 colors = PackedColorArray(0.09736288, 9.126794e-05, 0.2960626, 1, 0.4272387, 0.31936294, 0.22836813, 1)
@@ -36,6 +37,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+
+[node name="TargetHud" type="Control" parent="PlayerUI"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_thud")
 
 [node name="CenterContainer" type="CenterContainer" parent="PlayerUI" unique_id=719460325]
 layout_mode = 1

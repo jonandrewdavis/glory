@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://0q1kfwbxvljs" path="res://player/mage/player_mage.gd" id="1_61y20"]
 [ext_resource type="PackedScene" uid="uid://bxgf5rpc10cv0" path="res://assets/models/rat_scene.tscn" id="2_iud7l"]
 [ext_resource type="Script" uid="uid://bqflf4vw8mem1" path="res://addons/lines_and_trails_3d/trail_3d.gd" id="3_1vusn"]
+[ext_resource type="Script" uid="uid://r7356kes1ww2" path="res://player/mage/targeting_system.gd" id="4_tsys"]
+[ext_resource type="Script" uid="uid://c41481wheyqa2" path="res://player/mage/targeting_debug.gd" id="5_tdbg"]
+[ext_resource type="Script" uid="uid://eb3ac2lhjp1x" path="res://player/mage/weapons/beam_weapon.gd" id="6_beam"]
+[ext_resource type="Script" uid="uid://c8rainoecpyie" path="res://addons/lines_and_trails_3d/line_3d.gd" id="7_line"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kaddv"]
 
@@ -44,3 +48,46 @@ width_curve = SubResource("Curve_1vusn")
 color = Color(0.8156863, 0.23529412, 1, 1)
 material_type = 2
 metadata/_custom_type_script = "uid://bqflf4vw8mem1"
+
+[node name="TargetingSystem" type="Node3D" parent="." unique_id=1063074867]
+unique_name_in_owner = true
+script = ExtResource("4_tsys")
+max_distance = 2000.0
+switch_strength = 2000.0
+flick_decay = 800.0
+switch_cooldown = 0.5
+
+[node name="TargetSensor" type="Area3D" parent="TargetingSystem" unique_id=1984809591]
+unique_name_in_owner = true
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+
+[node name="SensorShape" type="CollisionShape3D" parent="TargetingSystem/TargetSensor" unique_id=837033639]
+unique_name_in_owner = true
+
+[node name="TargetingDebug" type="Node3D" parent="TargetingSystem" unique_id=187178334]
+unique_name_in_owner = true
+visible = false
+script = ExtResource("5_tdbg")
+
+[node name="Muzzle" type="Marker3D" parent="." unique_id=468599291]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -1.2)
+
+[node name="BeamWeapon" type="Node3D" parent="Muzzle" unique_id=1883754666]
+unique_name_in_owner = true
+script = ExtResource("6_beam")
+
+[node name="HitscanRay" type="RayCast3D" parent="Muzzle/BeamWeapon" unique_id=1470433043]
+unique_name_in_owner = true
+target_position = Vector3(0, 0, -120)
+collision_mask = 5
+
+[node name="Beam" type="MeshInstance3D" parent="Muzzle/BeamWeapon" unique_id=242661991]
+unique_name_in_owner = true
+visible = false
+script = ExtResource("7_line")
+use_global_space = true
+material_type = 4
+metadata/_custom_type_script = "uid://c8rainoecpyie"

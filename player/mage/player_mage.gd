@@ -14,6 +14,8 @@ class_name PlayerMage
 
 #@onready var prop = $Plane2/Plane/propellor
 @onready var player_mage_mesh: Node3D = %Rat
+@onready var targeting: TargetingSystem = %TargetingSystem
+@onready var weapon: Weapon = %BeamWeapon
 
 var turn_input =  Vector2()
 
@@ -24,6 +26,8 @@ func _ready() -> void:
 	pitch_speed = deg_to_rad(pitch_speed)
 	yaw_speed = deg_to_rad(yaw_speed)
 	roll_speed = deg_to_rad(roll_speed)
+	targeting.enabled = is_multiplayer_authority()
+	weapon.set_owner_body(self)
 	if is_multiplayer_authority():
 		World.fly_cam.target = self
 		trail_3d.color = Color.from_string("d03cff", Color.MAGENTA)
@@ -31,6 +35,8 @@ func _ready() -> void:
 		trail_3d.billboard_mode = Trail3D.BillboardMode.NONE
 
 func _physics_process(delta: float) -> void:
+	if not is_multiplayer_authority():
+		return
 	var input = Input.get_vector("left","right","down","up")
 	var roll = clampf(Input.get_axis("roll_left","roll_right"), -1.0, 1.0)
 	turn_input = input
@@ -45,6 +51,9 @@ func _physics_process(delta: float) -> void:
 	var turn_dir = Vector3(-turn_input.y,-turn_input.x,-roll)
 	apply_rotation(turn_dir,delta)
 	turn_input = Vector2()
+	targeting.tick(delta)
+	var firing := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and Input.is_action_pressed("primary")
+	weapon.update_weapon(delta, firing, targeting.locked_target)
 
 	# TODO: Effects for speed up, speed down... mesh
 	#spin_propellor(delta)
@@ -67,6 +76,7 @@ func render_ui_layer_elements():
 	if World.ui_layer:
 		World.ui_layer.throttle_progress_bar.max_value = MAX_SPEED
 		World.ui_layer.throttle_progress_bar.value = current_speed
+		World.ui_layer.target_hud.update_targets(targeting.locked_target, targeting.candidates, targeting.acquire_candidate, targeting.acquire_progress())
 
 #func spin_propellor(delta):
 	#var m = current_speed/MAX_SPEED

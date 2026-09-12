@@ -6,6 +6,7 @@ var exiting := false
 
 @onready var throttle_progress_bar: TextureProgressBar = %ThrottleProgressBar
 @onready var roll_texture_bar: TextureProgressBar = %RollTextureBar
+@onready var target_hud: TargetHud = %TargetHud
 
 func _ready() -> void:
 	# World is our Global link.
