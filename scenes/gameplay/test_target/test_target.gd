@@ -1,55 +1,36 @@
 extends StaticBody3D
 class_name TestTarget
 
-signal died
-signal respawned
-signal health_changed(current: float, max: float)
-
-@export var max_health := 100.0
-@export var respawn_delay := 5.0
-
-var health: float
-
 @onready var mesh: MeshInstance3D = %Mesh
 @onready var collision_shape: CollisionShape3D = %CollisionShape3D
+@onready var health: HealthComponent = %HealthComponent
 
 func _ready() -> void:
-	health = max_health
 	add_to_group("targetable")
+	health.changed.connect(_on_health_changed)
+	health.died.connect(_on_died)
+	health.respawned.connect(_on_respawned)
+	_apply_tint()
 
 func is_targetable() -> bool:
-	return health > 0.0
+	return health.is_alive()
 
-func take_damage(amount: float) -> void:
-	if health <= 0.0:
-		return
-	health = maxf(health - amount, 0.0)
-	health_changed.emit(health, max_health)
+func _on_health_changed(_current: float, _max_value: float) -> void:
 	_apply_tint()
-	if health <= 0.0:
-		_die()
 
 func _apply_tint() -> void:
 	var material := mesh.get_surface_override_material(0) as StandardMaterial3D
 	if material == null:
 		return
-	var t := health / max_health
+	var t := health.ratio()
 	material.albedo_color = Color(1.0, t, t)
 
-func _die() -> void:
+func _on_died(_source: Node) -> void:
 	remove_from_group("targetable")
 	collision_shape.set_deferred("disabled", true)
 	mesh.visible = false
-	died.emit()
-	await get_tree().create_timer(respawn_delay).timeout
-	if is_inside_tree():
-		_respawn()
 
-func _respawn() -> void:
-	health = max_health
+func _on_respawned() -> void:
 	collision_shape.set_deferred("disabled", false)
 	mesh.visible = true
-	_apply_tint()
 	add_to_group("targetable")
-	health_changed.emit(health, max_health)
-	respawned.emit()

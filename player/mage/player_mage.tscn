@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://c41481wheyqa2" path="res://player/mage/targeting_debug.gd" id="5_tdbg"]
 [ext_resource type="Script" uid="uid://eb3ac2lhjp1x" path="res://player/mage/weapons/beam_weapon.gd" id="6_beam"]
 [ext_resource type="Script" uid="uid://c8rainoecpyie" path="res://addons/lines_and_trails_3d/line_3d.gd" id="7_line"]
+[ext_resource type="Script" uid="uid://6yjmbrjl8cp0" path="res://components/health_component.gd" id="8_hc"]
+[ext_resource type="Script" uid="uid://bkop036eat14a" path="res://components/mana_component.gd" id="9_mc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kaddv"]
 
@@ -17,12 +19,16 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 1
+properties/2/path = NodePath("HealthComponent:current")
+properties/2/spawn = true
+properties/2/replication_mode = 2
 
 [sub_resource type="Curve" id="Curve_1vusn"]
 _data = [Vector2(0, 0.98269904), 0.0, -0.033186544, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 2
 
-[node name="PlayerMage" type="CharacterBody3D" unique_id=1757496055]
+[node name="PlayerMage" type="CharacterBody3D" unique_id=1757496055 groups=["targetable"]]
+collision_layer = 6
 script = ExtResource("1_61y20")
 
 [node name="Rat" parent="." unique_id=1283492536 instance=ExtResource("2_iud7l")]
@@ -30,6 +36,7 @@ unique_name_in_owner = true
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2038600600]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.38322413, 0)
 shape = SubResource("CapsuleShape3D_kaddv")
 
@@ -91,3 +98,14 @@ script = ExtResource("7_line")
 use_global_space = true
 material_type = 4
 metadata/_custom_type_script = "uid://c8rainoecpyie"
+
+[node name="HealthComponent" type="Node" parent="." unique_id=2095304952]
+unique_name_in_owner = true
+script = ExtResource("8_hc")
+networked = true
+
+[node name="ManaComponent" type="Node" parent="." unique_id=1050253536]
+unique_name_in_owner = true
+script = ExtResource("9_mc")
+regen_rate = 40.0
+regen_delay = 0.5

@@ -5,6 +5,8 @@ const MENU_SCENE := "res://scenes/menu/menu.tscn"
 var exiting := false
 
 @onready var throttle_progress_bar: TextureProgressBar = %ThrottleProgressBar
+@onready var health_progress_bar: TextureProgressBar = %HealthProgressBar
+@onready var mana_progress_bar: TextureProgressBar = %ManaProgressBar
 @onready var roll_texture_bar: TextureProgressBar = %RollTextureBar
 @onready var target_hud: TargetHud = %TargetHud
 

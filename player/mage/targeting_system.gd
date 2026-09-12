@@ -96,7 +96,9 @@ func _gather_candidates() -> void:
 	var cos_limit := cos(deg_to_rad(search_half_angle_deg))
 	var found: Array[Node3D] = []
 	for overlap in sensor.get_overlapping_bodies():
-		if not overlap.is_in_group("targetable") or not overlap.has_method("take_damage"):
+		if overlap == body or not overlap.is_in_group("targetable"):
+			continue
+		if HealthComponent.find_in(overlap) == null:
 			continue
 		var to: Vector3 = overlap.global_position - origin
 		var d := to.length()

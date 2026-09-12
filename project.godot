@@ -55,6 +55,7 @@ folder_colors={
 "res://addons/": "gray",
 "res://assets/": "green",
 "res://assets/models/": "red",
+"res://components/": "blue",
 "res://levels/": "orange",
 "res://networking/": "teal",
 "res://player/": "purple",

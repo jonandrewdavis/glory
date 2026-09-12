@@ -19,6 +19,7 @@ func _ready() -> void:
 	hitscan_ray.enabled = true
 
 func set_owner_body(body: PhysicsBody3D) -> void:
+	super(body)
 	hitscan_ray.add_exception(body)
 
 func update_weapon(delta: float, firing: bool, target: Node3D) -> void:

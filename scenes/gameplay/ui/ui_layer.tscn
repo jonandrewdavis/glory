@@ -27,6 +27,22 @@ colors = PackedColorArray(0.5411765, 0, 0, 1, 1, 1, 1, 1)
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_4i8qy"]
 gradient = SubResource("Gradient_n2icj")
 
+[sub_resource type="Gradient" id="Gradient_health"]
+colors = PackedColorArray(0.4, 0, 0.05, 1, 1, 0.3, 0.3, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_health"]
+gradient = SubResource("Gradient_health")
+width = 15
+height = 120
+
+[sub_resource type="Gradient" id="Gradient_mana"]
+colors = PackedColorArray(0, 0.1, 0.45, 1, 0.35, 0.75, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_mana"]
+gradient = SubResource("Gradient_mana")
+width = 15
+height = 120
+
 [node name="UILayer" type="CanvasLayer" unique_id=959767118]
 script = ExtResource("1_oq6q8")
 
@@ -76,6 +92,32 @@ value = 50.0
 fill_mode = 3
 texture_under = SubResource("GradientTexture2D_pr2nu")
 texture_progress = SubResource("GradientTexture2D_yruvy")
+
+[node name="StatsMargin" type="MarginContainer" parent="PlayerUI/CenterContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 300
+
+[node name="StatsBars" type="HBoxContainer" parent="PlayerUI/CenterContainer/StatsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HealthProgressBar" type="TextureProgressBar" parent="PlayerUI/CenterContainer/StatsMargin/StatsBars"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.49411765)
+layout_mode = 2
+value = 100.0
+fill_mode = 3
+texture_under = SubResource("GradientTexture2D_pr2nu")
+texture_progress = SubResource("GradientTexture2D_health")
+
+[node name="ManaProgressBar" type="TextureProgressBar" parent="PlayerUI/CenterContainer/StatsMargin/StatsBars"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.49411765)
+layout_mode = 2
+value = 100.0
+fill_mode = 3
+texture_under = SubResource("GradientTexture2D_pr2nu")
+texture_progress = SubResource("GradientTexture2D_mana")
 
 [node name="RollMargin" type="MarginContainer" parent="PlayerUI/CenterContainer" unique_id=852420271]
 visible = false
