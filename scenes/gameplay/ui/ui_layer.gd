@@ -1,10 +1,17 @@
-extends Node
-class_name Gameplay # TODO: Change this to be one layer lower and use "UILayer?"
+extends CanvasLayer
+class_name UILayer
 
 const MENU_SCENE := "res://scenes/menu/menu.tscn"
 var exiting := false
 
+@onready var throttle_progress_bar: TextureProgressBar = %ThrottleProgressBar
+@onready var roll_texture_bar: TextureProgressBar = %RollTextureBar
+
 func _ready() -> void:
+	# World is our Global link.
+	World.ui_layer = self
+	# Player will use this.
+
 	MultiplayerService.game_exited.connect(_on_game_exited)
 	if DebugMenu != null:
 		DebugMenu.update_settings_label()

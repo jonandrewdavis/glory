@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scenes/gameplay/pause-layer/player_list_item.gd" id="1"]
+[ext_resource type="Script" uid="uid://dsjfvtn5loldi" path="res://scenes/gameplay/ui/pause-layer/player_list_item.gd" id="1"]
 
 [node name="PlayerListItem" type="HBoxContainer"]
 layout_mode = 2

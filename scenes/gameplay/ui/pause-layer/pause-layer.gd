@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-const PLAYER_ITEM := preload("res://scenes/gameplay/pause-layer/player_list_item.tscn")
+const PLAYER_ITEM := preload("res://scenes/gameplay/ui/pause-layer/player_list_item.tscn")
 var players: Dictionary = {}
 
 func _ready() -> void:

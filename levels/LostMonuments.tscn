@@ -5,6 +5,7 @@
 [ext_resource type="Shader" uid="uid://cjpig6pptg3jv" path="res://resources/shaders/sky_test_1.gdshader" id="1_xepkr"]
 [ext_resource type="PackedScene" uid="uid://d2uep34eadcd4" path="res://assets/models/floating_island_1/floating_island.glb" id="4_t0rxd"]
 [ext_resource type="PackedScene" uid="uid://b00ahjjrx76fm" path="res://assets/models/polygonal_venus_statue_-_low_poly/scene.gltf" id="5_db25b"]
+[ext_resource type="PackedScene" uid="uid://c7616uqmxo3td" path="res://scenes/gameplay/ring.tscn" id="6_w7p1f"]
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_kaddv"]
 
@@ -145,5 +146,7 @@ transform = Transform3D(12.306391, 1.055766, -4.0543895, -1.3479874, 12.909299, 
 
 [node name="venus_venus_0" parent="Sketchfab_Scene6/Sketchfab_model/a2058afe318645d6b15993ec55d61d32_fbx/RootNode/venus" parent_id_path=PackedInt32Array(491594675, 1381075107) index="0" unique_id=105091288]
 mesh = SubResource("ArrayMesh_w7p1f")
+
+[node name="Ring" parent="." unique_id=1864204148 instance=ExtResource("6_w7p1f")]
 
 [editable path="Sketchfab_Scene6"]

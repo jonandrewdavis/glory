@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://barl4q1kugrmm"]
 
-[ext_resource type="Script" path="res://scenes/gameplay/pause-layer/pause-layer.gd" id="1"]
-[ext_resource type="PackedScene" path="res://addons/ggt-core/settings/settings_menu.tscn" id="2"]
+[ext_resource type="Script" uid="uid://do7kkb4ijqk5p" path="res://scenes/gameplay/ui/pause-layer/pause-layer.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://c2jxemjmao00b" path="res://addons/ggt-core/settings/settings_menu.tscn" id="2"]
 
 [node name="PauseLayer" type="CanvasLayer"]
 script = ExtResource("1")

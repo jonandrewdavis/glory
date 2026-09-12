@@ -1,0 +1,129 @@
+[gd_scene format=3 uid="uid://nbqhuft1wkg8"]
+
+[ext_resource type="Texture2D" uid="uid://cw17cenlqjc8q" path="res://assets/sprites/keyboard-&-mouse_sheet_default.png" id="1_rw3g5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dwui3"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(832, 832, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8x7gl"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(0, 256, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8aait"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(704, 640, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ymbhe"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(192, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rjdiv"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(448, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dwa1k"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(0, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hjpnp"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(512, 192, 64, 64)
+
+[node name="Controls" type="VBoxContainer" unique_id=1906408976]
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=1400739749]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer2" unique_id=599319666]
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwui3")
+
+[node name="Label" type="Label" parent="HBoxContainer2" unique_id=1101083458]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 2
+theme_override_font_sizes/font_size = 21
+text = "Steer"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="." unique_id=233439701]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="TextureRect3" type="TextureRect" parent="HBoxContainer4" unique_id=893362178]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+texture = SubResource("AtlasTexture_8x7gl")
+expand_mode = 2
+
+[node name="TextureRect2" type="TextureRect" parent="HBoxContainer4" unique_id=734129883]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+texture = SubResource("AtlasTexture_8aait")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer4" unique_id=847903273]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 2
+theme_override_font_sizes/font_size = 21
+text = " Roll  "
+
+[node name="HBoxContainer6" type="HBoxContainer" parent="." unique_id=1053070620]
+layout_mode = 2
+
+[node name="TextureRect2" type="TextureRect" parent="HBoxContainer6" unique_id=760640579]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+texture = SubResource("AtlasTexture_ymbhe")
+expand_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer6" unique_id=1531068695]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+texture = SubResource("AtlasTexture_rjdiv")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer6" unique_id=540230839]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 2
+theme_override_font_sizes/font_size = 21
+text = " Spells"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=905381372]
+layout_mode = 2
+theme_override_constants/separation = -12
+
+[node name="HBoxContainer7" type="HBoxContainer" parent="VBoxContainer" unique_id=336770904]
+layout_mode = 2
+
+[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/HBoxContainer7" unique_id=756750773]
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwa1k")
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer7" unique_id=1723112848]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 2
+theme_override_font_sizes/font_size = 21
+text = "Faster"
+
+[node name="HBoxContainer8" type="HBoxContainer" parent="VBoxContainer" unique_id=936823238]
+layout_mode = 2
+
+[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/HBoxContainer8" unique_id=1819097992]
+layout_mode = 2
+texture = SubResource("AtlasTexture_hjpnp")
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer8" unique_id=1306297845]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 3
+theme_override_font_sizes/font_size = 21
+text = "Slow down"

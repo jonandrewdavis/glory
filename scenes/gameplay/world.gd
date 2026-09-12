@@ -1,7 +1,15 @@
 extends Node
-
 # Global class: World
-# TODO: Rename to Gameplay and let the UI be seperate.
+
+# TODO: Organize this file since it'll be very central to everything.
+# This is very much like our "Global" class, since it's an autoload and never
+# ever disappears. Players and Levels are loaded in and out, but it is always 
+# at the top level.
+
+
+# UI
+var ui_layer: UILayer
+
 
 const DEFAULT_LEVEL := "LostMonuments"
 
@@ -36,7 +44,6 @@ func clear() -> void:
 func change_level(key: String) -> void:
 	if MultiplayerService.is_host() and LevelLoader.LEVEL_DICT.has(key):
 		level_loader.spawn_level.rpc(key)
-
 
 func host_debug_world():
 	var opt = HostOptions.new()

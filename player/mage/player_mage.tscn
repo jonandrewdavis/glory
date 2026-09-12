@@ -2,8 +2,21 @@
 
 [ext_resource type="Script" uid="uid://0q1kfwbxvljs" path="res://player/mage/player_mage.gd" id="1_61y20"]
 [ext_resource type="PackedScene" uid="uid://bxgf5rpc10cv0" path="res://assets/models/rat_scene.tscn" id="2_iud7l"]
+[ext_resource type="Script" uid="uid://bqflf4vw8mem1" path="res://addons/lines_and_trails_3d/trail_3d.gd" id="3_1vusn"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kaddv"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_iud7l"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[sub_resource type="Curve" id="Curve_1vusn"]
+_data = [Vector2(0, 0.98269904), 0.0, -0.033186544, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [node name="PlayerMage" type="CharacterBody3D" unique_id=1757496055]
 script = ExtResource("1_61y20")
@@ -15,3 +28,17 @@ transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2038600600]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.38322413, 0)
 shape = SubResource("CapsuleShape3D_kaddv")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1097728616]
+replication_config = SubResource("SceneReplicationConfig_iud7l")
+
+[node name="Trail3D" type="MeshInstance3D" parent="." unique_id=879127136]
+unique_name_in_owner = true
+process_priority = 9999
+process_physics_priority = 9999
+script = ExtResource("3_1vusn")
+time_limit = 2.5
+width = 1.0
+width_curve = SubResource("Curve_1vusn")
+color = Color(0.8156863, 0.23529412, 1, 1)
+metadata/_custom_type_script = "uid://bqflf4vw8mem1"

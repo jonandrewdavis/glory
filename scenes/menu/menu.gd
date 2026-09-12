@@ -1,6 +1,7 @@
 extends Control
 
-const GAMEPLAY_SCENE := "res://scenes/gameplay/gameplay.tscn"
+# NOTE: This is just a UI Scene. World handles adding / removing players and levels...
+const GAMEPLAY_SCENE := "res://scenes/gameplay/ui/ui_layer.tscn"
 const TIMEOUT_DUR := 10.0
 var timeout_token := 0
 
@@ -80,13 +81,13 @@ func _show_failure(reason: String) -> void:
 func _on_lobby_joined() -> void:
 	timeout_token += 1
 	%PendingOverlay.hide()
-	var destination := GAMEPLAY_SCENE
-	GGT.change_scene(destination, {"show_progress_bar": false})
+	var destination := GAMEPLAY_SCENE 
+	GGT.change_scene(destination, {"show_progress_bar": true})
 
 func _exit() -> void:
 	var transitions := get_node_or_null("/root/GGT_Transitions")
 	if transitions:
-		transitions.fade_in({"show_progress_bar": false})
+		transitions.fade_in({"show_progress_bar": true})
 		await transitions.anim.animation_finished
 		await get_tree().create_timer(0.3).timeout
 	get_tree().quit()
