@@ -1,8 +1,8 @@
 extends Node
 
-enum BackendType {ENET, NODETUNNEL}
-const BACKEND_SCRIPTS := {BackendType.ENET: preload("res://networking/enet_backend.gd"), BackendType.NODETUNNEL: preload("res://networking/nodetunnel_backend.gd")}
-const BACKEND_LABELS := {BackendType.ENET: "LAN (ENet)", BackendType.NODETUNNEL: "Online (NodeTunnel)"}
+enum BackendType {ENET, NODETUNNEL, TUBE}
+const BACKEND_SCRIPTS := {BackendType.TUBE: preload("res://networking/tube_backend.gd")}
+const BACKEND_LABELS := {BackendType.TUBE: "Online (Tube P2P)"}
 const CONFIG_SECTION := "multiplayer"
 const CONFIG_KEY_BACKEND := "backend"
 const DISCONNECT_REASON := "Disconnected from the host."
