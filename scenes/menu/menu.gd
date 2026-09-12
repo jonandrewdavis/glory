@@ -40,10 +40,12 @@ func _ready() -> void:
 	%ExitButton.pressed.connect(_exit)
 	if OS.has_feature("web"):
 		%ExitButton.hide()
+		%ServiceOption.item_selected.emit(%ServiceOption.get_item_index(MultiplayerService.BackendType.TUBE))
 	%HostButton.grab_focus()
 	if not MultiplayerService.kick_reason.is_empty():
 		_show_failure(MultiplayerService.kick_reason)
 		MultiplayerService.kick_reason = ""
+	
 
 func _restore_main() -> void:
 	%MainContainer.show()

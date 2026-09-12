@@ -26,11 +26,13 @@ func _ready() -> void:
 	roll_speed = deg_to_rad(roll_speed)
 	if is_multiplayer_authority():
 		World.fly_cam.target = self
-		trail_3d.transparency = 0.8
+		trail_3d.color = Color.from_string("d03cff", Color.MAGENTA)
+		trail_3d.color.a = 0.3
+		trail_3d.billboard_mode = Trail3D.BillboardMode.NONE
 
 func _physics_process(delta: float) -> void:
 	var input = Input.get_vector("left","right","down","up")
-	var roll = Input.get_axis("roll_left","roll_right")
+	var roll = clampf(Input.get_axis("roll_left","roll_right"), -1.0, 1.0)
 	turn_input = input
 
 	var speed_input = Vector2(0.0, Input.get_axis("throttle_down","throttle_up"))
@@ -49,7 +51,6 @@ func _physics_process(delta: float) -> void:
 
 	render_ui_layer_elements()
 
-	
 func apply_rotation(vector,delta):
 	rotate(basis.z,vector.z * roll_speed * delta)
 	rotate(basis.x,vector.x * pitch_speed * delta)

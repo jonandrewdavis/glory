@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1_vrk18")
 app_id = "7QC+k:EDJFr(hzh"
-mqtt_broker_url = "wss://broker.emqx.io:8084/mqtt"
+mqtt_broker_url = "wss://test.mosquitto.org:8081"
 stun_servers_urls = Array[String](["stun:stun.l.google.com:19302", "stun:stun.cloudflare.com:3478"])
 metadata/_custom_type_script = "uid://t4pe7yqc3pnt"
