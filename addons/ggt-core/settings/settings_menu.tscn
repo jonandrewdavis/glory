@@ -9,7 +9,7 @@ font_size = 64
 [sub_resource type="LabelSettings" id="LabelSettings_y1o0p"]
 font_size = 32
 
-[node name="SettingsMenu" type="PanelContainer" unique_id=190195239 node_paths=PackedStringArray("sound_master_slider", "sound_sfx_slider", "sound_music_slider", "resolution_scale_slider", "resolution_scale_value", "v_sync_checkbox", "fps_limit_option_button", "fullscreen_checkbox", "locale_option_button", "reset_confirmation_dialog", "cancel_confirmation_dialog", "cancel_button")]
+[node name="SettingsMenu" type="PanelContainer" unique_id=190195239 node_paths=PackedStringArray("sound_master_slider", "sound_sfx_slider", "sound_music_slider", "resolution_scale_slider", "resolution_scale_value", "v_sync_checkbox", "fps_limit_option_button", "fullscreen_checkbox", "locale_option_button", "aim_sensitivity_slider", "aim_sensitivity_value", "reset_confirmation_dialog", "cancel_confirmation_dialog", "cancel_button")]
 offset_right = 353.0
 offset_bottom = 707.0
 script = ExtResource("1_25law")
@@ -22,6 +22,8 @@ v_sync_checkbox = NodePath("MarginContainer/VBox/GfxVSync/VSyncCheckbox")
 fps_limit_option_button = NodePath("MarginContainer/VBox/FPSLimit/FPSLimitOptionButton")
 fullscreen_checkbox = NodePath("MarginContainer/VBox/Fullscreen/FullscreenCheckbox")
 locale_option_button = NodePath("MarginContainer/VBox/Language/LocaleOptionButton")
+aim_sensitivity_slider = NodePath("MarginContainer/VBox/AimSensitivity/HBoxContainer/AimSensitivitySlider")
+aim_sensitivity_value = NodePath("MarginContainer/VBox/AimSensitivity/HBoxContainer/AimSensitivityValue")
 reset_confirmation_dialog = NodePath("MarginContainer/VBox/ResetConfirmationDialog")
 cancel_confirmation_dialog = NodePath("MarginContainer/VBox/CancelConfirmationDialog")
 cancel_button = NodePath("MarginContainer/VBox/HBoxContainer/HBoxContainer/SettingsCancelButton")
@@ -67,6 +69,31 @@ text = "Language"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
+
+[node name="AimSensitivity" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBox/AimSensitivity"]
+layout_mode = 2
+size_flags_horizontal = 3
+translation_context = &"menu"
+text = "Aim sensitivity"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/AimSensitivity"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="AimSensitivitySlider" type="HSlider" parent="MarginContainer/VBox/AimSensitivity/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.01
+max_value = 0.5
+step = 0.01
+value = 0.15
+
+[node name="AimSensitivityValue" type="Label" parent="MarginContainer/VBox/AimSensitivity/HBoxContainer"]
+layout_mode = 2
 
 [node name="HSeparator5" type="Control" parent="MarginContainer/VBox" unique_id=1832025905]
 custom_minimum_size = Vector2(0, 20)

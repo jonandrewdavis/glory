@@ -86,11 +86,13 @@ func tick(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not enabled or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
+	if Input.is_action_pressed("secondary"):
+		return
 	if event is InputEventMouseMotion:
 		flick_accum += event.screen_relative
 
 func _forward() -> Vector3:
-	return -body.global_basis.z
+	return -global_basis.z
 
 func _gather_candidates() -> void:
 	var forward := _forward()

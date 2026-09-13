@@ -14,6 +14,7 @@
 - Could do host / join (lobbies)
 - Could do 1 giant room that is hosted constantly
 - This could be a "dedicated server" peer running somewhere
+- 
 
 ## Arena
 
@@ -36,6 +37,7 @@
 ## Character Controller Notes:
 
 - May need to test different "profile" in terms of speed, turn rate, acceleration, etc. 
+  - Done: `MageFlightProfile` resources in `player/mage/profiles/` (original, airplane, character, arcade, broom_drift). Swap via the `profile` export on `PlayerMage`, or press F1–F5 in a debug build to hot-swap.
   - These could be upgradeable
   - Max Speed
   - Accel

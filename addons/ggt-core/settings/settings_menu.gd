@@ -16,6 +16,8 @@ signal confirm_button_clicked
 @export var fps_limit_option_button: OptionButton
 @export var fullscreen_checkbox: CheckButton
 @export var locale_option_button: OptionButton
+@export var aim_sensitivity_slider: HSlider
+@export var aim_sensitivity_value: Label
 @export var reset_confirmation_dialog: ConfirmationModal
 @export var cancel_confirmation_dialog: ConfirmationModal
 @export var cancel_button: Button
@@ -36,6 +38,7 @@ func _ready() -> void:
 	fps_limit_option_button.item_selected.connect(on_fps_limit_option_button_item_selected)
 	fullscreen_checkbox.toggled.connect(on_fullscreen_checkbox)
 	locale_option_button.item_selected.connect(on_locale_option_button_item_selected)
+	aim_sensitivity_slider.value_changed.connect(on_aim_sensitivity_slider)
 	reset_confirmation_dialog.confirmed.connect(_on_reset_confirmed)
 	cancel_confirmation_dialog.confirmed.connect(_on_cancel_confirmed)
 	reset_confirmation_dialog.cancelled.connect(_on_modal_canceled)
@@ -49,6 +52,7 @@ func _ready() -> void:
 	fps_limit_option_button.item_selected.connect(_on_setting_changed)
 	fullscreen_checkbox.toggled.connect(_on_setting_changed)
 	locale_option_button.item_selected.connect(_on_setting_changed)
+	aim_sensitivity_slider.value_changed.connect(_on_setting_changed)
 
 	initialize()
 
@@ -119,6 +123,9 @@ func initialize(cfg: ConfigFile = GGT_GameConfig.config) -> void:
 			locale_option_button.select(i)
 			break
 
+	aim_sensitivity_slider.set_value_no_signal(cfg.get_value("controls", "aim_sensitivity", GGT_GameConfig.DEFAULT_AIM_SENSITIVITY))
+	aim_sensitivity_value.text = str(aim_sensitivity_slider.value)
+
 
 func on_sound_master_slider(value: float) -> void:
 	GGT_GameConfig.set_master_volume(value)
@@ -152,6 +159,11 @@ func on_fullscreen_checkbox(value: bool) -> void:
 func on_locale_option_button_item_selected(index: int) -> void:
 	var locale_code = locale_option_button.get_item_metadata(index)
 	GGT_GameConfig.set_locale(locale_code)
+
+
+func on_aim_sensitivity_slider(value: float) -> void:
+	GGT_GameConfig.set_aim_sensitivity(value)
+	aim_sensitivity_value.text = str(value)
 
 
 func _on_settings_cancel_button_pressed() -> void:

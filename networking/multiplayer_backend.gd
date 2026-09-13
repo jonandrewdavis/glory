@@ -9,6 +9,8 @@ signal join_lobby_failed(reason: String)
 ## and NodeTunnel reports relay loss via forced_disconnect, so neither fires server_disconnected.
 signal lobby_lost(reason: String)
 signal status_changed(text: String)
+## Emitted once the lobby list is live; lobby_found follows. May fire synchronously from fetch_lobby_list.
+signal listing_started
 
 @abstract
 func host_game(options: HostOptions) -> void

@@ -25,19 +25,27 @@ func _ready() -> void:
 			%LevelOption.add_item(key)
 		%LobbyAddressLabel.text = "Address: " + MultiplayerService.get_lobby_address()
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_menu") and not event.is_echo():
+		get_viewport().set_input_as_handled()
+		_toggle()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not event.is_echo():
 		get_viewport().set_input_as_handled()
-		if GGT.is_changing_scene() or not MultiplayerService.in_lobby:
-			return
-		if %SettingsMenu.visible:
-			%SettingsMenu.hide()
-		elif visible:
-			resume()
-		else:
-			show()
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-			%ResumeButton.grab_focus()
+		_toggle()
+
+func _toggle() -> void:
+	if GGT.is_changing_scene() or not MultiplayerService.in_lobby:
+		return
+	if %SettingsMenu.visible:
+		%SettingsMenu.hide()
+	elif visible:
+		resume()
+	else:
+		show()
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		%ResumeButton.grab_focus()
 
 func resume() -> void:
 	%SettingsMenu.hide()

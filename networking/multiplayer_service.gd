@@ -9,6 +9,7 @@ const CONFIG_KEY_BACKEND := "backend"
 const DISCONNECT_REASON := "Disconnected from the host."
 const KICK_REASON_KICKED := "You were kicked."
 const KICK_REASON_BANNED := "You are banned from this lobby."
+const MAX_PLAYERS := 25
 
 signal lobby_found(address: Variant, lobby_name: String, cur_players: int, max_players: int)
 signal creating_lobby
@@ -18,6 +19,7 @@ signal join_lobby_failed(reason: String)
 signal game_exited
 signal backend_changed(type: BackendType)
 signal status_changed(text: String)
+signal listing_started
 
 var backend: MultiplayerBackend
 var backend_type: BackendType
@@ -48,6 +50,7 @@ func set_backend(type: BackendType, persist_choice := true) -> void:
 	backend.join_lobby_failed.connect(_on_join_lobby_failed)
 	backend.lobby_lost.connect(_end_game)
 	backend.status_changed.connect(_on_status_changed)
+	backend.listing_started.connect(listing_started.emit)
 	add_child(backend)
 	if persist_choice:
 		GGT_GameConfig.config.set_value(CONFIG_SECTION, CONFIG_KEY_BACKEND, type)
@@ -64,8 +67,8 @@ func host_game(options: HostOptions) -> void:
 	kick_reason = ""
 	pending = true
 	creating_lobby.emit()
-	if options.max_players < 1 or options.max_players > 4:
-		_on_join_lobby_failed("Choose between 1 and 4 players.")
+	if options.max_players < 1 or options.max_players > MAX_PLAYERS:
+		_on_join_lobby_failed("Choose between 1 and %d players." % MAX_PLAYERS)
 	elif options.max_players == 1:
 		backend.leave_game()
 		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()

@@ -6,6 +6,9 @@ const CONFIG_FILE_PATH = &"user://settings.cfg"
 var config = ConfigFile.new()
 
 signal resolution_scale_changed
+signal aim_sensitivity_changed(value: float)
+
+const DEFAULT_AIM_SENSITIVITY := 0.05
 
 const SUPPORTED_LOCALES = {
 	"en": "English",
@@ -57,6 +60,7 @@ func initialize_default_file() -> void:
 	config.set_value("audio", "music", 0.0)
 	config.set_value("gfx", "resolution_scale", 1.0)
 	config.set_value("gfx", "fps_limit", 60)
+	config.set_value("controls", "aim_sensitivity", DEFAULT_AIM_SENSITIVITY)
 	if not OS.has_feature('web'):
 		config.set_value("gfx", "fullscreen", true)
 		config.set_value("gfx", "vsync", true)
@@ -79,6 +83,7 @@ func _apply_settings() -> void:
 	Engine.max_fps = fps_limit if fps_limit > 0 else FPS_MAX_HARD_CAP
 
 	TranslationServer.set_locale(config.get_value("game", "locale", "en"))
+	aim_sensitivity_changed.emit(get_aim_sensitivity())
 
 	if not OS.has_feature('web'):
 		var window_id = get_window().get_window_id()
@@ -135,6 +140,11 @@ func set_fullscreen(v: bool) -> void:
 func set_locale(locale: String) -> void:
 	config.set_value("game", "locale", locale)
 	TranslationServer.set_locale(locale)
+
+
+func set_aim_sensitivity(v: float) -> void:
+	config.set_value("controls", "aim_sensitivity", v)
+	aim_sensitivity_changed.emit(v)
 #endregion
 
 
@@ -145,4 +155,8 @@ func get_resolution_scale() -> float:
 
 func get_locale() -> String:
 	return config.get_value("game", "locale", "en")
+
+
+func get_aim_sensitivity() -> float:
+	return float(config.get_value("controls", "aim_sensitivity", DEFAULT_AIM_SENSITIVITY))
 #endregion

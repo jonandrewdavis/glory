@@ -145,3 +145,32 @@ layout_mode = 2
 
 [node name="PauseLayer" parent="." unique_id=1173719922 instance=ExtResource("3_n2icj")]
 visible = false
+
+[node name="ArenaStatus" type="VBoxContainer" parent="PlayerUI"]
+visible = false
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.18
+anchor_bottom = 0.18
+offset_left = -240.0
+offset_right = 240.0
+mouse_filter = 2
+
+[node name="ArenaWarning" type="Label" parent="PlayerUI/ArenaStatus"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="ArenaAllowance" type="ProgressBar" parent="PlayerUI/ArenaStatus"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 8)
+max_value = 1.0
+step = 0.001
+show_percentage = false
+mouse_filter = 2

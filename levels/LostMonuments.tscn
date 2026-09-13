@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://c7616uqmxo3td" path="res://scenes/gameplay/ring.tscn" id="6_w7p1f"]
 [ext_resource type="PackedScene" uid="uid://c4tt8q1m2vx0n" path="res://scenes/gameplay/test_target/test_target.tscn" id="7_ttgt"]
 [ext_resource type="Script" path="res://scenes/gameplay/test_target/target_spawner.gd" id="8_tspn"]
+[ext_resource type="Script" path="res://scenes/gameplay/arena_bounds.gd" id="9_bounds"]
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_kaddv"]
 
@@ -109,6 +110,9 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_5457t")
 
 [node name="LostMonuments" type="Node3D" unique_id=1685573245]
+
+[node name="ArenaBounds" type="Node3D" parent="."]
+script = ExtResource("9_bounds")
 
 [node name="Floor" type="StaticBody3D" parent="." unique_id=1396213789]
 

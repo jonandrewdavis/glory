@@ -3,20 +3,29 @@
 [ext_resource type="Script" uid="uid://0q1kfwbxvljs" path="res://player/mage/player_mage.gd" id="1_61y20"]
 [ext_resource type="PackedScene" uid="uid://bxgf5rpc10cv0" path="res://assets/models/rat_scene.tscn" id="2_iud7l"]
 [ext_resource type="Script" uid="uid://bqflf4vw8mem1" path="res://addons/lines_and_trails_3d/trail_3d.gd" id="3_1vusn"]
+[ext_resource type="Resource" uid="uid://bbftq3m5poa3o" path="res://player/mage/profiles/original_value_2.tres" id="4_t2qa0"]
 [ext_resource type="Script" uid="uid://r7356kes1ww2" path="res://player/mage/targeting_system.gd" id="4_tsys"]
 [ext_resource type="Script" uid="uid://c41481wheyqa2" path="res://player/mage/targeting_debug.gd" id="5_tdbg"]
 [ext_resource type="Script" uid="uid://eb3ac2lhjp1x" path="res://player/mage/weapons/beam_weapon.gd" id="6_beam"]
 [ext_resource type="Script" uid="uid://c8rainoecpyie" path="res://addons/lines_and_trails_3d/line_3d.gd" id="7_line"]
 [ext_resource type="Script" uid="uid://6yjmbrjl8cp0" path="res://components/health_component.gd" id="8_hc"]
 [ext_resource type="Script" uid="uid://bkop036eat14a" path="res://components/mana_component.gd" id="9_mc"]
+[ext_resource type="Script" uid="uid://b7bqkoll8o83d" path="res://player/mage/arena_tracker.gd" id="10_arena"]
+[ext_resource type="Resource" uid="uid://bw586gxbo3nrg" path="res://player/mage/profiles/original.tres" id="10_original"]
+[ext_resource type="Resource" uid="uid://biwbliddoiqk8" path="res://player/mage/profiles/airplane.tres" id="11_airplane"]
+[ext_resource type="Resource" uid="uid://b2b3ugvfbjuog" path="res://player/mage/profiles/character.tres" id="12_character"]
+[ext_resource type="Resource" uid="uid://bet7kt7f3wpg0" path="res://player/mage/profiles/arcade.tres" id="13_arcade"]
+[ext_resource type="Resource" uid="uid://11xb5v8mdc6f" path="res://player/mage/profiles/broom_drift.tres" id="14_broom"]
+[ext_resource type="Script" uid="uid://bbclo6oy1vxa0" path="res://player/mage/flight_profile.gd" id="15_flight_profile"]
+[ext_resource type="Script" uid="uid://be1trcobagwvn" path="res://player/mage/aim_look.gd" id="20_aim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kaddv"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_iud7l"]
-properties/0/path = NodePath(".:position")
+properties/0/path = NodePath(".:net_position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
-properties/1/path = NodePath(".:rotation")
+properties/1/path = NodePath(".:net_quaternion")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 properties/2/path = NodePath("HealthComponent:current")
@@ -30,10 +39,16 @@ point_count = 2
 [node name="PlayerMage" type="CharacterBody3D" unique_id=1757496055 groups=["targetable"]]
 collision_layer = 6
 script = ExtResource("1_61y20")
+profile = ExtResource("10_original")
+debug_profiles = Array[ExtResource("15_flight_profile")]([ExtResource("4_t2qa0"), ExtResource("13_arcade"), ExtResource("12_character"), ExtResource("10_original"), ExtResource("11_airplane"), ExtResource("14_broom")])
 
 [node name="Rat" parent="." unique_id=1283492536 instance=ExtResource("2_iud7l")]
 unique_name_in_owner = true
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="ArenaTracker" type="Node3D" parent="." unique_id=1450302553]
+unique_name_in_owner = true
+script = ExtResource("10_arena")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2038600600]
 unique_name_in_owner = true
@@ -47,9 +62,10 @@ replication_config = SubResource("SceneReplicationConfig_iud7l")
 unique_name_in_owner = true
 process_priority = 9999
 process_physics_priority = 9999
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 1.8354642)
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, -0.04691112, 1.8354642)
 script = ExtResource("3_1vusn")
 time_limit = 2.5
+tick_mode = 1
 width = 1.0
 width_curve = SubResource("Curve_1vusn")
 color = Color(0.8156863, 0.23529412, 1, 1)
@@ -59,7 +75,7 @@ metadata/_custom_type_script = "uid://bqflf4vw8mem1"
 [node name="TargetingSystem" type="Node3D" parent="." unique_id=1063074867]
 unique_name_in_owner = true
 script = ExtResource("4_tsys")
-max_distance = 2000.0
+max_distance = 1500.0
 switch_strength = 2000.0
 flick_decay = 800.0
 switch_cooldown = 0.5
@@ -109,3 +125,8 @@ unique_name_in_owner = true
 script = ExtResource("9_mc")
 regen_rate = 40.0
 regen_delay = 0.5
+
+[node name="AimLook" type="Node" parent="." unique_id=1363064726]
+unique_name_in_owner = true
+script = ExtResource("20_aim")
+return_speed = 4.0

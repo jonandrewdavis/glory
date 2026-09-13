@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="MageFlightProfile" format=3 uid="uid://bw586gxbo3nrg"]
+
+[ext_resource type="Script" uid="uid://bbclo6oy1vxa0" path="res://player/mage/flight_profile.gd" id="1_prof"]
+
+[resource]
+script = ExtResource("1_prof")
+display_name = "Original"

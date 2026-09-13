@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MageFlightProfile" format=3 uid="uid://biwbliddoiqk8"]
+
+[ext_resource type="Script" uid="uid://bbclo6oy1vxa0" path="res://player/mage/flight_profile.gd" id="1_prof"]
+
+[resource]
+script = ExtResource("1_prof")
+display_name = "Airplane"
+max_speed = 110.0
+min_speed = 35.0
+base_speed = 65.0
+acceleration = 12.0
+deceleration = 8.0
+yaw_speed = 35.0
+pitch_speed = 40.0
+roll_speed = 90.0
+turn_responsiveness = 4.0
+high_speed_turn_penalty = 0.5
+auto_level_speed = 25.0
+mesh_lean_degrees = 60.0
+mesh_lean_speed = 1.5

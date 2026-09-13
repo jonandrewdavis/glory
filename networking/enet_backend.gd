@@ -72,6 +72,7 @@ func leave_game() -> void:
 
 func fetch_lobby_list() -> void:
 	search_peer.put_packet(GREETING_MESSAGE.to_utf8_buffer())
+	listing_started.emit()
 
 func set_joinable(value: bool) -> void:
 	joinable = value
