@@ -28,7 +28,7 @@ func update_weapon(delta: float, firing: bool, target: Node3D) -> void:
 		return
 	var from := global_position
 	var to: Vector3
-	if target:
+	if is_instance_valid(target) and target.is_inside_tree():
 		to = target.global_position
 		apply_damage(target, damage_per_second * delta)
 	else:

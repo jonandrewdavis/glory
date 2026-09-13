@@ -4,7 +4,6 @@ extends MultiplayerBackend
 const CONTEXT: TubeContext = preload("uid://334o3kg81fih")
 const TRACKER_TIMEOUT := 5.0
 const LOST_REASON := "Disconnected from host."
-const MISSING_WEBRTC := "WebRTC extension missing; install addons/webrtc_native."
 enum Phase {IDLE, HOSTING, JOINING, IN_SESSION}
 
 var client: TubeClient
@@ -29,10 +28,7 @@ func _ready() -> void:
 	add_child(client)
 	multiplayer.peer_connected.connect(_on_peer_changed)
 	multiplayer.peer_disconnected.connect(_on_peer_changed)
-	status_changed.emit("Tube ready" if _has_webrtc() else MISSING_WEBRTC)
-
-func _has_webrtc() -> bool:
-	return OS.has_feature("web") or ClassDB.class_exists("WebRTCLibPeerConnection")
+	status_changed.emit("Tube ready" if TubeClient.is_webrtc_available() else "WebRTC extension missing; install addons/webrtc_native.")
 
 func host_game(options: HostOptions) -> void:
 	lobby_name = options.lobby_name
@@ -151,16 +147,10 @@ func get_uid(peer_id: int) -> String:
 func get_username(peer_id: int) -> String:
 	return str(peer_id)
 
-func get_address_hint() -> String:
-	return "Session code"
-
 func get_lobby_address() -> String:
 	return client.session_id
 
 func leave_game() -> void:
-	shutdown()
-
-func shutdown() -> void:
 	_stop_listing()
 	phase = Phase.IDLE
 	joinable = false

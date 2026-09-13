@@ -22,7 +22,7 @@ func open() -> void:
 	%AddressEdit.grab_focus()
 
 func _refresh_hint(_type: int) -> void:
-	%AddressEdit.placeholder_text = MultiplayerService.backend.get_address_hint()
+	%AddressEdit.placeholder_text = MultiplayerService.get_address_hint()
 	%AddressEdit.clear()
 
 func _refresh() -> void:

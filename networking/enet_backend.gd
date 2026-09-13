@@ -97,9 +97,6 @@ func get_uid(peer_id: int) -> String:
 func get_username(peer_id: int) -> String:
 	return str(peer_id)
 
-func get_address_hint() -> String:
-	return "IP address"
-
 func get_lobby_address() -> String:
 	for address in IP.get_local_addresses():
 		var parts := address.split(".")

@@ -5,6 +5,8 @@ extends Node
 signal lobby_found(address: Variant, lobby_name: String, cur_players: int, max_players: int)
 signal lobby_joined
 signal join_lobby_failed(reason: String)
+## Not in upstream. Tube replaces the peer with OfflineMultiplayerPeer in the same frame it closes,
+## and NodeTunnel reports relay loss via forced_disconnect, so neither fires server_disconnected.
 signal lobby_lost(reason: String)
 signal status_changed(text: String)
 
@@ -25,12 +27,7 @@ func get_uid(peer_id: int) -> Variant
 @abstract
 func get_username(peer_id: int) -> String
 @abstract
-func get_address_hint() -> String
-@abstract
 func get_lobby_address() -> String
-
-func shutdown() -> void:
-	leave_game()
 
 func _close_peer() -> void:
 	if multiplayer.has_multiplayer_peer():

@@ -146,7 +146,7 @@ layout_mode = 2
 bbcode_enabled = true
 text = "Host a game for your friends, or join an existing lobby.
 
-Choose LAN (ENet) for your local network or Online (NodeTunnel) to play over the relay.
+Choose LAN (ENet) for your local network or Online (Tube P2P) to play over the relay.
 
 Hosts can share the address or room code from the pause menu.
 

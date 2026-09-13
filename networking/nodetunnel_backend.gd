@@ -136,9 +136,6 @@ func get_uid(peer_id: int) -> String:
 func get_username(peer_id: int) -> String:
 	return str(peer_id)
 
-func get_address_hint() -> String:
-	return "Room code"
-
 func get_lobby_address() -> String:
 	return peer.room_id if peer != null and phase == Phase.IN_ROOM else ""
 
@@ -184,8 +181,4 @@ func _reset_peer() -> void:
 	status_changed.emit("Relay disconnected")
 
 func leave_game() -> void:
-	_reset_peer()
-	_connect_to_relay()
-
-func shutdown() -> void:
 	_reset_peer()

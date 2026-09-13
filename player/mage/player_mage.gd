@@ -47,6 +47,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
+	targeting.tick(delta)
 	if not health.is_alive():
 		velocity = Vector3.ZERO
 		weapon.update_weapon(delta, false, null)
@@ -62,7 +63,6 @@ func _physics_process(delta: float) -> void:
 	var turn_dir = Vector3(-turn_input.y,-turn_input.x,-roll)
 	apply_rotation(turn_dir,delta)
 	turn_input = Vector2()
-	targeting.tick(delta)
 	var firing := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and Input.is_action_pressed("primary")
 	firing = firing and mana.drain(weapon.mana_per_second, delta)
 	weapon.update_weapon(delta, firing, targeting.locked_target)

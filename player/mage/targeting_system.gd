@@ -68,6 +68,7 @@ func get_camera() -> Camera3D:
 	return get_viewport().get_camera_3d()
 
 func tick(delta: float) -> void:
+	_prune_stale()
 	if not enabled:
 		return
 	switch_cooldown_left = maxf(0.0, switch_cooldown_left - delta)
@@ -79,7 +80,8 @@ func tick(delta: float) -> void:
 	elif flick_accum.length() >= switch_strength and switch_cooldown_left == 0.0:
 		_try_switch(flick_accum.normalized())
 		flick_accum = Vector2.ZERO
-	debug.update_debug(candidates, locked_target, global_position)
+	if candidates.size():
+		debug.update_debug(candidates, locked_target, global_position)
 
 func _input(event: InputEvent) -> void:
 	if not enabled or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
@@ -142,10 +144,27 @@ func _update_acquire(delta: float) -> void:
 	if acquire_time >= acquire_dwell:
 		_set_lock(best)
 
+## A node can leave the game (player disconnect, despawn) between ticks. Freed
+## objects compare equal to null in GDScript, so check validity before any
+## null comparison and clear every reference we might hand out.
+func _prune_stale() -> void:
+	if not _is_live(locked_target):
+		_drop_lock()
+	if not _is_live(acquire_candidate):
+		acquire_candidate = null
+		acquire_time = 0.0
+	if candidates.any(func(c) -> bool: return not _is_live(c)):
+		candidates = candidates.filter(_is_live)
+		candidates_changed.emit(candidates)
+
+## Untyped on purpose: passing a freed instance to a Node3D parameter is itself an error.
+func _is_live(node) -> bool:
+	return is_instance_valid(node) and node.is_inside_tree()
+
 func _maintain_lock(delta: float) -> void:
 	if locked_target == null:
 		return
-	if not is_instance_valid(locked_target) or not locked_target.is_inside_tree() or not locked_target.is_in_group("targetable"):
+	if not locked_target.is_in_group("targetable"):
 		_drop_lock()
 		return
 	var origin := body.global_position
@@ -179,7 +198,7 @@ func _drop_lock() -> void:
 	var previous := locked_target
 	locked_target = null
 	grace_time = 0.0
-	if previous:
+	if is_instance_valid(previous):
 		target_lost.emit(previous)
 
 func _try_switch(dir: Vector2) -> void:

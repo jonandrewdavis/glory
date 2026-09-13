@@ -3,6 +3,7 @@ extends Node
 enum BackendType {ENET, NODETUNNEL, TUBE}
 const BACKEND_SCRIPTS := {BackendType.TUBE: preload("res://networking/tube_backend.gd"), BackendType.ENET: preload("res://networking/enet_backend.gd")}
 const BACKEND_LABELS := {BackendType.TUBE: "Online (Tube P2P)", BackendType.ENET: "ENet (Localhost)"}
+const BACKEND_ADDRESS_HINTS := {BackendType.TUBE: "Session code", BackendType.ENET: "IP address", BackendType.NODETUNNEL: "Room code"}
 const CONFIG_SECTION := "multiplayer"
 const CONFIG_KEY_BACKEND := "backend"
 const DISCONNECT_REASON := "Disconnected from the host."
@@ -38,7 +39,7 @@ func set_backend(type: BackendType, persist_choice := true) -> void:
 	if in_lobby or pending or not BACKEND_SCRIPTS.has(type):
 		return
 	if backend != null:
-		backend.shutdown()
+		backend.leave_game()
 		backend.free()
 	backend_type = type
 	backend = BACKEND_SCRIPTS[type].new()
@@ -66,7 +67,7 @@ func host_game(options: HostOptions) -> void:
 	if options.max_players < 1 or options.max_players > 4:
 		_on_join_lobby_failed("Choose between 1 and 4 players.")
 	elif options.max_players == 1:
-		backend.shutdown()
+		backend.leave_game()
 		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 		_on_lobby_joined()
 	else:
@@ -79,7 +80,7 @@ func join_game(address: Variant) -> void:
 	pending = true
 	joining_lobby.emit()
 	if str(address).strip_edges().is_empty() or str(address).to_utf8_buffer().size() > 256:
-		_on_join_lobby_failed("Enter a valid " + backend.get_address_hint().to_lower() + ".")
+		_on_join_lobby_failed("Enter a valid " + get_address_hint().to_lower() + ".")
 		return
 	backend.join_game(address)
 
@@ -95,7 +96,7 @@ func _on_join_lobby_failed(reason: String) -> void:
 		_on_status_changed(reason)
 		return
 	pending = false
-	backend.shutdown()
+	backend.leave_game()
 	join_lobby_failed.emit(reason)
 
 func leave_game() -> void:
@@ -105,11 +106,10 @@ func leave_game() -> void:
 	var was_in_lobby := in_lobby
 	in_lobby = false
 	pending = false
-	backend.shutdown()
+	backend.leave_game()
 	banlist.clear()
 	if was_in_lobby:
 		game_exited.emit()
-	backend.leave_game()
 	leaving = false
 
 func _end_game(reason: String) -> void:
@@ -135,6 +135,9 @@ func set_joinable(value: bool) -> void:
 
 func is_host() -> bool:
 	return in_lobby and multiplayer.is_server()
+
+func get_address_hint() -> String:
+	return BACKEND_ADDRESS_HINTS[backend_type]
 
 func get_lobby_address() -> String:
 	if multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
