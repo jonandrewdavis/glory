@@ -86,7 +86,7 @@ layout_mode = 2
 theme_type_variation = &"LabelSmall"
 autowrap_mode = 2
 
-[node name="MatchmakeButton" type="Button" parent="MainContainer/Control/VBoxContainer"]
+[node name="MatchmakeButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=268029676]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
@@ -200,6 +200,7 @@ horizontal_alignment = 1
 [node name="FailedLabel" type="Label" parent="PendingOverlay/CenterContainer/VBoxContainer" unique_id=1532521974]
 unique_name_in_owner = true
 visible = false
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 2
@@ -210,7 +211,7 @@ visible = false
 layout_mode = 2
 text = "CLOSE"
 
-[node name="CancelButton" type="Button" parent="PendingOverlay/CenterContainer/VBoxContainer"]
+[node name="CancelButton" type="Button" parent="PendingOverlay/CenterContainer/VBoxContainer" unique_id=598538003]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2

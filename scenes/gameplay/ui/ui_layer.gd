@@ -4,20 +4,6 @@ class_name UILayer
 const MENU_SCENE := "res://scenes/menu/menu.tscn"
 var exiting := false
 
-@onready var throttle_progress_bar: TextureProgressBar = %ThrottleProgressBar
-@onready var health_progress_bar: TextureProgressBar = %HealthProgressBar
-@onready var mana_progress_bar: TextureProgressBar = %ManaProgressBar
-@onready var roll_texture_bar: TextureProgressBar = %RollTextureBar
-@onready var target_hud: TargetHud = %TargetHud
-@onready var arena_warning: Label = %ArenaWarning
-@onready var arena_allowance: ProgressBar = %ArenaAllowance
-
-func update_arena_warning(message: String, fraction: float, outside := false) -> void:
-	arena_warning.text = message
-	arena_warning.get_parent().visible = not message.is_empty()
-	arena_warning.modulate = Color.TOMATO if outside else Color.ORANGE
-	arena_allowance.value = fraction
-
 func _ready() -> void:
 	# World is our Global link.
 	World.ui_layer = self

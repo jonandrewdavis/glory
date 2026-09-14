@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://du110eaumrcto"]
+
+[sub_resource type="Gradient" id="Gradient_chrw8"]
+colors = PackedColorArray(0.3137255, 0.3254902, 0, 1, 0.22745098, 0.09411765, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_yruvy"]
+gradient = SubResource("Gradient_chrw8")
+width = 8000
+height = 200
+fill_to = Vector2(0, 1)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_yruvy"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_pr2nu"]
+normal = Vector2(1, 0)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_chrw8"]
+normal = Vector2(-1, 0)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_6yina"]
+normal = Vector2(0, 1)
+
+[sub_resource type="Environment" id="Environment_6yina"]
+
+[node name="Fortress1" type="Node2D" unique_id=2094019741]
+
+[node name="StaticBodyLimits" type="StaticBody2D" parent="." unique_id=1408391747]
+
+[node name="Sprite2D" type="Sprite2D" parent="StaticBodyLimits" unique_id=966439295]
+texture = SubResource("GradientTexture2D_yruvy")
+
+[node name="Bottom" type="CollisionShape2D" parent="StaticBodyLimits" unique_id=1086453886]
+position = Vector2(0, -100)
+shape = SubResource("WorldBoundaryShape2D_yruvy")
+
+[node name="Left" type="CollisionShape2D" parent="StaticBodyLimits" unique_id=523009712]
+position = Vector2(-4000, 0)
+shape = SubResource("WorldBoundaryShape2D_pr2nu")
+
+[node name="Right" type="CollisionShape2D" parent="StaticBodyLimits" unique_id=1669708003]
+position = Vector2(4000, 0)
+shape = SubResource("WorldBoundaryShape2D_chrw8")
+
+[node name="Top" type="CollisionShape2D" parent="StaticBodyLimits" unique_id=995831256]
+position = Vector2(0, -8000)
+shape = SubResource("WorldBoundaryShape2D_6yina")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1866329671]
+environment = SubResource("Environment_6yina")

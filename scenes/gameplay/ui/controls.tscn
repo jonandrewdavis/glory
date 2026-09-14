@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://nbqhuft1wkg8"]
 
-[ext_resource type="Texture2D" uid="uid://cw17cenlqjc8q" path="res://assets/sprites/keyboard-&-mouse_sheet_default.png" id="1_rw3g5"]
+[ext_resource type="Texture2D" uid="uid://cw17cenlqjc8q" path="res://assets/sprites/keeb_mouse_sprite.png" id="1_rw3g5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dwui3"]
 atlas = ExtResource("1_rw3g5")

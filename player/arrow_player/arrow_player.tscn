@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bd7kaorjlt0go"]
+
+[ext_resource type="Script" uid="uid://cesmuf7fepyl" path="res://player/arrow_player/arrow_player.gd" id="1_co4h1"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yruvy"]
+
+[node name="ArrowPlayer" type="CharacterBody2D" unique_id=1076454491]
+script = ExtResource("1_co4h1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1699620186]
+shape = SubResource("CapsuleShape2D_yruvy")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1990536259]

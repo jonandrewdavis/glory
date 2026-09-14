@@ -3,7 +3,7 @@ extends Node
 
 const WAIT_INTERVAL := 0.1
 const LEVEL_DICT: Dictionary[String, String] = {
-	"LostMonuments": "uid://d1xpycgi6qs7k",
+	"Fortress1": "uid://du110eaumrcto",
 }
 var current_key := ""
 var generation := 0

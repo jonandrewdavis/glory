@@ -6,17 +6,14 @@ extends Node
 # ever disappears. Players and Levels are loaded in and out, but it is always 
 # at the top level.
 
-
 # UI
 var ui_layer: UILayer
 
-
-const DEFAULT_LEVEL := "LostMonuments"
+const DEFAULT_LEVEL := "Fortress1"
 
 var session := 0
 @onready var level_loader: LevelLoader = %LevelLoader
 @onready var player_spawner: PlayerSpawner = %PlayerSpawner
-@onready var fly_cam: Node3D = %FlyCam
 
 func _ready() -> void:
 	if OS.is_debug_build() and get_tree().current_scene == self:
