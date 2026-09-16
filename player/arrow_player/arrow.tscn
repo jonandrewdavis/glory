@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://player/arrow_player/arrow.gd" id="1_arrow"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shaft"]
+size = Vector2(14, 3)
+
+[sub_resource type="Gradient" id="Gradient_trail"]
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.6)
+
+[node name="Arrow" type="Area2D"]
+collision_layer = 4
+monitoring = false
+monitorable = true
+script = ExtResource("1_arrow")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_shaft")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-5, 0)
+scale = Vector2(0.06, 0.06)
+polygon = PackedVector2Array(-49.000835, -8.383104, 175.99998, -8, 159.99998, -24, 215.99998, 0, 159.99998, 24.000004, 175.99998, 7.999996, -47.71962, 7.803403, -56.350563, 16.989393, -103.79989, 24.344969, -89.34042, 0.36597383, -104.00384, -23.53025, -55.533623, -16.11337)
+
+[node name="Trail" type="Line2D" parent="."]
+top_level = true
+width = 1.0
+gradient = SubResource("Gradient_trail")

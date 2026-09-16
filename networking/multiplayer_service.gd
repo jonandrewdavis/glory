@@ -1,15 +1,15 @@
 extends Node
 
-enum BackendType {ENET, NODETUNNEL, TUBE}
-const BACKEND_SCRIPTS := {BackendType.TUBE: preload("res://networking/tube_backend.gd"), BackendType.ENET: preload("res://networking/enet_backend.gd")}
-const BACKEND_LABELS := {BackendType.TUBE: "Online (Tube P2P)", BackendType.ENET: "ENet (Localhost)"}
-const BACKEND_ADDRESS_HINTS := {BackendType.TUBE: "Session code", BackendType.ENET: "IP address", BackendType.NODETUNNEL: "Room code"}
+enum BackendType {ENET, NODETUNNEL, TUBE, PLAYFLOW}
+const BACKEND_SCRIPTS := {BackendType.PLAYFLOW: preload("res://networking/playflow_backend.gd"), BackendType.TUBE: preload("res://networking/tube_backend.gd"), BackendType.ENET: preload("res://networking/enet_backend.gd")}
+const BACKEND_LABELS := {BackendType.PLAYFLOW: "PlayFlow (Dedicated)", BackendType.TUBE: "Online (Tube P2P)", BackendType.ENET: "ENet (Localhost)"}
+const BACKEND_ADDRESS_HINTS := {BackendType.PLAYFLOW: "auto or WebSocket URL", BackendType.TUBE: "Session code", BackendType.ENET: "IP address", BackendType.NODETUNNEL: "Room code"}
 const CONFIG_SECTION := "multiplayer"
 const CONFIG_KEY_BACKEND := "backend"
 const DISCONNECT_REASON := "Disconnected from the host."
 const KICK_REASON_KICKED := "You were kicked."
 const KICK_REASON_BANNED := "You are banned from this lobby."
-const MAX_PLAYERS := 25
+const MAX_PLAYERS := 30
 
 signal lobby_found(address: Variant, lobby_name: String, cur_players: int, max_players: int)
 signal creating_lobby
@@ -34,8 +34,24 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	if is_dedicated_server():
+		set_backend(BackendType.PLAYFLOW, false)
+		_start_dedicated.call_deferred()
+		return
 	var saved: Variant = GGT_GameConfig.config.get_value(CONFIG_SECTION, CONFIG_KEY_BACKEND, BackendType.ENET)
 	set_backend(saved if saved is int and BACKEND_SCRIPTS.has(saved) else BackendType.ENET)
+
+func is_dedicated_server() -> bool:
+	return OS.has_feature("dedicated_server") or "--playflow-server" in OS.get_cmdline_user_args()
+
+func _start_dedicated() -> void:
+	join_lobby_failed.connect(func(reason: String) -> void:
+		push_error(reason)
+		get_tree().quit(1))
+	var options := HostOptions.new()
+	options.max_players = 30
+	options.lobby_name = "PlayFlow 15 vs 15"
+	host_game(options)
 
 func set_backend(type: BackendType, persist_choice := true) -> void:
 	if in_lobby or pending or not BACKEND_SCRIPTS.has(type):

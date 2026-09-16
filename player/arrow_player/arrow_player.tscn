@@ -1,13 +1,386 @@
 [gd_scene format=3 uid="uid://bd7kaorjlt0go"]
 
 [ext_resource type="Script" uid="uid://cesmuf7fepyl" path="res://player/arrow_player/arrow_player.gd" id="1_co4h1"]
+[ext_resource type="Texture2D" uid="uid://cr02jb2w6nmil" path="res://assets/sprites/archer_sprite.png" id="2_sheet"]
+[ext_resource type="Script" uid="uid://6yjmbrjl8cp0" path="res://components/health_component.gd" id="3_health"]
+[ext_resource type="Script" uid="uid://jk8lexroerip" path="res://player/arrow_player/charge_arc.gd" id="4_charge"]
+[ext_resource type="Script" uid="uid://cria8dvrsfl47" path="res://player/arrow_player/aim_reticle.gd" id="5_aim"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yruvy"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 6.0
+height = 16.0
 
-[node name="ArrowPlayer" type="CharacterBody2D" unique_id=1076454491]
+[sub_resource type="AtlasTexture" id="Atlas_attack_0"]
+atlas = ExtResource("2_sheet")
+region = Rect2(0, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(100, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(200, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(300, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(400, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_5"]
+atlas = ExtResource("2_sheet")
+region = Rect2(500, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_6"]
+atlas = ExtResource("2_sheet")
+region = Rect2(600, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_7"]
+atlas = ExtResource("2_sheet")
+region = Rect2(700, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_8"]
+atlas = ExtResource("2_sheet")
+region = Rect2(800, 300, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_death_0"]
+atlas = ExtResource("2_sheet")
+region = Rect2(0, 500, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_death_1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(100, 500, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_death_2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(200, 500, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_death_3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(300, 500, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_0"]
+atlas = ExtResource("2_sheet")
+region = Rect2(0, 400, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(100, 400, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(200, 400, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(300, 400, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_0"]
+atlas = ExtResource("2_sheet")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_5"]
+atlas = ExtResource("2_sheet")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_0"]
+atlas = ExtResource("2_sheet")
+region = Rect2(0, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(100, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(200, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(300, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(400, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_5"]
+atlas = ExtResource("2_sheet")
+region = Rect2(500, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_6"]
+atlas = ExtResource("2_sheet")
+region = Rect2(600, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_walk_7"]
+atlas = ExtResource("2_sheet")
+region = Rect2(700, 100, 100, 100)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_archer"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_8")
+}],
+"loop": 1,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_death_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_death_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_death_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_death_3")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_hurt_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_hurt_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_hurt_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_hurt_3")
+}],
+"loop": 1,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_5")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_7")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_player"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("AnimatedSprite2D:flip_h")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+properties/2/path = NodePath("AnimatedSprite2D:animation")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+properties/3/path = NodePath("ArrowContainer:visible")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+properties/4/path = NodePath("ArrowContainer:rotation")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath("ChargeArc:display_state")
+properties/5/spawn = true
+properties/5/replication_mode = 2
+properties/6/path = NodePath("ShieldContainer:visible")
+properties/6/spawn = true
+properties/6/replication_mode = 2
+properties/7/path = NodePath("ShieldContainer:rotation")
+properties/7/spawn = true
+properties/7/replication_mode = 1
+properties/8/path = NodePath("ShieldContainer/ShieldArea/ShieldCollision:disabled")
+properties/8/spawn = true
+properties/8/replication_mode = 2
+properties/9/path = NodePath("ArrowContainer:scale")
+properties/9/spawn = true
+properties/9/replication_mode = 2
+properties/10/path = NodePath("ChargeArc:readiness")
+properties/10/spawn = true
+properties/10/replication_mode = 2
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_health"]
+properties/0/path = NodePath("HealthComponent:current")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+
+[node name="ArrowPlayer" type="CharacterBody2D" unique_id=2068560485 groups=["players"]]
+z_index = 1
+scale = Vector2(1.2, 1.2)
+collision_layer = 2
+collision_mask = 33
 script = ExtResource("1_co4h1")
+minimum_charge_time = 0.8
+charge_perfect_window = 0.4
+charge_speed_steps = Array[float]([609.0, 756.0, 1008.0, 1296.0])
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1699620186]
-shape = SubResource("CapsuleShape2D_yruvy")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1966345579]
+shape = SubResource("CapsuleShape2D_body")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1990536259]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1365258805]
+unique_name_in_owner = true
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_archer")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="StuckArrows" type="Node2D" parent="." unique_id=1798662096]
+unique_name_in_owner = true
+
+[node name="AimReticle" type="Node2D" parent="." unique_id=996106882]
+unique_name_in_owner = true
+visible = false
+z_index = 5
+script = ExtResource("5_aim")
+
+[node name="HealthComponent" type="Node" parent="." unique_id=1752970858]
+unique_name_in_owner = true
+script = ExtResource("3_health")
+networked = true
+regen_enabled = false
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=347798596]
+replication_interval = 0.033
+replication_config = SubResource("SceneReplicationConfig_player")
+
+[node name="HealthSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=337667337]
+replication_config = SubResource("SceneReplicationConfig_health")
+
+[node name="ArrowContainer" type="Node2D" parent="." unique_id=1326967956]
+unique_name_in_owner = true
+visible = false
+
+[node name="ArrowPolygon2D" type="Polygon2D" parent="ArrowContainer" unique_id=1237987584]
+position = Vector2(8, 0)
+scale = Vector2(0.06, 0.06)
+polygon = PackedVector2Array(-49.000835, -8.383104, 175.99998, -8, 159.99998, -24, 215.99998, 0, 159.99998, 24.000004, 175.99998, 7.999996, -47.71962, 7.803403, -56.350563, 16.989393, -103.79989, 24.344969, -89.34042, 0.36597383, -104.00384, -23.53025, -55.533623, -16.11337)
+
+[node name="ChargeArc" type="Node2D" parent="." unique_id=1470063130]
+unique_name_in_owner = true
+visible = false
+script = ExtResource("4_charge")
+
+[node name="ShieldContainer" type="Node2D" parent="." unique_id=1612113249]
+unique_name_in_owner = true
+visible = false
+
+[node name="ShieldPolygon2D" type="Polygon2D" parent="ShieldContainer" unique_id=1017687896]
+unique_name_in_owner = true
+color = Color(1, 1, 1, 0.9)
+polygon = PackedVector2Array(8, -14, 14, -12, 18, -6, 19, 0, 18, 6, 14, 12, 8, 14, 10, 0)
+
+[node name="ShieldBoss" type="Polygon2D" parent="ShieldContainer" unique_id=1896025396]
+unique_name_in_owner = true
+polygon = PackedVector2Array(10.25, -7.7, 13.55, -6.6, 15.75, -3.3, 16.3, 0, 15.75, 3.3, 13.55, 6.6, 10.25, 7.7, 11.35, 0)
+
+[node name="ShieldArea" type="Area2D" parent="ShieldContainer" unique_id=1349116301 groups=["shields"]]
+unique_name_in_owner = true
+collision_layer = 8
+collision_mask = 4
+monitoring = false
+
+[node name="ShieldCollision" type="CollisionPolygon2D" parent="ShieldContainer/ShieldArea" unique_id=422980722]
+unique_name_in_owner = true
+polygon = PackedVector2Array(8, -14, 14, -12, 18, -6, 19, 0, 18, 6, 14, 12, 8, 14, 10, 0)
+disabled = true
+
+[node name="NameLabel" type="Label" parent="." unique_id=1548289511]
+unique_name_in_owner = true
+offset_left = -50.0
+offset_top = -60.0
+offset_right = 50.0
+offset_bottom = -48.0
+theme_override_font_sizes/font_size = 9
+text = "Player"
+horizontal_alignment = 1

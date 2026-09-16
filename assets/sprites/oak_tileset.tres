@@ -1,6 +1,6 @@
 [gd_resource type="TileSet" format=3 uid="uid://bin3kwb33d1rx"]
 
-[ext_resource type="Texture2D" uid="uid://27lqx1npt0x7" path="res://assets/oak_woods_tileset.png" id="1_uewgx"]
+[ext_resource type="Texture2D" uid="uid://chbqnxxrutwoh" path="res://assets/sprites/oak_woods_tileset.png" id="1_uewgx"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4717r"]
 texture = ExtResource("1_uewgx")
@@ -18,12 +18,33 @@ texture = ExtResource("1_uewgx")
 5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 7:0/0 = 0
 7:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
+8:0/next_alternative_id = 3
 8:0/0 = 0
 8:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+8:0/1 = 1
+8:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
+8:0/1/physics_layer_0/polygon_0/one_way = true
+8:0/2 = 2
+8:0/2/physics_layer_1/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
+8:0/2/physics_layer_1/polygon_0/one_way = true
+9:0/next_alternative_id = 3
 9:0/0 = 0
 9:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+9:0/1 = 1
+9:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
+9:0/1/physics_layer_0/polygon_0/one_way = true
+9:0/2 = 2
+9:0/2/physics_layer_1/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
+9:0/2/physics_layer_1/polygon_0/one_way = true
+10:0/next_alternative_id = 3
 10:0/0 = 0
 10:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+10:0/1 = 1
+10:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
+10:0/1/physics_layer_0/polygon_0/one_way = true
+10:0/2 = 2
+10:0/2/physics_layer_1/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
+10:0/2/physics_layer_1/polygon_0/one_way = true
 11:0/0 = 0
 11:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 12:0/0 = 0
@@ -513,6 +534,7 @@ texture = ExtResource("1_uewgx")
 
 [resource]
 physics_layer_0/collision_layer = 1
+physics_layer_1/collision_layer = 32
 terrain_set_0/mode = 1
 terrain_set_0/terrain_0/name = "Terrain 0"
 terrain_set_0/terrain_0/color = Color(0.5, 0.34375, 0.25, 1)

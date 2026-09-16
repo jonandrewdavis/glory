@@ -9,38 +9,43 @@ extends Node
 # UI
 var ui_layer: UILayer
 
-const DEFAULT_LEVEL := "Fortress1"
-
 var session := 0
 @onready var level_loader: LevelLoader = %LevelLoader
 @onready var player_spawner: PlayerSpawner = %PlayerSpawner
+@onready var projectile_spawner: ProjectileSpawner = %ProjectileSpawner
+@onready var creep_spawner: CreepSpawner = %CreepSpawner
+@onready var scoreboard: Scoreboard = %Scoreboard
+@onready var camera_rig: CameraRig = %CameraRig
 
 func _ready() -> void:
-	if OS.is_debug_build() and get_tree().current_scene == self:
-		host_debug_world()
-		
 	MultiplayerService.lobby_joined.connect(_on_lobby_joined)
 	MultiplayerService.game_exited.connect(clear)
+	if OS.is_debug_build() and (get_tree().current_scene == self):
+		host_debug_world()
 		
 func _on_lobby_joined() -> void:
 	if not MultiplayerService.is_host():
 		return
 	session += 1
 	var token := session
-	await level_loader.spawn_level(DEFAULT_LEVEL)
+	await level_loader.spawn_level(LevelLoader.DEFAULT_LEVEL)
 	if token != session or not MultiplayerService.is_host():
 		return
-	player_spawner.spawn_player(1)
+	if not MultiplayerService.is_dedicated_server():
+		player_spawner.spawn_player(1)
 	MultiplayerService.set_joinable(true)
 
 func clear() -> void:
 	session += 1
 	player_spawner.clear_players()
+	projectile_spawner.clear_projectiles()
+	scoreboard.clear()
+	camera_rig.clear()
 	level_loader.clear_level()
 
 func change_level(key: String) -> void:
 	if MultiplayerService.is_host() and LevelLoader.LEVEL_DICT.has(key):
-		level_loader.spawn_level.rpc(key)
+		level_loader.spawn_level(key)
 
 func host_debug_world():
 	var opt = HostOptions.new()

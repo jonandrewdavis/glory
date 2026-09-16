@@ -4,22 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="2_1aqtp"]
 [ext_resource type="PackedScene" uid="uid://barl4q1kugrmm" path="res://scenes/gameplay/ui/pause-layer/pause-layer.tscn" id="3_n2icj"]
 
-[sub_resource type="Gradient" id="Gradient_oq6q8"]
-colors = PackedColorArray(0.09736288, 9.126794e-05, 0.2960626, 1, 0.4272387, 0.31936294, 0.22836813, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_pr2nu"]
-gradient = SubResource("Gradient_oq6q8")
-width = 15
-height = 120
-
-[sub_resource type="Gradient" id="Gradient_1aqtp"]
-colors = PackedColorArray(0.25882354, 0, 0.60784316, 1, 1, 1, 1, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_yruvy"]
-gradient = SubResource("Gradient_1aqtp")
-width = 15
-height = 120
-
 [node name="UILayer" type="CanvasLayer" unique_id=959767118]
 script = ExtResource("1_oq6q8")
 
@@ -32,33 +16,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PlayerUI" unique_id=719460325]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="StrengthMargin" type="MarginContainer" parent="PlayerUI/CenterContainer" unique_id=173709439]
-layout_mode = 2
-theme_override_constants/margin_right = 300
-
-[node name="StrengthProgressBar" type="TextureProgressBar" parent="PlayerUI/CenterContainer/StrengthMargin" unique_id=829803639]
-unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0.49411765)
-layout_mode = 2
-value = 50.0
-fill_mode = 3
-texture_under = SubResource("GradientTexture2D_pr2nu")
-texture_progress = SubResource("GradientTexture2D_yruvy")
-
 [node name="MarginContainer" type="MarginContainer" parent="PlayerUI" unique_id=1386433855]
 layout_mode = 1
 offset_right = 225.0
@@ -70,6 +27,20 @@ theme_override_constants/margin_bottom = 24
 
 [node name="Controls" parent="PlayerUI/MarginContainer" unique_id=1906408976 instance=ExtResource("2_1aqtp")]
 layout_mode = 2
+
+[node name="ScoreLabel" type="Label" parent="PlayerUI" unique_id=1734567890]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -324.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 60.0
+grow_horizontal = 0
+horizontal_alignment = 2
+text = "Blue 0 - 0 Orange"
 
 [node name="PauseLayer" parent="." unique_id=1173719922 instance=ExtResource("3_n2icj")]
 visible = false

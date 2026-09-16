@@ -7,6 +7,9 @@ var timeout_token := 0
 var matchmaker: Matchmaker
 
 func _ready() -> void:
+	if MultiplayerService.is_dedicated_server():
+		hide()
+		return
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	for type in MultiplayerService.BACKEND_LABELS:
 		%ServiceOption.add_item(MultiplayerService.BACKEND_LABELS[type], type)
@@ -14,7 +17,10 @@ func _ready() -> void:
 	%ServiceOption.item_selected.connect(func(index: int) -> void: MultiplayerService.set_backend(%ServiceOption.get_item_id(index)))
 	MultiplayerService.backend_changed.connect(func(type: int) -> void: %ServiceOption.select(%ServiceOption.get_item_index(type)))
 	%StatusLabel.text = MultiplayerService.status_text
-	MultiplayerService.status_changed.connect(func(text: String) -> void: %StatusLabel.text = text)
+	MultiplayerService.status_changed.connect(func(text: String) -> void:
+		%StatusLabel.text = text
+		if MultiplayerService.pending and MultiplayerService.backend_type == MultiplayerService.BackendType.PLAYFLOW:
+			%PendingLabel.text = text)
 	MultiplayerService.creating_lobby.connect(_show_pending.bind("Hosting game..."))
 	MultiplayerService.joining_lobby.connect(_show_pending.bind("Joining game..."))
 	MultiplayerService.join_lobby_failed.connect(_on_join_lobby_failed)
@@ -32,7 +38,10 @@ func _ready() -> void:
 	matchmaker.progress.connect(func(text: String) -> void: %PendingLabel.text = text)
 	matchmaker.finished.connect(_on_matchmake_finished)
 	%MatchmakeButton.pressed.connect(_start_matchmake)
-	%CancelButton.pressed.connect(func() -> void: matchmaker.cancel())
+	%PlayFlowButton.pressed.connect(func() -> void:
+		MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
+		MultiplayerService.join_game("auto"))
+	%CancelButton.pressed.connect(_cancel_pending)
 	%HostPanel.closed.connect(_restore_main)
 	%JoinPanel.closed.connect(_restore_main)
 	%SettingsButton.pressed.connect(func() -> void: %SettingsMenu.show())
@@ -48,7 +57,7 @@ func _ready() -> void:
 	%ExitButton.pressed.connect(_exit)
 	if OS.has_feature("web"):
 		%ExitButton.hide()
-		MultiplayerService.set_backend(MultiplayerService.BackendType.TUBE)
+		MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
 	%MatchmakeButton.grab_focus()
 	if not MultiplayerService.kick_reason.is_empty():
 		_show_failure(MultiplayerService.kick_reason)
@@ -61,6 +70,16 @@ func _restore_main() -> void:
 	%MainContainer.show()
 	%Help.show()
 	%MatchmakeButton.grab_focus()
+
+func _cancel_pending() -> void:
+	if matchmaker.running:
+		matchmaker.cancel()
+		return
+	timeout_token += 1
+	MultiplayerService.leave_game()
+	%CancelButton.hide()
+	%PendingOverlay.hide()
+	_restore_main()
 
 func _start_matchmake() -> void:
 	timeout_token += 1
@@ -100,6 +119,11 @@ func _show_pending(text: String) -> void:
 	%FailedButton.hide()
 	%PendingOverlay.show()
 	%PendingOverlay.grab_focus()
+	var playflow := MultiplayerService.backend_type == MultiplayerService.BackendType.PLAYFLOW
+	%CancelButton.visible = playflow
+	if playflow:
+		%CancelButton.grab_focus()
+		return # Backend owns the 90-second deadline, including HTTP and connection.
 	await get_tree().create_timer(TIMEOUT_DUR).timeout
 	if token == timeout_token:
 		MultiplayerService.leave_game()

@@ -1,4 +1,4 @@
-name: "Web Export"
+name: "Web and PlayFlow Export"
 on:
   push:
     branches:
@@ -26,6 +26,12 @@ jobs:
           mkdir -v -p ~/.config/
           mv /root/.config/godot ~/.config/godot
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Import project
+        run: godot --headless --editor --import
+      - name: Configure PlayFlow client
+        env:
+          PLAYFLOW_CLIENT_KEY: ${{ secrets.PLAYFLOW_CLIENT_KEY }}
+        run: python3 tools/configure_playflow_client.py
       - name: Web Build
         run: |
           mkdir -v -p builds/web
@@ -36,6 +42,14 @@ jobs:
           name: web
           path: builds/web
           retention-days: 1
+      - name: Build PlayFlow server ZIP
+        run: bash tools/prepare_playflow.sh
+      - name: Upload PlayFlow server
+        uses: actions/upload-artifact@v4
+        with:
+          name: playflow-server
+          path: builds/playflow-server.zip
+          retention-days: 7
       - name: Zip Folder
         run: cd builds/web && zip -r ../../itch.zip .
       - name: Deploy to itch.io

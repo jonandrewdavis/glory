@@ -43,6 +43,17 @@ func is_alive() -> bool:
 	return current > 0.0
 
 func take_damage(amount: float, source: Node = null) -> bool:
+	if get_parent() is Creep:
+		if not multiplayer.is_server() or not is_instance_valid(source):
+			return false
+		if not (source is Creep or source is ArrowPlayer) or not Teams.are_enemies(source.team, get_parent().team):
+			return false
+	if get_parent() is ArrowPlayer:
+		if not multiplayer.is_server() or not is_instance_valid(source) or not source is ArrowPlayer:
+			return false
+		if not Teams.are_enemies(source.team, get_parent().team):
+			return false
+		get_parent().server_register_hit(source.peer_id)
 	if amount <= 0.0 or not is_alive():
 		return false
 	if not _is_local_authority():
@@ -102,6 +113,9 @@ func _flush_pending_damage(delta: float) -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func _request_damage(amount: float, source_path: NodePath) -> void:
+	# Combat damage is decided locally by the server, never a client RPC.
+	if get_parent() is ArrowPlayer or get_parent() is Creep:
+		return
 	if not networked or not is_multiplayer_authority():
 		return
 	var source: Node = null

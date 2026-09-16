@@ -1,0 +1,7 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://networking/playflow_config.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+client_key = "pfclient_76195b4ef45b4e8fa3e2ed0ce2fb775a"

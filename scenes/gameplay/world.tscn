@@ -3,6 +3,13 @@
 [ext_resource type="Script" uid="uid://drr02rjnx7ft0" path="res://scenes/gameplay/world.gd" id="1_4np77"]
 [ext_resource type="Script" uid="uid://bd240dbppqbi6" path="res://networking/level_loader.gd" id="1_pvtv0"]
 [ext_resource type="Script" uid="uid://cd1b7rpxgj5d2" path="res://networking/player_spawner.gd" id="2_4np77"]
+[ext_resource type="Script" path="res://networking/projectile_spawner.gd" id="3_proj"]
+[ext_resource type="Script" path="res://scenes/gameplay/scoreboard.gd" id="4_score"]
+[ext_resource type="Script" path="res://networking/creep_spawner.gd" id="5_creeps"]
+[ext_resource type="Script" path="res://scenes/gameplay/camera_rig.gd" id="5_rig"]
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="6_host"]
+[ext_resource type="Script" uid="uid://bhexx6mj1xv3q" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_2d.gd" id="7_pcam"]
+[ext_resource type="Resource" uid="uid://c0glorycamtwn" path="res://scenes/gameplay/camera_tween.tres" id="8_tween"]
 
 [node name="World" type="Node" unique_id=43387356]
 script = ExtResource("1_4np77")
@@ -15,3 +22,68 @@ script = ExtResource("1_pvtv0")
 unique_name_in_owner = true
 spawn_path = NodePath(".")
 script = ExtResource("2_4np77")
+
+[node name="Projectiles" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="."]
+unique_name_in_owner = true
+spawn_path = NodePath("../Projectiles")
+script = ExtResource("3_proj")
+
+[node name="Scoreboard" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_score")
+
+[node name="Creeps" type="Node2D" parent="."]
+
+[node name="CreepSpawner" type="MultiplayerSpawner" parent="."]
+unique_name_in_owner = true
+spawn_path = NodePath("../Creeps")
+script = ExtResource("5_creeps")
+
+[node name="CameraRig" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("5_rig")
+
+[node name="Camera2D" type="Camera2D" parent="CameraRig"]
+enabled = false
+zoom = Vector2(2.5, 2.5)
+process_callback = 0
+
+[node name="PhantomCameraHost" type="Node" parent="CameraRig/Camera2D"]
+process_priority = 300
+script = ExtResource("6_host")
+
+[node name="PlayerPCam" type="Node2D" parent="CameraRig"]
+unique_name_in_owner = true
+script = ExtResource("7_pcam")
+priority = 10
+follow_mode = 2
+zoom = Vector2(2.5, 2.5)
+tween_resource = ExtResource("8_tween")
+limit_left = -4000
+limit_top = -8000
+limit_right = 4000
+limit_bottom = 100
+
+[node name="ArrowPCam" type="Node2D" parent="CameraRig"]
+unique_name_in_owner = true
+script = ExtResource("7_pcam")
+priority = 0
+follow_mode = 3
+follow_damping = true
+follow_damping_value = Vector2(0.15, 0.15)
+auto_zoom = true
+auto_zoom_min = 1.0
+auto_zoom_max = 2.5
+auto_zoom_margin = Vector4(120, 120, 120, 120)
+zoom = Vector2(2.5, 2.5)
+tween_resource = ExtResource("8_tween")
+limit_left = -4000
+limit_top = -8000
+limit_right = 4000
+limit_bottom = 100
+
+[node name="LandingMarker" type="Node2D" parent="CameraRig"]
+unique_name_in_owner = true

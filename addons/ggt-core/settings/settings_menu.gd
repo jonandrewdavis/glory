@@ -123,8 +123,11 @@ func initialize(cfg: ConfigFile = GGT_GameConfig.config) -> void:
 			locale_option_button.select(i)
 			break
 
-	aim_sensitivity_slider.set_value_no_signal(cfg.get_value("controls", "aim_sensitivity", GGT_GameConfig.DEFAULT_AIM_SENSITIVITY))
-	aim_sensitivity_value.text = str(aim_sensitivity_slider.value)
+	aim_sensitivity_slider.min_value = GGT_GameConfig.MIN_AIM_SENSITIVITY * 100.0
+	aim_sensitivity_slider.max_value = GGT_GameConfig.MAX_AIM_SENSITIVITY * 100.0
+	aim_sensitivity_slider.step = GGT_GameConfig.AIM_SENSITIVITY_STEP * 100.0
+	aim_sensitivity_slider.set_value_no_signal(GGT_GameConfig.get_aim_sensitivity(cfg) * 100.0)
+	aim_sensitivity_value.text = "%d%%" % roundi(aim_sensitivity_slider.value)
 
 
 func on_sound_master_slider(value: float) -> void:
@@ -162,8 +165,8 @@ func on_locale_option_button_item_selected(index: int) -> void:
 
 
 func on_aim_sensitivity_slider(value: float) -> void:
-	GGT_GameConfig.set_aim_sensitivity(value)
-	aim_sensitivity_value.text = str(value)
+	GGT_GameConfig.set_aim_sensitivity(value / 100.0)
+	aim_sensitivity_value.text = "%d%%" % roundi(value)
 
 
 func _on_settings_cancel_button_pressed() -> void:

@@ -8,7 +8,10 @@ var config = ConfigFile.new()
 signal resolution_scale_changed
 signal aim_sensitivity_changed(value: float)
 
-const DEFAULT_AIM_SENSITIVITY := 0.05
+const DEFAULT_AIM_SENSITIVITY := 0.25
+const MIN_AIM_SENSITIVITY := 0.05
+const MAX_AIM_SENSITIVITY := 0.45
+const AIM_SENSITIVITY_STEP := 0.05
 
 const SUPPORTED_LOCALES = {
 	"en": "English",
@@ -143,6 +146,7 @@ func set_locale(locale: String) -> void:
 
 
 func set_aim_sensitivity(v: float) -> void:
+	v = clampf(snappedf(v, AIM_SENSITIVITY_STEP), MIN_AIM_SENSITIVITY, MAX_AIM_SENSITIVITY)
 	config.set_value("controls", "aim_sensitivity", v)
 	aim_sensitivity_changed.emit(v)
 #endregion
@@ -157,6 +161,10 @@ func get_locale() -> String:
 	return config.get_value("game", "locale", "en")
 
 
-func get_aim_sensitivity() -> float:
-	return float(config.get_value("controls", "aim_sensitivity", DEFAULT_AIM_SENSITIVITY))
+func get_aim_sensitivity(cfg: ConfigFile = config) -> float:
+	var value := float(cfg.get_value("controls", "aim_sensitivity", DEFAULT_AIM_SENSITIVITY))
+	# Bring the previously saved default onto the new centered default.
+	if is_equal_approx(value, 0.5):
+		value = DEFAULT_AIM_SENSITIVITY
+	return clampf(snappedf(value, AIM_SENSITIVITY_STEP), MIN_AIM_SENSITIVITY, MAX_AIM_SENSITIVITY)
 #endregion
