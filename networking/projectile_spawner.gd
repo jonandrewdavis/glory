@@ -10,7 +10,6 @@ signal hit_sound_played(headshot: bool)
 const ARROW_SCENE := preload("res://player/arrow_player/arrow.tscn")
 const STUCK_ARROW_SCENE := preload("res://player/arrow_player/stuck_arrow.tscn")
 const GROUND_ARROW_CAP := 64
-const PLAYER_ARROW_LIFETIME := 8.0
 const SINK := 3.0 ## px the tip is pushed into a body so it reads as embedded
 
 ## Real travel time divided by baseline time. Changes timing, never the arc.
@@ -111,13 +110,15 @@ func _on_arrow_blocked(_arrow: Arrow, _blocker: Node) -> void:
 ## Host only. victim null means the arrow hit the world; otherwise it is any
 ## node with attach_stuck_arrow() (players, creeps) that MultiplayerSpawner
 ## names identically on every peer, so its World-relative path resolves everywhere.
-func server_report_impact(pos: Vector2, rot: float, team: int, scale: float, victim: Node, lethal: bool) -> void:
+## Body arrows persist until the victim dies (players clear on respawn, creeps
+## are freed with the corpse); ground arrows are capped and cleared on reset.
+func server_report_impact(pos: Vector2, rot: float, team: int, scale: float, victim: Node) -> void:
 	if multiplayer.is_server():
 		var path := World.get_path_to(victim) if victim != null else NodePath()
-		_spawn_stuck_arrow.rpc(pos, rot, team, scale, path, lethal)
+		_spawn_stuck_arrow.rpc(pos, rot, team, scale, path)
 
 @rpc("authority", "call_local", "reliable")
-func _spawn_stuck_arrow(pos: Vector2, rot: float, team: int, scale: float, victim_path: NodePath, lethal: bool) -> void:
+func _spawn_stuck_arrow(pos: Vector2, rot: float, team: int, scale: float, victim_path: NodePath) -> void:
 	var stuck: StuckArrow = STUCK_ARROW_SCENE.instantiate()
 	if victim_path.is_empty():
 		var container := _ensure_ground_container()
@@ -136,7 +137,7 @@ func _spawn_stuck_arrow(pos: Vector2, rot: float, team: int, scale: float, victi
 		stuck.free()
 		return
 	victim.attach_stuck_arrow(stuck, pos, rot)
-	stuck.setup(team, scale, 0.0 if lethal else PLAYER_ARROW_LIFETIME)
+	stuck.setup(team, scale)
 
 func _ensure_ground_container() -> Node2D:
 	if is_instance_valid(_ground_arrows):

@@ -7,7 +7,7 @@ extends Node2D
 ## battlefield doesn't clutter.
 const SETTLE_DELAY := 0.25
 const SETTLE_DURATION := 0.35
-const SETTLED_ALPHA := 0.25
+const SETTLED_ALPHA := 0.55
 
 var _fading := false
 var _settle: Tween

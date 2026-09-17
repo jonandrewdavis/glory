@@ -132,13 +132,13 @@ func _sweep(from: Vector2, to: Vector2) -> void:
 		var outcome := _hit_body(collider, headshot)
 		if outcome != HitOutcome.NONE:
 			World.projectile_spawner.server_report_impact(
-				result.position, rotation, team, visual_scale.y, collider, outcome == HitOutcome.KILLED)
+				result.position, rotation, team, visual_scale.y, collider)
 			World.projectile_spawner.server_notify_hit(owner_id, headshot)
 		elif collider is FortressGate:
 			# Friendly timber: the arrow sticks but deals no damage.
-			World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, collider, false)
+			World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, collider)
 	else:
-		World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, null, false)
+		World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, null)
 	_finish()
 
 ## Host only. Called from the ray sweep or from the blocking player's area

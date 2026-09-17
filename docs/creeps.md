@@ -27,8 +27,8 @@ airborne above the slot. Waves have no population cap or timeout.
 
 Creeps occupy physics layer 5 (`creeps`, bit 16), with mask 17 (world + creeps).
 Players pass through them. Enemy arrows hit them; friendly arrows pass through.
-Enemy arrows that hit a creep stick in it; non-lethal hits fade after 8 seconds,
-lethal ones stay on the corpse.
+Enemy arrows that hit a creep stick in it until the creep dies and its corpse is
+removed.
 Arrows that land in the top 5-pixel band of a soldier's or player's body
 (`HeadHitbox/HeadShape`, an editor-visible rect with no physics layers) are
 headshots and deal `headshot_damage_multiplier` times damage (1.5 on
