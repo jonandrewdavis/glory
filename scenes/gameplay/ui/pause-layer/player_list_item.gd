@@ -5,6 +5,7 @@ var peer_id: int
 
 func _ready() -> void:
 	World.scoreboard.changed.connect(_update_team)
+	MultiplayerService.username_changed.connect(func(_id: int) -> void: _update_team())
 	_update_team()
 	var team: int = World.scoreboard.get_team(peer_id)
 	if team >= 0:

@@ -10,12 +10,13 @@ signal confirm_button_clicked
 @export var sound_master_slider: HSlider
 @export var sound_sfx_slider: HSlider
 @export var sound_music_slider: HSlider
-@export var resolution_scale_slider: HSlider
-@export var resolution_scale_value: Label
+@export var ui_scale_slider: HSlider
+@export var ui_scale_value: Label
 @export var v_sync_checkbox: CheckButton
 @export var fps_limit_option_button: OptionButton
 @export var fullscreen_checkbox: CheckButton
 @export var locale_option_button: OptionButton
+@export var username_line_edit: LineEdit
 @export var aim_sensitivity_slider: HSlider
 @export var aim_sensitivity_value: Label
 @export var reset_confirmation_dialog: ConfirmationModal
@@ -33,12 +34,14 @@ func _ready() -> void:
 	sound_master_slider.value_changed.connect(on_sound_master_slider)
 	sound_sfx_slider.value_changed.connect(on_sound_sfx_slider)
 	sound_music_slider.value_changed.connect(on_sound_music_slider)
-	resolution_scale_slider.value_changed.connect(on_resolution_scale_slider)
+	ui_scale_slider.value_changed.connect(on_ui_scale_slider)
 	v_sync_checkbox.toggled.connect(on_vsync_toggled)
 	fps_limit_option_button.item_selected.connect(on_fps_limit_option_button_item_selected)
 	fullscreen_checkbox.toggled.connect(on_fullscreen_checkbox)
 	locale_option_button.item_selected.connect(on_locale_option_button_item_selected)
 	aim_sensitivity_slider.value_changed.connect(on_aim_sensitivity_slider)
+	username_line_edit.text_submitted.connect(on_username_committed)
+	username_line_edit.focus_exited.connect(on_username_committed)
 	reset_confirmation_dialog.confirmed.connect(_on_reset_confirmed)
 	cancel_confirmation_dialog.confirmed.connect(_on_cancel_confirmed)
 	reset_confirmation_dialog.cancelled.connect(_on_modal_canceled)
@@ -47,12 +50,13 @@ func _ready() -> void:
 	sound_master_slider.value_changed.connect(_on_setting_changed)
 	sound_sfx_slider.value_changed.connect(_on_setting_changed)
 	sound_music_slider.value_changed.connect(_on_setting_changed)
-	resolution_scale_slider.value_changed.connect(_on_setting_changed)
+	ui_scale_slider.value_changed.connect(_on_setting_changed)
 	v_sync_checkbox.toggled.connect(_on_setting_changed)
 	fps_limit_option_button.item_selected.connect(_on_setting_changed)
 	fullscreen_checkbox.toggled.connect(_on_setting_changed)
 	locale_option_button.item_selected.connect(_on_setting_changed)
 	aim_sensitivity_slider.value_changed.connect(_on_setting_changed)
+	username_line_edit.text_changed.connect(_on_setting_changed)
 
 	initialize()
 
@@ -94,8 +98,11 @@ func initialize(cfg: ConfigFile = GGT_GameConfig.config) -> void:
 	sound_sfx_slider.set_value_no_signal(cfg.get_value("audio", "sfx"))
 	sound_music_slider.set_value_no_signal(cfg.get_value("audio", "music"))
 
-	resolution_scale_slider.set_value_no_signal(cfg.get_value("gfx", "resolution_scale"))
-	resolution_scale_value.text = str(resolution_scale_slider.value)
+	ui_scale_slider.min_value = GGT_GameConfig.MIN_UI_SCALE * 100.0
+	ui_scale_slider.max_value = GGT_GameConfig.MAX_UI_SCALE * 100.0
+	ui_scale_slider.step = GGT_GameConfig.UI_SCALE_STEP * 100.0
+	ui_scale_slider.set_value_no_signal(GGT_GameConfig.get_ui_scale(cfg) * 100.0)
+	ui_scale_value.text = "%d%%" % roundi(ui_scale_slider.value)
 
 	v_sync_checkbox.set_pressed_no_signal(cfg.get_value("gfx", "vsync", true))
 
@@ -123,11 +130,14 @@ func initialize(cfg: ConfigFile = GGT_GameConfig.config) -> void:
 			locale_option_button.select(i)
 			break
 
-	aim_sensitivity_slider.min_value = GGT_GameConfig.MIN_AIM_SENSITIVITY * 100.0
-	aim_sensitivity_slider.max_value = GGT_GameConfig.MAX_AIM_SENSITIVITY * 100.0
-	aim_sensitivity_slider.step = GGT_GameConfig.AIM_SENSITIVITY_STEP * 100.0
-	aim_sensitivity_slider.set_value_no_signal(GGT_GameConfig.get_aim_sensitivity(cfg) * 100.0)
-	aim_sensitivity_value.text = "%d%%" % roundi(aim_sensitivity_slider.value)
+	username_line_edit.max_length = GGT_GameConfig.MAX_USERNAME_LENGTH
+	username_line_edit.text = GGT_GameConfig.get_username(cfg)
+
+	aim_sensitivity_slider.min_value = 0.0
+	aim_sensitivity_slider.max_value = GGT_GameConfig.AIM_SENSITIVITY_LEVELS
+	aim_sensitivity_slider.step = 1.0
+	aim_sensitivity_slider.set_value_no_signal(GGT_GameConfig.aim_sensitivity_to_level(GGT_GameConfig.get_aim_sensitivity(cfg)))
+	aim_sensitivity_value.text = str(roundi(aim_sensitivity_slider.value))
 
 
 func on_sound_master_slider(value: float) -> void:
@@ -142,9 +152,9 @@ func on_sound_music_slider(value: float) -> void:
 	GGT_GameConfig.set_music_volume(value)
 
 
-func on_resolution_scale_slider(value: float) -> void:
-	GGT_GameConfig.set_resolution_scale(value)
-	resolution_scale_value.text = str(value)
+func on_ui_scale_slider(value: float) -> void:
+	GGT_GameConfig.set_ui_scale(value / 100.0)
+	ui_scale_value.text = "%d%%" % roundi(value)
 
 
 func on_vsync_toggled(value: bool) -> void:
@@ -164,9 +174,15 @@ func on_locale_option_button_item_selected(index: int) -> void:
 	GGT_GameConfig.set_locale(locale_code)
 
 
+## Commits on submit/focus loss rather than per keystroke, since a change is broadcast to the lobby.
+func on_username_committed(_text: String = "") -> void:
+	GGT_GameConfig.set_username(username_line_edit.text)
+	username_line_edit.text = GGT_GameConfig.get_username()
+
+
 func on_aim_sensitivity_slider(value: float) -> void:
-	GGT_GameConfig.set_aim_sensitivity(value / 100.0)
-	aim_sensitivity_value.text = "%d%%" % roundi(value)
+	GGT_GameConfig.set_aim_sensitivity(GGT_GameConfig.aim_level_to_sensitivity(value))
+	aim_sensitivity_value.text = str(roundi(value))
 
 
 func _on_settings_cancel_button_pressed() -> void:
@@ -191,6 +207,7 @@ func _on_modal_canceled() -> void:
 
 
 func _on_settings_confirm_button_pressed() -> void:
+	on_username_committed()
 	GGT_GameConfig.persist()
 	confirm_button_clicked.emit()
 

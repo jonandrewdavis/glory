@@ -76,7 +76,7 @@ msgstr ""
 
 #: addons/ggt-core/settings/settings_menu.tscn
 msgctxt "menu"
-msgid "Resolution scale 3D"
+msgid "UI scale"
 msgstr ""
 
 #: addons/ggt-core/settings/settings_menu.tscn
@@ -122,4 +122,9 @@ msgid "Pause: ESC (keyboard) or START button (joypad)"
 msgstr ""
 
 msgid "godot-game-template"
+msgstr ""
+
+#: addons/ggt-core/settings/settings_menu.tscn
+msgctxt "menu"
+msgid "Username"
 msgstr ""

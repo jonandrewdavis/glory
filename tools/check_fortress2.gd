@@ -152,7 +152,7 @@ func check_defenses() -> void:
 			shot_arrow.setup({"position": Vector2(side * 976, -308), "velocity": Vector2(horizontal_speed, 400), "team": 0})
 			for frame in range(12):
 				shot_arrow._physics_process(DT)
-			expect(not shot_arrow._finished and shot_arrow.position.y > -220, "Side %d real arrow clears grated floor, vx=%d" % [side, horizontal_speed])
+			expect(not shot_arrow._finished and shot_arrow.position.y > -220, "Side %d real arrow clears murder-hole floor, vx=%d" % [side, horizontal_speed])
 			shot_arrow.free()
 		for x in [952, 976, 992]:
 			var shot := PhysicsRayQueryParameters2D.create(Vector2(side * x, -308), Vector2(side * x, -200), arrow_mask)

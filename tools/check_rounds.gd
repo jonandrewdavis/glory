@@ -110,7 +110,8 @@ func check_arrows() -> void:
 	expect(world.scoreboard.entries[1].kills == 0, "Gate damage grants no kill")
 	world.projectile_spawner.spawn_arrow({"position": Vector2(-960, -208), "velocity": Vector2(-600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
 	await ticks(10)
-	expect(blue.health.current == 5000.0 and blue.stuck_arrows.get_child_count() == 0, "Friendly arrow passes through the friendly gate")
+	expect(blue.health.current == 5000.0 and blue.stuck_arrows.get_child_count() == 1, "Friendly arrow is blocked by the friendly gate without damage")
+	expect(sounds == [false], "Friendly gate hit plays no hit click")
 	world.projectile_spawner.hit_sound_played.disconnect(listener)
 
 func check_validation() -> void:

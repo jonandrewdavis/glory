@@ -134,6 +134,9 @@ func _sweep(from: Vector2, to: Vector2) -> void:
 			World.projectile_spawner.server_report_impact(
 				result.position, rotation, team, visual_scale.y, collider, outcome == HitOutcome.KILLED)
 			World.projectile_spawner.server_notify_hit(owner_id, headshot)
+		elif collider is FortressGate:
+			# Friendly timber: the arrow sticks but deals no damage.
+			World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, collider, false)
 	else:
 		World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, null, false)
 	_finish()
@@ -147,8 +150,9 @@ func server_touched_shield(blocker: Node, at: Vector2) -> void:
 	blocked.emit(self, blocker)
 	_finish()
 
-## Own body, teammates, dead players, friendly shields and friendly or
-## breached gates are transparent.
+## Own body, teammates, dead players, friendly shields and breached gates are
+## transparent. A standing gate stops its defenders' arrows too (harmlessly), so
+## nobody shoots out through closed timber.
 func _ignored_rids() -> Array[RID]:
 	return ignored_rids(get_tree(), owner_id, team)
 
@@ -165,7 +169,7 @@ static func ignored_rids(tree: SceneTree, shooter_id: int, shooter_team: int) ->
 		if blocker == null or blocker.get("peer_id") == shooter_id or blocker.get("team") == shooter_team:
 			rids.append(area.get_rid())
 	for gate in tree.get_nodes_in_group("fortress_gates"):
-		if gate is FortressGate and (gate.team == shooter_team or not gate.is_alive()):
+		if gate is FortressGate and not gate.is_alive():
 			rids.append(gate.get_rid())
 	return rids
 

@@ -4,7 +4,7 @@ const Trajectory := preload("res://player/arrow_player/trajectory_preview.gd")
 @export_range(24.0, 160.0) var radius := 96.0
 @export_range(16.0, 240.0) var mouse_radius := 80.0
 
-var sensitivity := 25.0
+var sensitivity := 5.0
 
 var direction := Vector2.RIGHT
 var _mouse_offset := Vector2.ZERO

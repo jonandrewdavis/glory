@@ -9,6 +9,10 @@ func _ready() -> void:
 	World.ui_layer = self
 	# Player will use this.
 
+	GGT_GameConfig.ui_scale_changed.connect(_apply_ui_scale)
+	$PlayerUI.resized.connect(_apply_ui_scale)
+	_apply_ui_scale()
+
 	MultiplayerService.game_exited.connect(_on_game_exited)
 	if DebugMenu != null:
 		DebugMenu.update_settings_label()
@@ -20,7 +24,14 @@ func _ready() -> void:
 	elif not exiting:
 		capture_player_mouse()
 	World.scoreboard.changed.connect(_update_score)
+	MultiplayerService.username_changed.connect(func(_id: int) -> void: _update_score())
 	_update_score()
+
+## Scales the HUD (everything but Controls) while keeping it anchored to the screen edges.
+func _apply_ui_scale(_value: float = 0.0) -> void:
+	var ui_scale := GGT_GameConfig.get_ui_scale()
+	%HudRoot.scale = Vector2(ui_scale, ui_scale)
+	%HudRoot.size = $PlayerUI.size / ui_scale
 
 func _on_game_exited() -> void:
 	if exiting:
@@ -45,8 +56,8 @@ func capture_player_mouse() -> void:
 func _update_score() -> void:
 	var board: Scoreboard = World.scoreboard
 	var lines := PackedStringArray()
-	var viewer := board.get_team(multiplayer.get_unique_id())
-	lines.append("%s %d - %d %s" % [Teams.display_name(Teams.Team.BLUE, viewer), board.team_kills(Teams.Team.BLUE), board.team_kills(Teams.Team.ORANGE), Teams.display_name(Teams.Team.ORANGE, viewer)])
+	#var viewer := board.get_team(multiplayer.get_unique_id())
+	lines.append("%d - %s" % [board.team_kills(Teams.Team.BLUE), board.team_kills(Teams.Team.ORANGE)])
 	var ids := board.entries.keys()
 	ids.sort()
 	for id in ids:

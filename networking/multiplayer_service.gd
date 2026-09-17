@@ -20,10 +20,12 @@ signal game_exited
 signal backend_changed(type: BackendType)
 signal status_changed(text: String)
 signal listing_started
+signal username_changed(peer_id: int)
 
 var backend: MultiplayerBackend
 var backend_type: BackendType
 var banlist: Array = []
+var usernames: Dictionary[int, String] = {}
 var kick_reason := ""
 var status_text := ""
 var in_lobby := false
@@ -33,7 +35,9 @@ var leaving := false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(func(peer_id: int) -> void: usernames.erase(peer_id))
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	GGT_GameConfig.username_changed.connect(func(_value: String) -> void: _submit_local_username())
 	if is_dedicated_server():
 		set_backend(BackendType.PLAYFLOW, false)
 		_start_dedicated.call_deferred()
@@ -108,6 +112,7 @@ func _on_lobby_joined() -> void:
 		return
 	pending = false
 	in_lobby = true
+	_submit_local_username()
 	lobby_joined.emit()
 
 func _on_join_lobby_failed(reason: String) -> void:
@@ -127,6 +132,7 @@ func leave_game() -> void:
 	pending = false
 	backend.leave_game()
 	banlist.clear()
+	usernames.clear()
 	if was_in_lobby:
 		game_exited.emit()
 	leaving = false
@@ -182,4 +188,36 @@ func _on_peer_connected(peer_id: int) -> void:
 		kick_player(peer_id)
 
 func get_username(peer_id: int) -> String:
-	return backend.get_username(peer_id)
+	return usernames.get(peer_id, backend.get_username(peer_id))
+
+func _submit_local_username() -> void:
+	if not in_lobby or is_dedicated_server():
+		return
+	if multiplayer.is_server():
+		_register_username(multiplayer.get_unique_id(), GGT_GameConfig.get_username())
+	else:
+		_submit_username.rpc_id(1, GGT_GameConfig.get_username())
+
+## Server: stores a peer's name and tells everyone, the new peer also gets the full table.
+@rpc("any_peer", "call_remote", "reliable")
+func _submit_username(username: String) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	var known := usernames.has(peer_id)
+	_register_username(peer_id, username)
+	if not known:
+		_receive_usernames.rpc_id(peer_id, usernames)
+
+func _register_username(peer_id: int, username: String) -> void:
+	username = GGT_GameConfig.sanitize_username(username)
+	if username.is_empty() or usernames.get(peer_id, "") == username:
+		return
+	_receive_usernames({peer_id: username})
+	_receive_usernames.rpc({peer_id: username})
+
+@rpc("authority", "call_remote", "reliable")
+func _receive_usernames(names: Dictionary) -> void:
+	for peer_id: int in names:
+		usernames[peer_id] = GGT_GameConfig.sanitize_username(str(names[peer_id]))
+		username_changed.emit(peer_id)

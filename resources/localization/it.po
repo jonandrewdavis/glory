@@ -79,8 +79,8 @@ msgstr "GRAFICA"
 
 #: addons/ggt-core/settings/settings_menu.tscn
 msgctxt "menu"
-msgid "Resolution scale 3D"
-msgstr "Scala Risoluzione 3D"
+msgid "UI scale"
+msgstr "Scala interfaccia"
 
 #: addons/ggt-core/settings/settings_menu.tscn
 msgctxt "menu"
@@ -130,3 +130,8 @@ msgstr ""
 #~ msgctxt "menu"
 #~ msgid "FPS Limit Active"
 #~ msgstr "Limite FPS Attivo"
+
+#: addons/ggt-core/settings/settings_menu.tscn
+msgctxt "menu"
+msgid "Username"
+msgstr "Nome utente"

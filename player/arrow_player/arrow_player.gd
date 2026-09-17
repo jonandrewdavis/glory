@@ -91,6 +91,9 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		_update_readiness_indicator()
 	name_label.text = MultiplayerService.get_username(peer_id)
+	MultiplayerService.username_changed.connect(func(id: int) -> void:
+		if id == peer_id:
+			name_label.text = MultiplayerService.get_username(peer_id))
 	health.died.connect(_on_died)
 	health.respawned.connect(_on_respawned)
 	if multiplayer.is_server():

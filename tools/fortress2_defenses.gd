@@ -20,22 +20,10 @@ static func apply(level: Node2D) -> void:
 		floor_layer.clear()
 		for x in range(16):
 			floor_layer.set_cell(Vector2i(x, 0), 0, Vector2i(8 + x % 3, 0), 2)
-		# Retain the collision platform but draw an open metal grating over the gap.
-		floor_layer.self_modulate.a = 0.0
+		floor_layer.self_modulate.a = 1.0
 		var old_grate := keep.get_node_or_null("MurderHoleGrating")
 		if old_grate:
 			old_grate.free()
-		var grate := Node2D.new()
-		grate.name = "MurderHoleGrating"
-		keep.add_child(grate)
-		grate.owner = level
-		for x in range(920, 1176, 8):
-			var bar := Line2D.new()
-			bar.points = PackedVector2Array([Vector2(side * x, -288), Vector2(side * (x + 4), -284)])
-			bar.width = 2
-			bar.default_color = Color(0.65, 0.69, 0.72)
-			grate.add_child(bar)
-			bar.owner = level
 		var lip := keep.get_node("BalconyLip") as TileMapLayer
 		lip.position = Vector2(side * 928 - 8, -320)
 		lip.clear()

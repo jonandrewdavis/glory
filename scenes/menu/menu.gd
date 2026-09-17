@@ -25,6 +25,13 @@ func _ready() -> void:
 	MultiplayerService.joining_lobby.connect(_show_pending.bind("Joining game..."))
 	MultiplayerService.join_lobby_failed.connect(_on_join_lobby_failed)
 	MultiplayerService.lobby_joined.connect(_on_lobby_joined)
+	%UsernameEdit.max_length = GGT_GameConfig.MAX_USERNAME_LENGTH
+	%UsernameEdit.text = GGT_GameConfig.get_username()
+	%UsernameEdit.text_submitted.connect(_commit_username)
+	%UsernameEdit.focus_exited.connect(_commit_username)
+	GGT_GameConfig.username_changed.connect(func(value: String) -> void: %UsernameEdit.text = value)
+	MultiplayerService.creating_lobby.connect(_commit_username)
+	MultiplayerService.joining_lobby.connect(_commit_username)
 	%HostButton.pressed.connect(func() -> void:
 		%MainContainer.hide()
 		%Help.hide()
@@ -71,6 +78,11 @@ func _ready() -> void:
 ## Web and release exports hide the developer backends (ENet, Tube, Host/Join).
 static func is_shipping_menu() -> bool:
 	return OS.has_feature("web") or not OS.is_debug_build()
+
+func _commit_username(_text: String = "") -> void:
+	GGT_GameConfig.set_username(%UsernameEdit.text)
+	%UsernameEdit.text = GGT_GameConfig.get_username()
+	GGT_GameConfig.persist()
 
 func _focus_default() -> void:
 	if %MatchmakeButton.visible:

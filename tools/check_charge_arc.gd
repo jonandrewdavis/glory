@@ -32,11 +32,13 @@ func check() -> void:
 	var reticle = player.get_node("AimReticle")
 	reticle._ready()
 	expect(not reticle.visible, "Reticle starts hidden for remote players")
-	reticle.apply_mouse_motion(Vector2(-320.0, 0.0))
+	# Motions are expressed as virtual cursor travel so they hold at any default sensitivity.
+	var per_pixel: float = GGT_GameConfig.DEFAULT_AIM_SENSITIVITY
+	reticle.apply_mouse_motion(Vector2(-80.0, 0.0) / per_pixel)
 	expect(reticle.direction == Vector2.RIGHT, "Aim stays valid at virtual cursor origin")
-	reticle.apply_mouse_motion(Vector2(0.0, -320.0))
+	reticle.apply_mouse_motion(Vector2(0.0, -80.0) / per_pixel)
 	expect(reticle.direction.is_equal_approx(Vector2.UP), "Relative mouse movement aims upward")
-	reticle.apply_mouse_motion(Vector2(-640.0, 320.0))
+	reticle.apply_mouse_motion(Vector2(-160.0, 80.0) / per_pixel)
 	expect(reticle.direction.is_equal_approx(Vector2.LEFT), "Relative mouse movement can reverse aim")
 	for motion in [Vector2(10000.0, 5000.0), Vector2(-400.0, -800.0), Vector2.ZERO]:
 		reticle.apply_mouse_motion(motion)
@@ -48,17 +50,23 @@ func check() -> void:
 	var settings = load("res://addons/ggt-core/settings/settings_menu.tscn").instantiate()
 	add_child(settings)
 	var slider: HSlider = settings.aim_sensitivity_slider
-	expect(slider.min_value == 5.0 and slider.max_value == 45.0 and slider.step == 5.0, "Settings slider uses readable percent range and steps")
-	expect(slider.value == 25.0 and settings.aim_sensitivity_value.text == "25%", "Settings default is displayed at midpoint")
-	slider.value = 35.0
-	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(), 0.35) and is_equal_approx(reticle.sensitivity, 35.0), "Settings slider changes live aiming sensitivity")
-	expect(settings.aim_sensitivity_value.text == "35%", "Settings label updates as percentage")
+	expect(slider.min_value == 0.0 and slider.max_value == 100.0 and slider.step == 1.0, "Settings slider uses a 0-100 range in whole steps")
+	expect(slider.value == 50.0 and settings.aim_sensitivity_value.text == "50", "Settings default is displayed at midpoint")
+	slider.value = 75.0
+	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(), 0.07) and is_equal_approx(reticle.sensitivity, 7.0), "Settings slider changes live aiming sensitivity")
+	expect(settings.aim_sensitivity_value.text == "75", "Settings label updates as a 0-100 value")
 	GGT_GameConfig.revert_to(saved_config)
 	settings.initialize()
-	expect(is_equal_approx(reticle.sensitivity, slider.value), "Reverting settings restores both slider and live aim")
+	expect(is_equal_approx(reticle.sensitivity, GGT_GameConfig.aim_level_to_sensitivity(slider.value) * 100.0), "Reverting settings restores both slider and live aim")
 	var legacy_config := ConfigFile.new()
 	legacy_config.set_value("controls", "aim_sensitivity", 0.5)
-	expect(GGT_GameConfig.get_aim_sensitivity(legacy_config) == 0.25, "Old saved default maps to new midpoint")
+	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(legacy_config), 0.05), "Old saved default maps to new midpoint")
+	legacy_config.set_value("controls", "aim_sensitivity", 0.25)
+	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(legacy_config), 0.05), "Previous midpoint default maps to new midpoint")
+	legacy_config.set_value("controls", "aim_sensitivity", 0.10)
+	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(legacy_config), 0.05), "Values from the older, faster scale map to new midpoint")
+	legacy_config.set_value("controls", "aim_sensitivity", 0.09)
+	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(legacy_config), 0.09), "Maximum of the current range is kept")
 	settings.free()
 	var config: SceneReplicationConfig = player.get_node("MultiplayerSynchronizer").replication_config
 	for property in config.get_properties():

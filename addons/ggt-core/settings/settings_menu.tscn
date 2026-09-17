@@ -9,19 +9,20 @@ font_size = 64
 [sub_resource type="LabelSettings" id="LabelSettings_y1o0p"]
 font_size = 32
 
-[node name="SettingsMenu" type="PanelContainer" unique_id=190195239 node_paths=PackedStringArray("sound_master_slider", "sound_sfx_slider", "sound_music_slider", "resolution_scale_slider", "resolution_scale_value", "v_sync_checkbox", "fps_limit_option_button", "fullscreen_checkbox", "locale_option_button", "aim_sensitivity_slider", "aim_sensitivity_value", "reset_confirmation_dialog", "cancel_confirmation_dialog", "cancel_button")]
+[node name="SettingsMenu" type="PanelContainer" unique_id=190195239 node_paths=PackedStringArray("sound_master_slider", "sound_sfx_slider", "sound_music_slider", "ui_scale_slider", "ui_scale_value", "v_sync_checkbox", "fps_limit_option_button", "fullscreen_checkbox", "locale_option_button", "username_line_edit", "aim_sensitivity_slider", "aim_sensitivity_value", "reset_confirmation_dialog", "cancel_confirmation_dialog", "cancel_button")]
 offset_right = 353.0
 offset_bottom = 707.0
 script = ExtResource("1_25law")
 sound_master_slider = NodePath("MarginContainer/VBox/VolumeMaster/HSlider")
 sound_sfx_slider = NodePath("MarginContainer/VBox/VolumeSFX/HSlider")
 sound_music_slider = NodePath("MarginContainer/VBox/Volume3/SoundMusicSlider")
-resolution_scale_slider = NodePath("MarginContainer/VBox/GfxRes/HBoxContainer/ResolutionScaleSlider")
-resolution_scale_value = NodePath("MarginContainer/VBox/GfxRes/HBoxContainer/ResolutionScaleValue")
+ui_scale_slider = NodePath("MarginContainer/VBox/UIScale/HBoxContainer/UIScaleSlider")
+ui_scale_value = NodePath("MarginContainer/VBox/UIScale/HBoxContainer/UIScaleValue")
 v_sync_checkbox = NodePath("MarginContainer/VBox/GfxVSync/VSyncCheckbox")
 fps_limit_option_button = NodePath("MarginContainer/VBox/FPSLimit/FPSLimitOptionButton")
 fullscreen_checkbox = NodePath("MarginContainer/VBox/Fullscreen/FullscreenCheckbox")
 locale_option_button = NodePath("MarginContainer/VBox/Language/LocaleOptionButton")
+username_line_edit = NodePath("MarginContainer/VBox/Username/UsernameLineEdit")
 aim_sensitivity_slider = NodePath("MarginContainer/VBox/AimSensitivity/HBoxContainer/AimSensitivitySlider")
 aim_sensitivity_value = NodePath("MarginContainer/VBox/AimSensitivity/HBoxContainer/AimSensitivityValue")
 reset_confirmation_dialog = NodePath("MarginContainer/VBox/ResetConfirmationDialog")
@@ -57,6 +58,7 @@ custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
 [node name="Language" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=336382435]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBox/Language" unique_id=1910880852]
@@ -70,32 +72,45 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="AimSensitivity" type="HBoxContainer" parent="MarginContainer/VBox"]
+[node name="Username" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=99794591]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBox/AimSensitivity"]
+[node name="Label" type="Label" parent="MarginContainer/VBox/Username" unique_id=1657022484]
+layout_mode = 2
+size_flags_horizontal = 3
+translation_context = &"menu"
+text = "Username"
+
+[node name="UsernameLineEdit" type="LineEdit" parent="MarginContainer/VBox/Username" unique_id=210281029]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+max_length = 20
+select_all_on_focus = true
+
+[node name="AimSensitivity" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=1461766652]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBox/AimSensitivity" unique_id=1661262442]
 layout_mode = 2
 size_flags_horizontal = 3
 translation_context = &"menu"
 text = "Aim sensitivity"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/AimSensitivity"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/AimSensitivity" unique_id=895706113]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="AimSensitivitySlider" type="HSlider" parent="MarginContainer/VBox/AimSensitivity/HBoxContainer"]
+[node name="AimSensitivitySlider" type="HSlider" parent="MarginContainer/VBox/AimSensitivity/HBoxContainer" unique_id=937866015]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 5.0
-max_value = 45.0
-step = 5.0
-value = 25.0
+value = 50.0
 
-[node name="AimSensitivityValue" type="Label" parent="MarginContainer/VBox/AimSensitivity/HBoxContainer"]
-layout_mode = 2
+[node name="AimSensitivityValue" type="Label" parent="MarginContainer/VBox/AimSensitivity/HBoxContainer" unique_id=827163505]
 custom_minimum_size = Vector2(48, 0)
-text = "25%"
+layout_mode = 2
+text = "50"
 
 [node name="HSeparator5" type="Control" parent="MarginContainer/VBox" unique_id=1832025905]
 custom_minimum_size = Vector2(0, 20)
@@ -171,30 +186,33 @@ text = "GRAPHICS"
 label_settings = SubResource("LabelSettings_y1o0p")
 horizontal_alignment = 1
 
-[node name="GfxRes" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=2085811889]
+[node name="UIScale" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=2085811889]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBox/GfxRes" unique_id=1370347764]
+[node name="Label" type="Label" parent="MarginContainer/VBox/UIScale" unique_id=1370347764]
 layout_mode = 2
 size_flags_horizontal = 3
 translation_context = &"menu"
-text = "Resolution scale 3D"
+text = "UI scale"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/GfxRes" unique_id=1761079247]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/UIScale" unique_id=1761079247]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="ResolutionScaleSlider" type="HSlider" parent="MarginContainer/VBox/GfxRes/HBoxContainer" unique_id=1757909015]
+[node name="UIScaleSlider" type="HSlider" parent="MarginContainer/VBox/UIScale/HBoxContainer" unique_id=1757909015]
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 1.0
-step = 0.1
-value = 0.1
-tick_count = 5
+min_value = 75.0
+max_value = 200.0
+step = 5.0
+value = 125.0
+tick_count = 6
 
-[node name="ResolutionScaleValue" type="Label" parent="MarginContainer/VBox/GfxRes/HBoxContainer" unique_id=1209477800]
+[node name="UIScaleValue" type="Label" parent="MarginContainer/VBox/UIScale/HBoxContainer" unique_id=1209477800]
+custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
+text = "125%"
 
 [node name="Fullscreen" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=965735602 groups=["settings_desktop_only"]]
 layout_mode = 2

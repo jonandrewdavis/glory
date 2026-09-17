@@ -88,6 +88,20 @@ layout_mode = 2
 theme_type_variation = &"LabelSmall"
 autowrap_mode = 2
 
+[node name="UsernameRow" type="HBoxContainer" parent="MainContainer/Control/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/Control/VBoxContainer/UsernameRow"]
+layout_mode = 2
+text = "Username"
+
+[node name="UsernameEdit" type="LineEdit" parent="MainContainer/Control/VBoxContainer/UsernameRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_length = 20
+select_all_on_focus = true
+
 [node name="PlayFlowButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=593834291]
 unique_name_in_owner = true
 layout_mode = 2
