@@ -9,23 +9,41 @@ const ORANGE := Color(1.0, 0.82, 0.66)
 var level: Node2D
 
 func _initialize() -> void:
+	if "--upgrade-defenses" in OS.get_cmdline_user_args():
+		level = load(LEVEL_PATH).instantiate()
+		root.add_child(level)
+		current_scene = level
+		call_deferred("_upgrade_defenses")
+		return
 	level = Node2D.new()
 	level.name = "Fortress2"
 	root.add_child(level)
 	current_scene = level
 	call_deferred("_build")
 
+func _upgrade_defenses() -> void:
+	preload("res://tools/fortress2_defenses.gd").apply(level)
+	var packed := PackedScene.new()
+	var error := packed.pack(level)
+	if error == OK:
+		error = ResourceSaver.save(packed, LEVEL_PATH)
+	print("Fortress2 defense upgrade: ", error_string(error))
+	quit(error)
+
 func _build() -> void:
 	var sky := polygon(level, "Sky", rect_points(Rect2(-8192, -8192, 16384, 16384)), Color(0.12, 0.15, 0.19))
 	sky.z_index = -10
+	var sky_material := ShaderMaterial.new()
+	sky_material.shader = load("res://assets/shaders/Fortress2.gdshader")
+	sky.material = sky_material
+	sky.set_script(load("res://scenes/gameplay/sky_parallax.gd"))
 	build_limits()
 	for side in [-1, 1]:
 		build_side(side)
+	build_center()
 	build_ram()
 	build_spawns()
-	var environment := WorldEnvironment.new()
-	environment.environment = Environment.new()
-	attach(level, environment, "WorldEnvironment")
+	preload("res://tools/fortress2_defenses.gd").apply(level)
 	var packed := PackedScene.new()
 	var error := packed.pack(level)
 	if error == OK:
@@ -204,18 +222,17 @@ func build_keep(parent: Node, side: int, tint: Color) -> void:
 
 func build_gate(parent: Node, side: int, tint: Color) -> void:
 	var gate := branch(parent, "MainGate")
-	gate.add_to_group("fortress_gates", true)
-	gate.set_meta("placeholder", true)
-	gate.set_meta("team", "blue" if side < 0 else "orange")
 	var shape := rect_points(mirrored_rect(side, 1008, -256, 48, 96))
 	polygon(gate, "GateTimber", shape, Color(0.39, 0.27, 0.17))
 	for x in range(1016, 1056, 12):
 		line(gate, "Plank%d" % x, PackedVector2Array([Vector2(side * x, -252), Vector2(side * x, -164)]), Color(0.18, 0.14, 0.12), 2)
 	for y in [-240, -184]:
 		polygon(gate, "IronBand%d" % -y, rect_points(mirrored_rect(side, 1008, y, 48, 6)), Color(0.55, 0.57, 0.59) * tint)
-	var target := Marker2D.new()
-	target.position = Vector2(side * 1006, -208)
-	attach(gate, target, "RamImpactPoint")
+	# The damageable objective is its own scene; MainGate is art only.
+	var objective: Node2D = load("res://entities/fortress_gate.tscn").instantiate()
+	objective.team = Teams.Team.BLUE if side < 0 else Teams.Team.ORANGE
+	objective.position = Vector2(side * 1006, -208)
+	attach(parent, objective, "FortressGate")
 
 func build_outpost(parent: Node, side: int, tint: Color) -> void:
 	var outpost := branch(parent, "ForwardOutpost")
@@ -227,8 +244,6 @@ func build_outpost(parent: Node, side: int, tint: Color) -> void:
 	cover(outpost, "LowBarricade", side, 544, -48, tint)
 
 func build_field(parent: Node, side: int, tint: Color) -> void:
-	platform(parent, "CenterShelter", side, 160, 64, 64, tint)
-	cover(parent, "CenterLip", side, 136, 48, tint)
 	# Broken bridge and a stepping stone span the shallow middle trench.
 	platform(parent, "BridgeInner", side, 672, -32, 48, tint)
 	platform(parent, "BridgeOuter", side, 784, -32, 48, tint)
@@ -237,6 +252,32 @@ func build_field(parent: Node, side: int, tint: Color) -> void:
 	var perch_x := 880 if side < 0 else 864
 	platform(parent, "PerchStep", side, perch_x - 40, -64, 48, tint)
 	platform(parent, "Perch", side, perch_x, -96, 80, tint)
+
+func build_center() -> void:
+	# Neutral bridge over the trench with a climbable tower in the middle.
+	# Every platform here, including the roof, is an arrow-transparent one-way platform.
+	var center := branch(level, "Center")
+	center.add_to_group("fortress_center_towers", true)
+	center.set_meta("team", "neutral")
+	var tint := Color.WHITE
+	var deck_y := -24
+	platform(center, "BridgeDeck", 1, 0, deck_y, 352, tint, true)
+	for side in [-1, 1]:
+		var ramp := branch(center, "RampBlue" if side < 0 else "RampOrange")
+		# Three 32-pixel hops: y=72 shelf -> 40 -> 8 -> deck.
+		platform(ramp, "Step1", side, 240, 40, 64, tint, true)
+		platform(ramp, "Step2", side, 200, 8, 64, tint, true)
+	var tower := branch(center, "Tower")
+	var roof_y := deck_y - 96
+	var back := polygon(tower, "Backdrop", rect_points(Rect2(-72, roof_y, 144, 96)), Color(0.24, 0.26, 0.28))
+	back.z_index = -2
+	for side in [-1, 1]:
+		var post := rect_points(Rect2(side * 56 - 6, roof_y, 12, 96))
+		var art := polygon(tower, "PostBlue" if side < 0 else "PostOrange", post, Color(0.42, 0.44, 0.46))
+		art.z_index = -1
+	# Two staggered steps inside the tower lead from the deck up onto the roof.
+	climb(tower, 1, 0, deck_y, 2, tint)
+	platform(tower, "Roof", 1, 0, roof_y, 160, tint, true)
 
 func build_ram() -> void:
 	var ram: Node2D = load("res://entities/battering_ram.tscn").instantiate()

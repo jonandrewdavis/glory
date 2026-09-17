@@ -3,7 +3,14 @@ extends Node2D
 ## Purely local, non-networked visual of an arrow that has landed. Position,
 ## rotation and parent are decided by whoever spawns it (ProjectileSpawner).
 
+## Arrows read clearly on impact, then settle to a faint ghost so a busy
+## battlefield doesn't clutter.
+const SETTLE_DELAY := 0.25
+const SETTLE_DURATION := 0.35
+const SETTLED_ALPHA := 0.25
+
 var _fading := false
+var _settle: Tween
 
 @onready var polygon: Polygon2D = %Polygon2D
 
@@ -14,6 +21,9 @@ func setup(team: int, scale := 1.0, lifetime := 0.0) -> void:
 	if scale != 1.0:
 		polygon.scale *= scale
 		polygon.position *= scale
+	_settle = create_tween()
+	_settle.tween_interval(SETTLE_DELAY)
+	_settle.tween_property(self, "modulate:a", SETTLED_ALPHA, SETTLE_DURATION)
 	if lifetime > 0.0:
 		get_tree().create_timer(lifetime).timeout.connect(_on_lifetime_timeout)
 
@@ -32,6 +42,8 @@ func fade_out(duration := 0.4) -> void:
 	if _fading:
 		return
 	_fading = true
+	if _settle != null and _settle.is_valid():
+		_settle.kill()
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, duration)
 	tween.tween_callback(queue_free)

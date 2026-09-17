@@ -19,7 +19,7 @@ const SHEETS := {
 static var _frames: SpriteFrames
 
 @export var walk_speed := 60.0
-@export var melee_reach := 20.0
+@export var melee_reach := 48.0
 @export var swing_interval_min := 0.8
 @export var swing_interval_max := 1.4
 @export var damage_low := 20.0
@@ -36,7 +36,8 @@ var visual_animation: StringName = &"idle"
 var visual_frame := 0
 var hit_serial := 0
 
-var _target: Creep
+## Enemy Creep, or the enemy FortressGate when no soldier is in reach.
+var _target: Node
 var _rng := RandomNumberGenerator.new()
 var _cooldown := 0.0
 var _swing_elapsed := -1.0
@@ -49,6 +50,8 @@ var _flash_left := 0.0
 
 @onready var health: HealthComponent = $HealthComponent
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+## Editor-visible headshot band; no physics layers, tested by Arrow.is_head_point().
+@onready var head_shape: CollisionShape2D = $HeadHitbox/HeadShape
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer
 ## Under the sprite, not the body, so arrows follow the locally smoothed position.
 @onready var stuck_arrows: Node2D = $AnimatedSprite2D/StuckArrows
@@ -110,18 +113,20 @@ func _physics_process(delta: float) -> void:
 			queue_free()
 		return
 	_cooldown = maxf(0.0, _cooldown - delta)
-	if not _can_hit(_target):
+	# A soldier hitting the gate keeps looking for enemy soldiers.
+	if not _can_hit(_target) or _target is FortressGate:
 		_target = _find_target()
 	if _target != null:
-		state = State.ATTACK
-		facing = 1 if _target.position.x >= position.x else -1
+		# Striking the gate is part of holding at the marker.
+		state = State.HOLD if _target is FortressGate else State.ATTACK
+		facing = 1 if _target.global_position.x >= global_position.x else -1
 		if _swing_elapsed < 0.0 and _cooldown <= 0.0:
 			_swing_elapsed = 0.0
 			_struck = false
 			_animation_time = 0.0
 			_cooldown = next_swing_interval()
 	else:
-		state = State.HOLD if (goal_x - position.x) * march_direction <= 1.0 else State.MARCH
+		state = State.HOLD if _at_goal() else State.MARCH
 		facing = march_direction
 	if _swing_elapsed >= 0.0:
 		_swing_elapsed += delta
@@ -150,6 +155,8 @@ func _creep_ahead() -> bool:
 	for other: Node in get_tree().get_nodes_in_group("creeps"):
 		if other == self or not other is Creep or not other.is_alive():
 			continue
+		if absf(other.global_position.y - global_position.y) > melee_reach:
+			continue
 		var ahead: float = (other.global_position.x - global_position.x) * march_direction
 		if ahead > 0.0 and ahead < BODY_SIZE.x + 3.0:
 			return true
@@ -160,21 +167,22 @@ func _world_obstacle_ahead() -> bool:
 	var query := PhysicsRayQueryParameters2D.create(from, from + Vector2(march_direction * 10, 0), 1)
 	return not get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
-func _can_hit(other: Creep) -> bool:
-	if not is_instance_valid(other) or not other.is_alive() or not Teams.are_enemies(team, other.team):
+func _can_hit(other: Node) -> bool:
+	if not is_instance_valid(other) or not (other is Creep or other is FortressGate):
 		return false
-	var offset := other.global_position - global_position
-	var horizontal_distance := absf(offset.x)
-	# Queue spacing is horizontal. Allow the corresponding rise on walkable
-	# slopes so adjacent opponents cannot block one another outside melee range.
-	var slope_angle := minf(floor_max_angle, other.floor_max_angle)
-	var vertical_reach := maxf(BODY_SIZE.y * 0.75, horizontal_distance * tan(slope_angle) + 2.0)
-	if horizontal_distance > melee_reach or absf(offset.y) > vertical_reach:
+	if not other.is_alive() or not Teams.are_enemies(team, other.team):
 		return false
-	var query := PhysicsRayQueryParameters2D.create(global_position, other.global_position, 1)
-	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+	var point: Vector2 = other.closest_point(global_position) if other is FortressGate else other.global_position
+	var offset := point - global_position
+	# Forgiving radial melee deliberately reaches across ramp edges and cover.
+	return offset.length_squared() <= melee_reach * melee_reach
 
-func _find_target() -> Creep:
+func _at_goal() -> bool:
+	return (goal_x - position.x) * march_direction <= 1.0
+
+## Nearest enemy soldier; otherwise, once holding at the marker, the enemy gate
+## when it is within reach.
+func _find_target() -> Node:
 	var nearest: Creep
 	var best := INF
 	for other: Node in get_tree().get_nodes_in_group("creeps"):
@@ -184,7 +192,12 @@ func _find_target() -> Creep:
 		if distance < best or (is_equal_approx(distance, best) and (nearest == null or other.serial < nearest.serial)):
 			nearest = other
 			best = distance
-	return nearest
+	if nearest != null or not _at_goal():
+		return nearest
+	for gate: Node in get_tree().get_nodes_in_group("fortress_gates"):
+		if gate is FortressGate and _can_hit(gate):
+			return gate
+	return null
 
 func _set_animation(animation: StringName, delta: float) -> void:
 	if visual_animation != animation:

@@ -24,7 +24,7 @@ func check() -> void:
 	var excluded: Array[RID] = []
 	var step := 1.0 / Engine.physics_ticks_per_second
 	var began := Time.get_ticks_usec()
-	for speed in [300.0, 420.0, 560.0, 720.0]:
+	for speed in [756.0, 1008.0, 1296.0]:
 		for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN, Vector2(1, -1).normalized()]:
 			var velocity: Vector2 = direction * speed
 			var full := Trajectory.predict(space, start, velocity, excluded, step)
@@ -38,7 +38,22 @@ func check() -> void:
 			arrow._physics_process(step * 10)
 			expect(arrow.global_position.is_equal_approx(full[10]), "Actual projectile follows predicted samples")
 			arrow.free()
-	print("Mean full-flight prediction + verification: ", (Time.get_ticks_usec() - began) / 20.0, " us")
+			for multiplier in [1.0, 1.5, 2.0]:
+				var slowed: Arrow = load("res://player/arrow_player/arrow.tscn").instantiate()
+				slowed.setup({"position": start, "velocity": velocity, "travel_time_multiplier": multiplier})
+				add_child(slowed)
+				slowed.set_physics_process(false)
+				slowed._physics_process(0.5 * multiplier)
+				expect(slowed.global_position.is_equal_approx(Arrow.flight_position(start, velocity, 0.5)), "Slowdown preserves arc at proportional time")
+				expect(slowed.velocity.is_equal_approx((velocity + Arrow.GRAVITY * 0.5) / multiplier), "World velocity includes slowdown")
+				slowed._physics_process(4.49 * multiplier)
+				expect(not slowed._finished, "Arrow survives until scaled lifetime")
+				slowed._physics_process(0.02 * multiplier)
+				expect(slowed._finished and slowed.global_position.is_equal_approx(full[-1]), "Scaled lifetime clamps to original endpoint")
+				slowed.free()
+	for invalid in [0.0, -1.0, INF, NAN]:
+		expect(Arrow.valid_travel_time_multiplier(invalid) == 1.0, "Invalid travel-time multiplier falls back to one")
+	print("Mean full-flight prediction + verification: ", (Time.get_ticks_usec() - began) / 15.0, " us")
 	var wall := StaticBody2D.new()
 	wall.position = Vector2(100, 0)
 	wall.collision_layer = 1

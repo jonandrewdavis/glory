@@ -4,6 +4,8 @@ extends MultiplayerSpawner
 ## custom spawn function from the same data, so flight is deterministic.
 
 signal arrow_spawned(arrow: Arrow)
+## Local hit feedback fired on the shooting peer; also a test hook.
+signal hit_sound_played(headshot: bool)
 
 const ARROW_SCENE := preload("res://player/arrow_player/arrow.tscn")
 const STUCK_ARROW_SCENE := preload("res://player/arrow_player/stuck_arrow.tscn")
@@ -11,18 +13,55 @@ const GROUND_ARROW_CAP := 64
 const PLAYER_ARROW_LIFETIME := 8.0
 const SINK := 3.0 ## px the tip is pushed into a body so it reads as embedded
 
+## Real travel time divided by baseline time. Changes timing, never the arc.
+## Captured by the host at launch; reflections retain the launch value.
+@export_range(0.1, 5.0, 0.05, "or_greater") var arrow_travel_time_multiplier := 1.5
+
 var _serial := 0
 var _ground_arrows: Node2D
 
+@onready var hit_sound: AudioStreamPlayer = $HitSound
+@onready var headshot_sound: AudioStreamPlayer = $HeadshotSound
+
 func _ready() -> void:
 	spawn_function = _spawn_arrow
+	get_node("../LevelLoader").level_clearing.connect(_on_level_clearing)
 
-## Host only. data: {position, velocity, owner_id, team, damage}
+## Ground-stuck arrows and in-flight arrows belong to the old level's terrain.
+func _on_level_clearing() -> void:
+	if is_instance_valid(_ground_arrows):
+		_ground_arrows.queue_free()
+	_ground_arrows = null
+	if multiplayer.is_server():
+		for arrow in get_tree().get_nodes_in_group("projectiles"):
+			arrow.queue_free()
+
+# --- Hit feedback (shooter only, host-announced) ----------------------------
+
+## Host only. Tells the shooting peer a damaging arrow landed so it can play
+## the click (body) or the ping (headshot). Nobody else hears it.
+func server_notify_hit(shooter_id: int, headshot: bool) -> void:
+	if not multiplayer.is_server():
+		return
+	if shooter_id == multiplayer.get_unique_id():
+		_play_hit_sound(headshot)
+	elif multiplayer.get_peers().has(shooter_id):
+		_play_hit_sound.rpc_id(shooter_id, headshot)
+
+@rpc("authority", "call_remote", "reliable")
+func _play_hit_sound(headshot: bool) -> void:
+	(headshot_sound if headshot else hit_sound).play()
+	hit_sound_played.emit(headshot)
+
+## Host only. position/velocity describe the original baseline trajectory.
+## Optional trajectory_time/flight_direction resume that curve after a block.
 func spawn_arrow(data: Dictionary) -> Arrow:
 	if not multiplayer.is_server():
 		return null
 	_serial += 1
 	data.serial = _serial
+	data.travel_time_multiplier = Arrow.valid_travel_time_multiplier(
+		data.get("travel_time_multiplier", arrow_travel_time_multiplier))
 	return spawn(data) as Arrow
 
 func _spawn_arrow(data: Variant) -> Node:
@@ -50,11 +89,14 @@ func remove_owned_projectiles(peer_id: int) -> void:
 		if arrow.owner_id == peer_id:
 			arrow.queue_free()
 
-## Host only. Re-spawns an arrow flying back, owned by the blocker.
+## Host only. Reverse the same trajectory without resetting its bounds or speed.
 func reflect_arrow(arrow: Arrow, blocker: ArrowPlayer, at: Vector2) -> Arrow:
 	return spawn_arrow({
-		"position": at,
-		"velocity": -arrow.velocity * blocker.shield_reflect_speed_mult,
+		"position": arrow.origin,
+		"velocity": arrow.initial_velocity,
+		"trajectory_time": arrow.trajectory_time_at(at),
+		"flight_direction": -arrow.flight_direction,
+		"travel_time_multiplier": arrow.travel_time_multiplier,
 		"owner_id": blocker.peer_id,
 		"team": blocker.team,
 		"damage": arrow.damage,

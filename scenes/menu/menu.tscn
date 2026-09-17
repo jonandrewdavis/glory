@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cvc42inud8fxx" path="res://scenes/menu/menu.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/menu/host_panel.tscn" id="host"]
 [ext_resource type="PackedScene" path="res://scenes/menu/join_panel.tscn" id="join"]
+[ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="controls"]
 
 [node name="Menu" type="Control" unique_id=1641158152]
 layout_mode = 3
@@ -50,7 +51,7 @@ grow_vertical = 2
 [node name="Title" type="Label" parent="MainContainer/Control/CenterContainer" unique_id=1695717094]
 layout_mode = 2
 theme_override_font_sizes/font_size = 60
-text = "Mouse Mage Arena"
+text = "Glory"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/Control" unique_id=737419068]
 layout_mode = 1
@@ -68,6 +69,7 @@ grow_vertical = 2
 theme_override_constants/separation = 16
 
 [node name="ServiceRow" type="HBoxContainer" parent="MainContainer/Control/VBoxContainer" unique_id=1290981585]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MainContainer/Control/VBoxContainer/ServiceRow" unique_id=40573821]
@@ -139,33 +141,26 @@ grow_vertical = 2
 
 [node name="Help" type="PanelContainer" parent="." unique_id=891782893]
 unique_name_in_owner = true
-auto_translate_mode = 2
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 40.0
-offset_top = -186.0
-offset_right = 464.0
-offset_bottom = 276.0
+offset_top = -200.0
+offset_right = 380.0
+offset_bottom = 200.0
 grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="Help" unique_id=2052955873]
 layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Help/MarginContainer" unique_id=1170172205]
+[node name="Controls" parent="Help/MarginContainer" instance=ExtResource("controls")]
 layout_mode = 2
-bbcode_enabled = true
-text = "Host a game for your friends, or join an existing lobby.
-
-Play connects to the 15 vs 15 dedicated server, starting it if needed.
-
-Choose LAN (ENet) for your local network or Online (Tube P2P) to play over the relay.
-
-Hosts can share the address or room code from the pause menu.
-
-F3: cycle debug stats
-F4: change stats size"
+size_flags_vertical = 4
 
 [node name="HostPanel" parent="." unique_id=169543228 instance=ExtResource("host")]
 unique_name_in_owner = true

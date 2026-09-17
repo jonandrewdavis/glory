@@ -29,23 +29,26 @@ wall walk at y=-352. Balconies at y=-288 and -448 provide additional firing
 positions. The lower balcony has an opening through the front wall, allowing
 defenders to exit above the gate facade. Multiple parapets provide solid cover.
 
-The main gate is a noncolliding 48×96 wooden facade at |x|=2160–2208.
+The main gate is a noncolliding 48×96 wooden facade at |x|=2160–2208, backed by
+a `FortressGate` objective with 5000 health (see `docs/rounds.md`).
 One shared, collision-free battering ram follows an editable terrain route from
-the center toward either gate. The server moves it at 24 px/s when one team has
+the center toward either gate. The server moves it at 14 px/s when one team has
 more living players and creeps within 160 px; ties stop it. Both values are Inspector options.
-The ground route through the gate is currently open.
+The ground route through the gate stays open; the gate hitbox never blocks bodies.
 
 Each fortress spawns three melee creeps every 30 seconds, starting immediately.
 Dedicated creep markers live under `SpawnPoints`. See `docs/creeps.md` for combat,
 networking, Inspector tuning, and checks.
 
-Gate health, breach effects and objective scoring are **deferred**. Named nodes and persistent groups
-provide integration points:
+Named nodes and persistent groups provide the objective integration points:
 
-- `Blockout/{Blue,Orange}/Keep/MainGate`: group `fortress_gates`, team and
-  placeholder metadata and the noncolliding `GateTimber` facade.
-- `MainGate/RamImpactPoint`: marker immediately outside the gate.
-- `BatteringRam`: group `fortress_rams`; server-replicated route distance.
+- `Blockout/{Blue,Orange}/Keep/FortressGate`: instance of
+  `entities/fortress_gate.tscn` at the old impact point (±2158, -208); group
+  `fortress_gates`, exported `team`, an Area2D hitbox on physics layer 7
+  (`gates`, bit 64) with no mask, and a 5000-point server-owned HealthComponent.
+- `Blockout/{Blue,Orange}/Keep/MainGate`: art only (`GateTimber`, planks, bands, label).
+- `BatteringRam`: group `fortress_rams`; server-replicated route distance and
+  attack state.
 - Keep and outpost roots use `fortress_keeps` and `fortress_outposts`.
 
 The checker verifies that players can pass through the facade into the keep.
@@ -64,8 +67,8 @@ The checker verifies that players can pass through the facade into the keep.
   arrows pass in every direction while supporting players from above.
   These platforms retain their stone art and team tint; field platforms are unchanged.
 - Tower platforms use physics layer 6 (`arrow_transparent_platforms`, bit 32).
-  The archer mask is 33 (world plus platforms); arrows retain mask 27 and creeps
-  retain mask 17, so neither collides with these platforms. Converted nodes also
+  The archer mask is 33 (world plus platforms); arrows use mask 91 (27 plus
+  gates) and creeps retain mask 17, so neither collides with these platforms. Converted nodes also
   belong to `fortress_arrow_transparent_platforms`.
 - Terrain, solid cover and field platforms use world layer 1. Ground art has
   tile collisions disabled; continuous polygons provide smooth ramp collisions.

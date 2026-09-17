@@ -9,8 +9,8 @@ class ShotProbe extends ArrowPlayer:
 	func _physics_process(_delta: float) -> void:
 		pass
 	func _fire(target: Vector2) -> void:
-		shots.append({"aim": (target - global_position).normalized(), "time": charge_time, "position": global_position})
-		_cancel_charge()
+		shots.append({"aim": (target - global_position).normalized(), "time": preparation_time, "level": selected_level, "speed": compute_arrow_speed(selected_level), "position": global_position})
+		_cancel_preparation()
 		fire_cooldown_left = FIRE_COOLDOWN
 
 func _ready() -> void:
@@ -24,7 +24,7 @@ func expect(condition: bool, description: String) -> void:
 		push_error(description)
 
 func check() -> void:
-	await check_queued_shots()
+	await check_shots()
 	var saved_config := ConfigFile.new()
 	saved_config.parse(GGT_GameConfig.config.encode_to_text())
 	GGT_GameConfig.set_aim_sensitivity(GGT_GameConfig.DEFAULT_AIM_SENSITIVITY)
@@ -60,85 +60,170 @@ func check() -> void:
 	legacy_config.set_value("controls", "aim_sensitivity", 0.5)
 	expect(GGT_GameConfig.get_aim_sensitivity(legacy_config) == 0.25, "Old saved default maps to new midpoint")
 	settings.free()
-	var arc = player.get_node("ChargeArc")
-	player.remove_child(arc)
-	arc.owner = null
-	add_child(arc)
-	arc.set_process(false)
-	expect(not player.has_node("ChargeBar") and not player.has_node("HealthBar"), "Old player bars removed")
-	expect(player.has_node("HealthComponent") and player.has_node("ArrowContainer"), "Health mechanics and aiming arrow retained")
 	var config: SceneReplicationConfig = player.get_node("MultiplayerSynchronizer").replication_config
 	for property in config.get_properties():
 		var node_path := NodePath(String(property).get_slice(":", 0))
-		var target: Node = arc if node_path == NodePath("ChargeArc") else player.get_node_or_null(node_path)
-		expect(target != null, "Replication target resolves: " + String(property))
-	var hud = load("res://scenes/gameplay/ui/ui_layer.tscn").instantiate()
-	expect(hud.find_child("StrengthProgressBar", true, false) == null and hud.find_child("ChargeLevelLabel", true, false) == null, "HUD charge duplicates removed")
-	for t in [0.1, 1.3, 2.1, 3.3, 4.1, 5.3, 6.0, 8.0]:
-		arc.display_state = Vector4(1.0, player.charge_strength(t), player.charge_level(t), 1.0 if player.is_perfect(t) else 0.0)
-		arc._process(0.016)
-		expect(arc.visible and arc._tier == player.charge_level(t), "Charge state at %.1f seconds" % t)
-		await get_tree().process_frame
-	arc._process(0.3)
-	arc._process(0.016)
-	expect(is_zero_approx(arc._effect_left) and arc.position == Vector2.ZERO, "Maximum hold does not retrigger shake")
-	arc.reset()
-	expect(not arc.visible and arc.scale == Vector2.ONE and arc.position == Vector2.ZERO, "Cancel clears all effects")
-	arc.display_state = Vector4(1.0, 0.6, 2.0, 1.0)
-	arc._process(0.016)
-	expect(not arc._burst, "Late join at tier three does not replay a tier-up burst")
-	arc.reset()
-	arc.display_state = Vector4(1.0, 0.8, 0.0, 1.0)
-	arc._process(0.016)
-	arc.display_state = Vector4(1.0, 0.0, 1.0, 0.0)
-	arc._process(0.016)
-	expect(arc._burst and arc._effect_left > 0.0, "Tier transition triggers burst")
-	arc.display_state = Vector4.ZERO
-	arc._process(0.016)
-	expect(not arc.visible and arc._effect_left == 0.0, "Replicated release clears arc")
-	arc.free()
+		expect(player.get_node_or_null(node_path) != null, "Replication target resolves: " + String(property))
+	for level in 3:
+		var events := InputMap.action_get_events(ArrowPlayer.LEVEL_ACTIONS[level])
+		expect(events.size() == 1 and events[0].physical_keycode == KEY_1 + level, "Level key binding %d" % (level + 1))
 	player.free()
-	hud.free()
 	get_tree().quit(1 if failures else 0)
 
-func check_queued_shots() -> void:
+func reset_probe(probe: ArrowPlayer, level: int) -> void:
+	probe._cancel_preparation()
+	probe.shots.clear()
+	probe.fire_cooldown_left = 0.0
+	probe.select_level(level)
+
+func check_shots() -> void:
 	var probe = load("res://player/arrow_player/arrow_player.tscn").instantiate()
 	probe.set_script(ShotProbe)
 	probe.name = "1"
 	add_child(probe)
-	for early in [0.0, 0.1, probe.minimum_charge_time - 0.001]:
-		probe._cancel_charge()
-		probe.shots.clear()
-		probe.fire_cooldown_left = 0.0
-		if early > 0.0:
-			probe._update_charge_input(early, probe.global_position + Vector2.RIGHT * 96.0, true, true, false)
-		probe._update_charge_input(0.0, probe.global_position + Vector2.RIGHT * 96.0, true, false, true)
-		expect(probe._shot_queued and probe.shots.is_empty() and probe.fire_cooldown_left == 0.0, "Early release %.3f queues without cooldown" % early)
-		probe.position += Vector2(10.0, 0.0)
-		# Pending shots follow live aim without creating a second shot.
-		probe._update_charge_input(probe.minimum_charge_time - early, probe.global_position + Vector2.UP * 96.0, true, true, true)
-		expect(probe.shots.size() == 1 and is_equal_approx(probe.shots[0].time, probe.minimum_charge_time), "Queued shot fires once at minimum")
-		expect(probe.shots[0].aim.is_equal_approx(Vector2.UP) and probe.shots[0].position == probe.global_position, "Queued shot uses live aim and current origin")
-		expect(not probe._shot_queued and probe.fire_cooldown_left == probe.FIRE_COOLDOWN, "Queue clears and cooldown starts on fire")
-		probe._update_charge_input(0.01, Vector2.UP, true, true, true)
-		expect(probe.shots.size() == 1, "Extra clicks cannot duplicate shot during cooldown")
-	for held_time in [probe.minimum_charge_time, 0.8, 2.2]:
-		probe.fire_cooldown_left = 0.0
-		probe.shots.clear()
-		probe._update_charge_input(held_time, probe.global_position + Vector2.RIGHT * 96.0, true, true, false)
-		probe._update_charge_input(0.0, probe.global_position + Vector2.RIGHT * 96.0, true, false, true)
-		expect(probe.shots.size() == 1 and not probe._shot_queued, "Release %.1f fires immediately" % held_time)
+	probe.aim_reticle.set_physics_process(false)
+	for level in 3:
+		var minimum: float = probe.minimum_preparation_time(level)
+		for early in [0.0, 0.1, minimum - 0.001]:
+			reset_probe(probe, level)
+			if early > 0.0:
+				probe._update_shot_input(early, Vector2.RIGHT * 96.0, true, true, false)
+			probe._update_shot_input(0.0, Vector2.RIGHT * 96.0, true, false, true)
+			expect(probe._shot_queued and probe.shots.is_empty(), "Early release queues level %d" % level)
+			probe.position += Vector2(10, 0)
+			probe._update_shot_input(minimum - early + 0.000001, probe.position + Vector2.UP * 96.0, true, true, true)
+			expect(probe.shots.size() == 1 and probe.shots[0].level == level, "Queue fires selected level once")
+			expect(probe.shots[0].aim.is_equal_approx(Vector2.UP) and probe.shots[0].position == probe.position, "Queue uses live aim and origin")
+			expect(not probe._shot_queued and probe.fire_cooldown_left == probe.FIRE_COOLDOWN, "Fire clears queue and starts cooldown")
+			probe._update_shot_input(0.1, Vector2.UP, true, true, true)
+			expect(probe.shots.size() == 1, "Cooldown prevents duplicate shot")
+		for held_time in [minimum, 10.0]:
+			reset_probe(probe, level)
+			probe._update_shot_input(held_time, probe.position + Vector2.RIGHT * 96.0, true, true, false)
+			expect(probe.shots.is_empty() and probe.readiness_indicator.display_state.w == 1.0, "Ready held shot never auto-fires")
+			expect(probe.arrow_container.scale == probe.level_arrow_scales[level], "Aiming arrow uses selected size")
+			probe._update_shot_input(0.0, probe.position + Vector2.RIGHT * 96.0, true, false, true)
+			expect(probe.shots.size() == 1 and probe.shots[0].speed == probe.level_speeds[level], "Hold duration cannot change speed")
+		probe._server_last_fire_msec = -100000
+		probe.server_fire(Vector2.RIGHT, level, minimum - 0.001)
+		expect(probe._server_last_fire_msec == -100000, "Host rejects premature level %d" % level)
+
+	# A full tap anywhere in recovery must survive until preparation can start.
+	for level in 3:
+		for cooldown in [0.5, 0.25, 0.001]:
+			reset_probe(probe, level)
+			probe.fire_cooldown_left = cooldown
+			probe._update_shot_input(0.01, Vector2.RIGHT, true, false, true)
+			expect(probe._shot_queued and probe.is_preparing, "Cooldown tap buffers level %d at %.3f" % [level, cooldown])
+			for click in 3:
+				probe._update_shot_input(0.01, Vector2.RIGHT, true, true, false)
+				probe._update_shot_input(0.01, Vector2.RIGHT, true, false, true)
+			expect(probe.preparation_time == 0.0 and probe.shots.is_empty(), "Repeated cooldown clicks preserve one shot without preparing early")
+			probe.fire_cooldown_left = 0.0
+			var minimum: float = probe.minimum_preparation_time(level)
+			probe._update_shot_input(minimum * 0.5, Vector2.UP, true, false, false)
+			expect(probe.shots.is_empty() and probe._shot_queued, "Buffered shot waits for full preparation")
+			probe._update_shot_input(minimum * 0.5 + 0.000001, Vector2.UP, true, false, false)
+			expect(probe.shots.size() == 1 and probe.shots[0].level == level, "Buffered shot fires once after recovery and preparation")
+			probe.fire_cooldown_left = 0.0
+			probe._update_shot_input(10.0, Vector2.UP, true, false, false)
+			expect(probe.shots.size() == 1, "Repeated clicks do not create extra buffered shots")
+
+	reset_probe(probe, 0)
+	probe.fire_cooldown_left = 0.25
+	probe._update_shot_input(0.1, Vector2.RIGHT, true, true, false)
 	probe.fire_cooldown_left = 0.0
-	probe.shots.clear()
-	probe._update_charge_input(0.1, probe.global_position + Vector2.RIGHT * 96.0, true, true, false)
-	expect(is_equal_approx(probe.charge_arc.readiness.x, probe.charge_strength(probe.minimum_charge_time)) and probe.charge_arc.readiness.y == 0.0, "Level 1 marks configured minimum and starts unready")
-	probe._update_charge_input(0.0, probe.global_position + Vector2.RIGHT * 96.0, true, false, true)
-	probe._update_charge_input(0.5, Vector2.ZERO, false, false, false)
-	expect(not probe.is_charging and not probe._shot_queued and probe.shots.is_empty(), "Losing ability to act cancels pending shot")
-	probe._update_charge_input(probe.minimum_charge_time, probe.global_position + Vector2.RIGHT * 96.0, true, true, false)
-	expect(probe.charge_arc.readiness.y == 1.0, "Minimum hold changes arc to ready")
-	probe.server_fire(Vector2.RIGHT, probe.minimum_charge_time - 0.001)
-	expect(probe._server_last_fire_msec == -100000, "Server rejects early shot without consuming cooldown")
-	probe._cancel_charge()
+	probe._update_shot_input(1.0, Vector2.RIGHT, true, true, false)
+	expect(probe.shots.is_empty() and probe.is_preparing, "Hold begun during cooldown still waits for release")
+	probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+	expect(probe.shots.size() == 1, "Held buffered shot fires on release")
+
+	for cancel in [false, true]:
+		reset_probe(probe, 0)
+		probe.fire_cooldown_left = 0.25
+		probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+		probe._update_shot_input(0.0, Vector2.RIGHT, cancel, false, false, cancel)
+		probe.fire_cooldown_left = 0.0
+		probe._update_shot_input(10.0, Vector2.RIGHT, true, false, false)
+		expect(probe.shots.is_empty() and not probe._shot_queued, "Cancel or loss of control clears cooldown buffer")
+
+	reset_probe(probe, 0)
+	probe._update_shot_input(1.0, Vector2.RIGHT, true, true, false)
+	probe.select_level(2)
+	expect(probe.preparation_time == 1.0 and probe.readiness_indicator.display_state.w == 0.0, "Switch up preserves elapsed time and becomes unready")
+	expect(probe.compute_arrow_speed(probe.selected_level) == 1296.0, "Preview speed changes immediately with selection")
+	probe.select_level(0)
+	probe._update_shot_input(0.0, Vector2.RIGHT, true, true, false)
+	expect(probe.shots.is_empty() and probe.readiness_indicator.display_state.w == 1.0, "Switch down while held still waits for release")
+
+	reset_probe(probe, 2)
+	probe._update_shot_input(1.0, Vector2.RIGHT, true, true, false)
+	probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+	probe.select_level(0)
+	probe._update_shot_input(0.0, Vector2.RIGHT, true, false, false)
+	expect(probe.shots.size() == 1 and probe.shots[0].level == 0, "Switch queued shot down fires when already ready")
+
+	reset_probe(probe, 0)
+	probe._update_shot_input(0.4, Vector2.RIGHT, true, true, false)
+	probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+	probe.select_level(2)
+	probe._update_shot_input(0.5, Vector2.RIGHT, true, false, false)
+	expect(probe.shots.is_empty() and probe._shot_queued, "Switch queued shot up waits for longer minimum")
+	probe._update_shot_input(1.5, Vector2.RIGHT, true, false, false)
+	expect(probe.shots.size() == 1 and probe.shots[0].level == 2, "Switched queue fires at new minimum")
+
+	for queued in [false, true]:
+		reset_probe(probe, 2)
+		probe._update_shot_input(0.1, Vector2.RIGHT, true, true, false)
+		if queued:
+			probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+		probe._update_shot_input(10.0, Vector2.RIGHT, false, false, false)
+		expect(not probe.is_preparing and not probe._shot_queued and probe.shots.is_empty(), "Loss of ability to act cancels held/queued shot")
+
+	for queued in [false, true]:
+		reset_probe(probe, 2)
+		probe._update_shot_input(0.1, Vector2.RIGHT, true, true, false)
+		if queued:
+			probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+		probe._update_shot_input(10.0, Vector2.RIGHT, true, not queued, false, true)
+		expect(not probe.is_preparing and not probe._shot_queued and probe.shots.is_empty(), "Jump cancels held/queued shot before it can fire")
+		expect(probe.fire_cooldown_left == 0.0 and not probe.arrow_container.visible, "Jump cancellation hides arrow without cooldown")
+		probe._reset_jump()
+		probe._update_jump(0.0, true, true, true, true)
+		expect(probe.velocity.y == ArrowPlayer.JUMP_VELOCITY, "Canceling held or queued preparation also jumps")
+		if not queued:
+			probe._update_shot_input(10.0, Vector2.RIGHT, true, true, false)
+			expect(not probe.is_preparing, "Canceled hold cannot restart preparation")
+			probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true)
+			expect(not probe._shot_queued and probe.shots.is_empty(), "Canceled hold's release cannot queue a shot")
+		probe._update_shot_input(0.1, Vector2.RIGHT, true, true, false)
+		expect(probe.is_preparing, "Fresh press prepares normally after cancellation")
+		probe._cancel_preparation()
+
+	reset_probe(probe, 2)
+	probe._update_shot_input(3.0, Vector2.RIGHT, true, true, false)
+	probe._update_shot_input(0.0, Vector2.RIGHT, true, false, true, true)
+	expect(probe.shots.is_empty() and not probe.is_preparing, "Jump takes priority over simultaneous ready-shot release")
+
+	probe.readiness_indicator._process(0.0)
+	expect(probe.readiness_indicator.visible and probe.readiness_indicator.display_state == Vector4(2, 0, 0, 0), "Idle indicator retains selected level")
+	probe._on_died(null)
+	probe.readiness_indicator._process(0.0)
+	expect(not probe.readiness_indicator.visible and not probe.is_preparing, "Death hides indicator and cancels shot")
+	probe._on_respawned()
+	probe.readiness_indicator._process(0.0)
+	expect(probe.selected_level == 2 and probe.readiness_indicator.visible, "Respawn preserves selection and restores indicator")
+	probe.set_multiplayer_authority(2)
+	probe.selected_level = 0 # Remote gameplay state is not the presentation snapshot.
+	probe._on_died(null)
+	probe._on_respawned()
+	probe.readiness_indicator._process(0.0)
+	expect(probe.readiness_indicator.display_state == Vector4(2, 0, 0, 0), "Remote respawn preserves the owner's replicated selection")
+
+	for invalid in [[-1, 10.0], [3, 10.0], [0, NAN], [0, INF]]:
+		probe.server_fire(Vector2.RIGHT, invalid[0], invalid[1])
+	probe.server_fire(Vector2(NAN, 0), 0, 10.0)
+	probe.server_fire(Vector2.ZERO, 0, 10.0)
+	expect(probe._server_last_fire_msec == -100000, "Host rejects invalid shot data without consuming cooldown")
 	probe.free()
 	await get_tree().process_frame

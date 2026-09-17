@@ -8,14 +8,14 @@ static func run(check: SceneTree, level: Node2D) -> void:
 	var converted := 0
 	for platform in check.get_nodes_in_group("fortress_one_way_platforms"):
 		var path := str(level.get_path_to(platform))
-		var tower := "/Keep/" in path or "/ForwardOutpost/" in path
+		var tower := level.name == "Fortress2" or "/Keep/" in path or "/ForwardOutpost/" in path or path.begins_with("Center/")
 		var valid: bool = platform.is_in_group("fortress_arrow_transparent_platforms") == tower
 		for cell in platform.get_used_cells():
 			valid = valid and platform.get_cell_alternative_tile(cell) == (2 if tower else 1)
 		check.expect(valid, "%s platform classification" % path)
 		if tower:
 			converted += 1
-	check.expect(converted == (56 if level.name == "Fortress1" else 28), "All tower platforms converted")
+	check.expect(converted == (56 if level.name == "Fortress1" else 46), "All expected platforms converted")
 	# Isolate the same baked tiles so nearby tower walls cannot mask the result.
 	var limits := level.get_node("StaticBodyLimits") as StaticBody2D
 	var limits_layer := limits.collision_layer

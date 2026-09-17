@@ -228,19 +228,17 @@ func build_keep(parent: Node, side: int, tint: Color) -> void:
 
 func build_gate(parent: Node, side: int, tint: Color) -> void:
 	var gate := branch(parent, "MainGate")
-	gate.add_to_group("fortress_gates", true)
-	gate.set_meta("placeholder", true)
-	gate.set_meta("team", "blue" if side < 0 else "orange")
-	gate.set_meta("objective", "Enemy battering ram breaches this gate; damage and breach logic deferred.")
 	var shape := rect_points(mirrored_rect(side, 2160, -256, 48, 96))
 	polygon(gate, "GateTimber", shape, Color(0.39, 0.27, 0.17))
 	for x in range(2168, 2208, 12):
 		line(gate, "Plank%d" % x, PackedVector2Array([Vector2(side * x, -252), Vector2(side * x, -164)]), Color(0.18, 0.14, 0.12), 2)
 	for y in [-240, -184]:
 		polygon(gate, "IronBand%d" % -y, rect_points(mirrored_rect(side, 2160, y, 48, 6)), Color(0.55, 0.57, 0.59) * tint)
-	var target := Marker2D.new()
-	target.position = Vector2(side * 2158, -208)
-	attach(gate, target, "RamImpactPoint")
+	# The damageable objective is its own scene; MainGate is art only.
+	var objective: Node2D = load("res://entities/fortress_gate.tscn").instantiate()
+	objective.team = Teams.Team.BLUE if side < 0 else Teams.Team.ORANGE
+	objective.position = Vector2(side * 2158, -208)
+	attach(parent, objective, "FortressGate")
 	label(gate, "GateLabel", "GATE", Vector2(side * 2184, -280), tint)
 
 func label(parent: Node, node_name: String, text: String, center: Vector2, tint: Color) -> void:

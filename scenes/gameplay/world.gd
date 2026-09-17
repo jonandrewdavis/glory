@@ -15,6 +15,7 @@ var session := 0
 @onready var projectile_spawner: ProjectileSpawner = %ProjectileSpawner
 @onready var creep_spawner: CreepSpawner = %CreepSpawner
 @onready var scoreboard: Scoreboard = %Scoreboard
+@onready var round_manager: RoundManager = %RoundManager
 @onready var camera_rig: CameraRig = %CameraRig
 
 func _ready() -> void:
@@ -40,6 +41,7 @@ func clear() -> void:
 	player_spawner.clear_players()
 	projectile_spawner.clear_projectiles()
 	scoreboard.clear()
+	round_manager.clear()
 	camera_rig.clear()
 	level_loader.clear_level()
 

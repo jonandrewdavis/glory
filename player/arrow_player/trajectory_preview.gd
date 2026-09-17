@@ -1,5 +1,7 @@
 extends RefCounted
 ## Read-only prediction against the current physics world; no future target motion.
+## Sample baseline time: the shared travel-time multiplier changes when an
+## arrow arrives, but does not change these positions or the preview length.
 
 static func predict(space: PhysicsDirectSpaceState2D, origin: Vector2, velocity: Vector2, excluded: Array[RID], step: float) -> PackedVector2Array:
 	var points := PackedVector2Array([origin])

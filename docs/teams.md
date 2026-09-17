@@ -12,10 +12,11 @@ Cooldowns last for the current connection and clear on disconnect or session exi
 Player health belongs to the server. Only opposing players can cause damage;
 client damage RPCs, friendly fire, self damage, and unattributed damage are rejected.
 
-The Fortress1 ram has no collision objects. Living players inside the circular
-radius determine its direction: Blue pushes right, Orange pushes left, ties stop.
-Speed is constant. Its editable route follows terrain and stops with the nose at
-either gate. Gate damage and victory logic are not implemented.
+The shared ram has no collision objects. Living players and creeps inside the
+circular radius determine its direction: Blue pushes right, Orange pushes left,
+ties stop. Speed is constant (14 px/s). Its editable route follows terrain and
+stops with the nose at either gate, where it winds up and strikes; gate health,
+rounds and the siege HUD are described in `docs/rounds.md`.
 
 The server synchronizes route distance and direction; clients smooth the drawing.
 The level builder preserves the root ram instance while rebuilding scenery.

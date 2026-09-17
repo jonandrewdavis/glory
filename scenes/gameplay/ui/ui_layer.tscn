@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b83omkj4aqsph" path="res://scenes/gameplay/ui/ui_layer.gd" id="1_oq6q8"]
 [ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="2_1aqtp"]
 [ext_resource type="PackedScene" uid="uid://barl4q1kugrmm" path="res://scenes/gameplay/ui/pause-layer/pause-layer.tscn" id="3_n2icj"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/round_hud.tscn" id="4_round"]
 
 [node name="UILayer" type="CanvasLayer" unique_id=959767118]
 script = ExtResource("1_oq6q8")
@@ -41,6 +42,9 @@ offset_bottom = 60.0
 grow_horizontal = 0
 horizontal_alignment = 2
 text = "Blue 0 - 0 Orange"
+
+[node name="RoundHud" parent="PlayerUI" instance=ExtResource("4_round")]
+layout_mode = 1
 
 [node name="PauseLayer" parent="." unique_id=1173719922 instance=ExtResource("3_n2icj")]
 visible = false

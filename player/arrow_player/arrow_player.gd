@@ -5,31 +5,44 @@ extends CharacterBody2D
 
 const SPEED_MAX := 100.0
 const JUMP_VELOCITY := -290.0
-const ACCELERATION := 17.5
-const FRICTION := 8.0
 const FIRE_COOLDOWN := 0.5
 
-@export_group("Charge")
-@export_range(0.0, 2.0, 0.05) var minimum_charge_time := 0.5
-@export var charge_level_durations: Array[float] = [2.0, 2.0, 2.0]
-@export var charge_perfect_window := 0.8 ## last N seconds of each level
-## Maps progress within a level (0..1) to strength (0..1) for that level.
-@export var charge_curves: Array[Curve] = [
-	preload("res://player/arrow_player/charge_curves/level_1_linear.tres"),
-	preload("res://player/arrow_player/charge_curves/level_2_linear.tres"),
-	preload("res://player/arrow_player/charge_curves/level_3_linear.tres"),
-]
-## Static speed steps. Level N fires at steps[N] (normal) or steps[N + 1]
-## (perfect), so each level's normal shot equals the previous level's perfect.
-@export var charge_speed_steps: Array[float] = [300.0, 420.0, 560.0, 720.0]
-@export var charge_damage: Array[float] = [25.0, 35.0, 50.0]
+@export_group("Movement Feel")
+@export var acceleration := 1700.0
+@export var braking := 2200.0
+@export var reversal_acceleration := 2400.0
+@export var coyote_time := 0.10
+@export var jump_buffer_time := 0.12
+@export_range(0.0, 1.0) var jump_cut_factor := 0.5
+@export_range(0.01, 1.0) var facing_threshold := 0.15
+## How long the dropped platform stays passable after pressing down.
+@export var drop_through_time := 0.25
+
+var _facing := 1
+var _coyote_left := 0.0
+var _jump_buffer_left := 0.0
+var _jump_consumed := false
+var _jump_cut := false
+var _drop_through_left := 0.0
+var _drop_exceptions: Array[RID] = []
+
+const LEVEL_COUNT := 3
+const LEVEL_ACTIONS := [&"select_arrow_level_1", &"select_arrow_level_2", &"select_arrow_level_3"]
+
+@export_group("Arrow Levels")
+@export var level_minimum_times: Array[float] = [0.8, 1.6, 2.4]
+@export var level_speeds: Array[float] = [756.0, 1008.0, 1296.0]
+@export var level_damage: Array[float] = [25.0, 35.0, 50.0]
 ## x = length factor, y = thickness factor of the arrow per level.
-@export var charge_arrow_scales: Array[Vector2] = [Vector2(1.0, 1.0), Vector2(1.1, 1.6), Vector2(1.2, 2.2)]
+@export var level_arrow_scales: Array[Vector2] = [Vector2(1.0, 1.0), Vector2(1.1, 1.6), Vector2(1.2, 2.2)]
 
 @export_group("Shield")
 @export var shield_duration := 0.7
 @export var shield_cooldown := 2.0
-@export var shield_reflect_speed_mult := 1.1
+
+@export_group("Damage")
+## Host-side multiplier for this player's arrows that land in an enemy's HeadHitbox.
+@export var headshot_damage_multiplier := 1.5
 
 var peer_id := 0
 var team: int = Teams.Team.BLUE
@@ -39,10 +52,11 @@ var is_blocking := false
 var block_time_left := 0.0
 var shield_cooldown_left := 0.0
 
-var charge_time := 0.0
-var is_charging := false
+var preparation_time := 0.0
+var is_preparing := false
 var _shot_queued := false ## released early; fires at the live reticle aim once the minimum is reached
-var _charge_level_shown := -1
+var _wait_for_primary_release := false
+var selected_level := 0
 var is_dead := false
 var fire_cooldown_left := 0.0
 
@@ -54,7 +68,7 @@ var _server_last_hit_by := 0
 @onready var health: HealthComponent = %HealthComponent
 @onready var arrow_container: Node2D = %ArrowContainer
 @onready var aim_reticle: Node2D = %AimReticle
-@onready var charge_arc: Node2D = %ChargeArc
+@onready var readiness_indicator: Node2D = %ReadinessIndicator
 @onready var shield_container: Node2D = %ShieldContainer
 @onready var shield_polygon: Polygon2D = %ShieldPolygon2D
 @onready var shield_boss: Polygon2D = %ShieldBoss
@@ -62,6 +76,8 @@ var _server_last_hit_by := 0
 @onready var shield_collision: CollisionPolygon2D = %ShieldCollision
 @onready var name_label: Label = %NameLabel
 @onready var stuck_arrows: Node2D = %StuckArrows
+## Editor-visible headshot band; no physics layers, tested by Arrow.is_head_point().
+@onready var head_shape: CollisionShape2D = %HeadShape
 
 func _enter_tree() -> void:
 	peer_id = name.to_int()
@@ -72,6 +88,8 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	add_to_group("players")
 	_apply_team_colors()
+	if is_multiplayer_authority():
+		_update_readiness_indicator()
 	name_label.text = MultiplayerService.get_username(peer_id)
 	health.died.connect(_on_died)
 	health.respawned.connect(_on_respawned)
@@ -151,28 +169,120 @@ func _owner_physics(delta: float) -> void:
 		if block_time_left <= 0.0:
 			_end_block()
 
-	if can_act and Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = JUMP_VELOCITY * (0.55 if (is_charging or is_blocking) else 1.0)
+	var jump_requested := can_act and Input.is_action_just_pressed("jump")
 
-	_update_charge_input(delta, mouse, can_act, Input.is_action_pressed("primary"), Input.is_action_just_released("primary"))
+	if can_act:
+		for level in LEVEL_COUNT:
+			if Input.is_action_just_pressed(LEVEL_ACTIONS[level]):
+				select_level(level)
+	_update_shot_input(delta, mouse, can_act, Input.is_action_pressed("primary"), Input.is_action_just_released("primary"), jump_requested)
+	_update_jump(delta, can_act, jump_requested, Input.is_action_pressed("jump"), is_on_floor())
+	if can_act and Input.is_action_just_pressed("down") and is_on_floor():
+		_drop_through_floor()
+	_update_drop_through(delta)
+	if can_act:
+		_update_facing(aim_reticle.direction)
 
-	if can_act and Input.is_action_just_pressed("secondary") and not is_charging and not is_blocking and shield_cooldown_left <= 0.0:
+	if can_act and Input.is_action_just_pressed("secondary") and not is_preparing and not is_blocking and shield_cooldown_left <= 0.0:
 		_start_block(mouse)
 
 	var direction := Input.get_axis("left", "right") if can_act else 0.0
 	var speed_mult := 1.0
 	if not is_on_floor():
 		speed_mult = 0.97
-	elif is_charging or is_blocking:
+	elif is_preparing or is_blocking:
 		speed_mult = 0.5
-	var weight := delta * (ACCELERATION if direction != 0.0 else FRICTION)
-	velocity.x = lerpf(velocity.x, direction * SPEED_MAX * speed_mult, weight)
+	_update_horizontal(delta, direction, speed_mult)
 	move_and_slide()
+	if is_on_floor():
+		_jump_consumed = false
 
 	if not is_dead:
-		sprite.flip_h = aim_reticle.direction.x < 0.0
-		if not is_charging:
+		sprite.flip_h = _facing < 0
+		if not is_preparing:
 			sprite.play("walk" if absf(velocity.x) > 5.0 else "idle")
+
+func get_facing_direction() -> int:
+	return _facing
+
+func _update_facing(aim: Vector2) -> void:
+	if aim.x > facing_threshold:
+		_facing = 1
+	elif aim.x < -facing_threshold:
+		_facing = -1
+
+func _update_horizontal(delta: float, direction: float, speed_mult: float) -> void:
+	var rate := acceleration
+	if direction == 0.0:
+		rate = braking
+	elif velocity.x * direction < 0.0:
+		rate = reversal_acceleration
+	velocity.x = move_toward(velocity.x, direction * SPEED_MAX * speed_mult, rate * delta)
+
+func _reset_jump() -> void:
+	_coyote_left = 0.0
+	_jump_buffer_left = 0.0
+	_jump_consumed = false
+	_jump_cut = false
+
+func _update_jump(delta: float, can_act: bool, requested: bool, held: bool, grounded: bool) -> void:
+	if not can_act:
+		_reset_jump()
+		return
+	_coyote_left = maxf(_coyote_left - delta, 0.0)
+	_jump_buffer_left = maxf(_jump_buffer_left - delta, 0.0)
+	if grounded and not _jump_consumed:
+		_coyote_left = coyote_time
+	if requested:
+		_jump_buffer_left = jump_buffer_time
+	if _jump_buffer_left > 0.0 and not _jump_consumed and (grounded or _coyote_left > 0.0):
+		velocity.y = JUMP_VELOCITY * (0.55 if is_blocking else 1.0)
+		_jump_buffer_left = 0.0
+		_coyote_left = 0.0
+		_jump_consumed = true
+		_jump_cut = false
+	if not held and velocity.y < 0.0 and _jump_consumed and not _jump_cut:
+		velocity.y *= jump_cut_factor
+		_jump_cut = true
+
+# --- Drop-through -----------------------------------------------------------
+
+## Lets the body fall through whichever one-way platform it is standing on.
+## Solid floors are unaffected. Returns true when a platform was released.
+func _drop_through_floor() -> bool:
+	var dropped := false
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		if collision.get_normal().y >= 0.0:
+			continue
+		var collider := collision.get_collider()
+		if collider == null or not collider.is_in_group("fortress_one_way_platforms"):
+			continue
+		var rid := collision.get_collider_rid()
+		if rid in _drop_exceptions:
+			dropped = true
+			continue
+		PhysicsServer2D.body_add_collision_exception(get_rid(), rid)
+		_drop_exceptions.append(rid)
+		dropped = true
+	if dropped:
+		_drop_through_left = drop_through_time
+		if velocity.y < 0.0:
+			velocity.y = 0.0
+	return dropped
+
+func _update_drop_through(delta: float) -> void:
+	if _drop_exceptions.is_empty():
+		return
+	_drop_through_left -= delta
+	if _drop_through_left <= 0.0:
+		_clear_drop_through()
+
+func _clear_drop_through() -> void:
+	for rid in _drop_exceptions:
+		PhysicsServer2D.body_remove_collision_exception(get_rid(), rid)
+	_drop_exceptions.clear()
+	_drop_through_left = 0.0
 
 func _is_paused() -> bool:
 	return World.ui_layer != null and World.ui_layer.is_paused()
@@ -182,134 +292,103 @@ func capture_mouse() -> void:
 		if World.ui_layer == null or not World.ui_layer.exiting:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-# --- Charge / fire ---------------------------------------------------------
+# --- Preparation / fire ---------------------------------------------------
 
-func _update_charge_input(delta: float, mouse: Vector2, can_act: bool, held: bool, released: bool) -> void:
+func select_level(level: int) -> void:
+	if level < 0 or level >= LEVEL_COUNT:
+		return
+	selected_level = level
+	if is_preparing:
+		arrow_container.scale = _level_vec(level_arrow_scales, level, Vector2.ONE)
+	_update_readiness_indicator()
+
+func minimum_preparation_time(level: int) -> float:
+	return maxf(_level_value(level_minimum_times, level, 0.8), 0.0)
+
+func _update_readiness_indicator() -> void:
+	var minimum := minimum_preparation_time(selected_level)
+	var ready := is_preparing and preparation_time >= minimum
+	var fill := clampf(preparation_time / minimum, 0.0, 1.0) if minimum > 0.0 else (1.0 if is_preparing else 0.0)
+	readiness_indicator.display_state = Vector4(float(selected_level), 1.0 if is_preparing else 0.0, fill, 1.0 if ready else 0.0)
+
+func _update_shot_input(delta: float, mouse: Vector2, can_act: bool, held: bool, released: bool, cancel_requested := false) -> void:
+	if _wait_for_primary_release:
+		# Consume the canceled hold's release as well as the hold itself.
+		if not held:
+			_wait_for_primary_release = false
+		return
 	if not can_act:
-		if is_charging or _shot_queued:
-			_cancel_charge()
+		if is_preparing or _shot_queued:
+			_cancel_preparation()
+		return
+	if cancel_requested and (is_preparing or _shot_queued):
+		_cancel_preparation()
+		_wait_for_primary_release = held
+		return
+	if cancel_requested:
+		_wait_for_primary_release = held
+		return
+	if fire_cooldown_left > 0.0 and not is_blocking:
+		# Buffer one shot without counting recovery time as preparation.
+		if (held or released) and not is_preparing:
+			_prepare(0.0, mouse)
+		if released and is_preparing:
+			_shot_queued = true
 		return
 	if _shot_queued:
-		_charge(minf(delta, maxf(minimum_charge_time - charge_time, 0.0)), mouse)
-		if charge_time >= minimum_charge_time:
+		_prepare(delta, mouse)
+		if preparation_time >= minimum_preparation_time(selected_level):
 			_fire(mouse)
 		return
 	if held and not is_blocking and fire_cooldown_left <= 0.0:
-		_charge(delta, mouse)
+		_prepare(delta, mouse)
 	elif released and not is_blocking and fire_cooldown_left <= 0.0:
 		# Also catch a press/release shorter than one physics tick.
-		if not is_charging:
-			_charge(0.0, mouse)
-		if charge_time < minimum_charge_time:
+		if not is_preparing:
+			_prepare(0.0, mouse)
+		if preparation_time < minimum_preparation_time(selected_level):
 			_shot_queued = true
 		else:
 			_fire(mouse)
-	elif is_charging:
-		_cancel_charge()
+	elif is_preparing:
+		_cancel_preparation()
 
-func _charge(delta: float, mouse: Vector2) -> void:
-	is_charging = true
-	charge_time = minf(charge_time + delta, charge_total())
-	var level := charge_level(charge_time)
-	if level != _charge_level_shown:
-		_apply_charge_level(level)
-	var perfect := is_perfect(charge_time)
+func _prepare(delta: float, mouse: Vector2) -> void:
+	is_preparing = true
+	# Do not cap at the current minimum: a later level change keeps all elapsed time.
+	preparation_time += delta
+	arrow_container.scale = _level_vec(level_arrow_scales, selected_level, Vector2.ONE)
 	arrow_container.show()
 	arrow_container.look_at(mouse)
-	charge_arc.display_state = Vector4(1.0, charge_strength(charge_time), float(level), 1.0 if perfect else 0.0)
-	charge_arc.readiness = Vector3(charge_strength(minimum_charge_time), 1.0 if charge_time >= minimum_charge_time else 0.0, perfect_threshold_fill(level))
+	_update_readiness_indicator()
 	sprite.play("attack")
 
-## Grows the aiming arrow when a new charge level is reached.
-func _apply_charge_level(level: int) -> void:
-	_charge_level_shown = level
-	arrow_container.scale = _level_vec(charge_arrow_scales, level, Vector2.ONE)
-
-func _cancel_charge() -> void:
-	is_charging = false
+func _cancel_preparation() -> void:
+	is_preparing = false
 	_shot_queued = false
-	charge_time = 0.0
-	_charge_level_shown = -1
+	preparation_time = 0.0
 	arrow_container.hide()
 	arrow_container.scale = Vector2.ONE
-	charge_arc.reset()
+	_update_readiness_indicator()
 
 func _fire(mouse: Vector2) -> void:
-	if charge_time < minimum_charge_time:
+	if preparation_time < minimum_preparation_time(selected_level):
 		return
 	var aim := (mouse - global_position).normalized()
-	var t := charge_time
-	_cancel_charge()
+	var elapsed := preparation_time
+	var level := selected_level
+	_cancel_preparation()
 	fire_cooldown_left = FIRE_COOLDOWN
 	if aim.is_zero_approx():
 		return
 	if multiplayer.is_server():
-		server_fire(aim, t)
+		server_fire(aim, level, elapsed)
 	else:
-		request_fire.rpc_id(1, aim, t)
+		request_fire.rpc_id(1, aim, level, elapsed)
 
-# --- Charge levels (pure helpers over the exported tuning) -----------------
-
-func charge_total() -> float:
-	var total := 0.0
-	for d in charge_level_durations:
-		total += d
-	return total
-
-## 0-based level for a hold time; clamps to the last level past the end.
-func charge_level(t: float) -> int:
-	var elapsed := 0.0
-	for i in charge_level_durations.size():
-		elapsed += charge_level_durations[i]
-		if t < elapsed:
-			return i
-	return maxi(charge_level_durations.size() - 1, 0)
-
-## Seconds into the current level.
-func _level_elapsed(t: float) -> float:
-	var level := charge_level(t)
-	var start := 0.0
-	for i in level:
-		start += charge_level_durations[i]
-	return t - start
-
-## 0..1 within the current level (1 once past the end of the last level).
-func level_progress(t: float) -> float:
-	if charge_level_durations.is_empty():
-		return 0.0
-	var duration: float = charge_level_durations[charge_level(t)]
-	return clampf(_level_elapsed(t) / maxf(duration, 0.001), 0.0, 1.0)
-
-## Inside the last charge_perfect_window seconds of a level. Once the final
-## level's window is reached it stays perfect no matter how long the hold.
-func is_perfect(t: float) -> bool:
-	if charge_level_durations.is_empty():
-		return false
-	var duration: float = charge_level_durations[charge_level(t)]
-	return _level_elapsed(t) >= duration - charge_perfect_window
-
-## 0..1 bar fill within the current level, shaped by that level's curve (visual only).
-func charge_strength(t: float) -> float:
-	return _strength_at_progress(charge_level(t), level_progress(t))
-
-## Bar fill at which a level's perfect window opens (visual only).
-func perfect_threshold_fill(level: int) -> float:
-	if charge_level_durations.is_empty():
-		return 1.0
-	var duration: float = charge_level_durations[clampi(level, 0, charge_level_durations.size() - 1)]
-	var progress := clampf(1.0 - charge_perfect_window / maxf(duration, 0.001), 0.0, 1.0)
-	return _strength_at_progress(level, progress)
-
-func _strength_at_progress(level: int, progress: float) -> float:
-	if level < charge_curves.size() and charge_curves[level] != null:
-		return clampf(charge_curves[level].sample(progress), 0.0, 1.0)
-	return progress
-
-## Two static speeds per level: normal, or perfect when released in the window.
-func compute_arrow_speed(t: float) -> float:
-	t = maxf(t, 0.0)
-	var step := charge_level(t) + (1 if is_perfect(t) else 0)
-	return _level_value(charge_speed_steps, step, 300.0)
+## Shot strength depends only on the selected level, never on preparation time.
+func compute_arrow_speed(level: int) -> float:
+	return _level_value(level_speeds, level, 756.0)
 
 func _level_value(values: Array, level: int, fallback: float) -> float:
 	if values.is_empty():
@@ -322,14 +401,16 @@ func _level_vec(values: Array, level: int, fallback: Vector2) -> Vector2:
 	return values[clampi(level, 0, values.size() - 1)]
 
 @rpc("any_peer", "call_remote", "reliable")
-func request_fire(aim: Vector2, t: float) -> void:
+func request_fire(aim: Vector2, level: int, elapsed: float) -> void:
 	if not multiplayer.is_server() or multiplayer.get_remote_sender_id() != peer_id:
 		return
-	server_fire(aim, t)
+	server_fire(aim, level, elapsed)
 
 ## Host only.
-func server_fire(aim: Vector2, t: float) -> void:
-	if not is_finite(t) or t < minimum_charge_time:
+func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
+	if level < 0 or level >= LEVEL_COUNT or not is_finite(elapsed):
+		return
+	if elapsed < minimum_preparation_time(level) or not aim.is_finite():
 		return
 	if not multiplayer.is_server() or not health.is_alive() or aim.is_zero_approx():
 		return
@@ -338,15 +419,13 @@ func server_fire(aim: Vector2, t: float) -> void:
 		return
 	_server_last_fire_msec = now
 	aim = aim.normalized()
-	t = clampf(t, 0.0, charge_total() + 1.0)
-	var level := charge_level(t)
 	World.projectile_spawner.spawn_arrow({
 		"position": global_position,
-		"velocity": aim * compute_arrow_speed(t),
+		"velocity": aim * compute_arrow_speed(level),
 		"owner_id": peer_id,
 		"team": team,
-		"damage": _level_value(charge_damage, level, 35.0),
-		"scale": _level_vec(charge_arrow_scales, level, Vector2.ONE),
+		"damage": _level_value(level_damage, level, 35.0),
+		"scale": _level_vec(level_arrow_scales, level, Vector2.ONE),
 		"level": level,
 	})
 
@@ -383,12 +462,14 @@ func _server_check_shield() -> void:
 
 func _on_died(_source: Node) -> void:
 	is_dead = true
+	_reset_jump()
+	_clear_drop_through()
 	aim_reticle.hide()
-	charge_arc.reset()
+	readiness_indicator.hide()
 	sprite.play("death")
 	arrow_container.hide()
 	if is_multiplayer_authority():
-		_cancel_charge()
+		_cancel_preparation()
 		if is_blocking:
 			_end_block()
 	shield_container.hide()
@@ -398,6 +479,7 @@ func _on_respawned() -> void:
 	_clear_stuck_arrows()
 	sprite.play("idle")
 	if is_multiplayer_authority():
+		_update_readiness_indicator()
 		spawn_index = randi() % PlayerSpawner.SPAWN_SLOTS
 		_teleport_to_spawn()
 		capture_mouse()
@@ -410,4 +492,8 @@ func _on_died_server(_source: Node) -> void:
 func _teleport_to_spawn() -> void:
 	global_position = Teams.spawn_position(get_tree(), team, spawn_index)
 	velocity = Vector2.ZERO
+	_reset_jump()
+	_clear_drop_through()
 	reset_physics_interpolation()
+	if World.camera_rig != null:
+		World.camera_rig.reset_for_relocation(self)

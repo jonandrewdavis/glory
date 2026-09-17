@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/check_arrow_levels_network.gd" id="1"]
+
+[node name="CheckArrowLevelsNetwork" type="Node"]
+script = ExtResource("1")

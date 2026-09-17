@@ -57,19 +57,33 @@ func _ready() -> void:
 	%ExitButton.pressed.connect(_exit)
 	if OS.has_feature("web"):
 		%ExitButton.hide()
+	if is_shipping_menu():
+		# Shipped builds only expose the dedicated PlayFlow flow and settings.
 		MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
-	%MatchmakeButton.grab_focus()
+		for node in [%ServiceRow, %MatchmakeButton, %HostButton, %JoinButton]:
+			node.hide()
+	_focus_default()
 	if not MultiplayerService.kick_reason.is_empty():
 		_show_failure(MultiplayerService.kick_reason)
 		MultiplayerService.kick_reason = ""
 	
+
+## Web and release exports hide the developer backends (ENet, Tube, Host/Join).
+static func is_shipping_menu() -> bool:
+	return OS.has_feature("web") or not OS.is_debug_build()
+
+func _focus_default() -> void:
+	if %MatchmakeButton.visible:
+		%MatchmakeButton.grab_focus()
+	else:
+		%PlayFlowButton.grab_focus()
 
 func _restore_main() -> void:
 	if matchmaker.running:
 		return
 	%MainContainer.show()
 	%Help.show()
-	%MatchmakeButton.grab_focus()
+	_focus_default()
 
 func _cancel_pending() -> void:
 	if matchmaker.running:

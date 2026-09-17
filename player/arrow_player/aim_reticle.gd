@@ -43,8 +43,7 @@ func _physics_process(_delta: float) -> void:
 		_trajectory_dots.clear()
 		return
 	var player: ArrowPlayer = get_parent()
-	var hold := maxf(player.charge_time, player.minimum_charge_time)
-	var launch_velocity := direction * player.compute_arrow_speed(hold)
+	var launch_velocity := direction * player.compute_arrow_speed(player.selected_level)
 	var points := Trajectory.predict(get_world_2d().direct_space_state, player.global_position, launch_velocity,
 		Arrow.ignored_rids(get_tree(), player.peer_id, player.team), 1.0 / Engine.physics_ticks_per_second)
 	_trajectory_dots = Trajectory.dots(Trajectory.first_half(points))
@@ -54,7 +53,8 @@ func _can_aim() -> bool:
 	return player.is_multiplayer_authority() and not player.is_dead and not player._is_paused() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 
 func _draw() -> void:
-	for i in _trajectory_dots.size():
+	# Leave room around the player for the charging arc.
+	for i in range(4, _trajectory_dots.size()):
 		var dot := to_local(_trajectory_dots[i])
 		var progress := float(i) / maxf(_trajectory_dots.size() - 1, 1.0)
 		var alpha := 0.65 * (1.0 - 0.7 * smoothstep(0.75, 1.0, progress))

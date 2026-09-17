@@ -86,6 +86,7 @@ func _check() -> void:
 	await check_queue()
 	await check_combat()
 	await check_arrows_and_ram()
+	await check_headshots()
 	world.clear()
 	await ticks(2)
 	expect(get_nodes_in_group("creeps").is_empty() and world.creep_spawner.pending.is_empty(), "Session cleanup removes creeps and pending waves")
@@ -114,11 +115,59 @@ func check_ramp_combat() -> void:
 		await ramp_duel(Vector2(-7.25, -424 + 7.25 * slope), Vector2(7.25, -424 - 7.25 * slope), "Near-maximum slope side %d" % side)
 		ramp.free()
 	var blue := soldier(Teams.Team.BLUE, Vector2(0, -400), 0)
-	var orange := soldier(Teams.Team.ORANGE, Vector2(14, -440), 14)
+	var orange := soldier(Teams.Team.ORANGE, Vector2(14, -460), 14)
 	blue.set_physics_process(false)
 	orange.set_physics_process(false)
 	await ticks(2)
 	expect(not blue._can_hit(orange) and not orange._can_hit(blue), "Vertically distant soldiers remain out of melee reach")
+	expect(not blue._creep_ahead(), "Soldiers on distant elevations do not reserve the lane")
+	orange.position = blue.position + Vector2(48, 0)
+	expect(blue._can_hit(orange), "Melee includes the 48-pixel radius boundary")
+	orange.position.x += 0.1
+	expect(not blue._can_hit(orange), "Melee excludes enemies beyond the radius")
+	orange.position = blue.position + Vector2(35, 35)
+	expect(not blue._can_hit(orange), "Diagonal range uses a circle rather than a square")
+	orange.position = blue.position + Vector2(14, -40)
+	expect(blue._can_hit(orange), "Nearby enemies above a ramp edge remain hittable")
+	await reset_creeps()
+	for side in [-1, 1]:
+		for center in [864.0, 936.0, 1008.0]:
+			await moving_wave_duel(side * center)
+		var obstacle := StaticBody2D.new()
+		var collision := CollisionShape2D.new()
+		var shape := RectangleShape2D.new()
+		shape.size = Vector2(4, 16)
+		collision.shape = shape
+		obstacle.add_child(collision)
+		obstacle.position = Vector2(side * 936, -104)
+		add_child(obstacle)
+		await moving_wave_duel(side * 936, " with small obstacle")
+		obstacle.free()
+
+func moving_wave_duel(center: float, context: String = "") -> void:
+	var blue_wave: Array[Creep] = []
+	var orange_wave: Array[Creep] = []
+	for i in range(3):
+		for direction in [-1, 1]:
+			var x: float = center + direction * (60 + i * 24)
+			var ground := -32.0 - clampf((absf(x) - 864.0) / 144.0, 0.0, 1.0) * 128.0
+			var creep := soldier(Teams.Team.BLUE if direction < 0 else Teams.Team.ORANGE, Vector2(x, ground - 24), center - direction * 200)
+			if direction < 0:
+				blue_wave.append(creep)
+			else:
+				orange_wave.append(creep)
+	var both_damaged := false
+	var separated := true
+	for i in range(360):
+		await get_tree().physics_frame
+		for wave in [blue_wave, orange_wave]:
+			for j in range(1, wave.size()):
+				separated = separated and absf(wave[j].position.x - wave[j - 1].position.x) >= Creep.BODY_SIZE.x
+		if blue_wave[0].health.current < 200 and orange_wave[0].health.current < 200:
+			both_damaged = true
+			break
+	expect(both_damaged, ("Moving waves exchange hits at ramp/transition x=%d" % center) + context)
+	expect(separated, ("Moving waves retain spacing at x=%d" % center) + context)
 	await reset_creeps()
 
 func ramp_duel(first: Vector2, second: Vector2, description: String) -> void:
@@ -207,7 +256,7 @@ func check_combat() -> void:
 	blue = soldier(Teams.Team.BLUE, Vector2(-8, 80), -8)
 	orange = soldier(Teams.Team.ORANGE, Vector2(8, 80), 8)
 	await ticks(180)
-	expect(blue.health.current == 200 and orange.health.current == 200, "Terrain between opposing soldiers blocks melee damage")
+	expect(blue.health.current < 200 and orange.health.current < 200, "Nearby soldiers hit through small terrain obstacles")
 	wall.free()
 	await ticks(180)
 	expect(blue.health.current < 200 and orange.health.current < 200, "Both opposing soldiers attack when the obstruction clears")
@@ -260,6 +309,51 @@ func check_arrows_and_ram() -> void:
 	world.projectile_spawner.spawn_arrow({"position": Vector2(-40, 85), "velocity": Vector2(600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
 	await ticks(10)
 	expect(opponent.health.current == before - 35, "Existing enemy-player arrow damage still works")
+	world.player_spawner.clear_players()
+
+func check_headshots() -> void:
+	world.player_spawner.spawn_player(1)
+	var player: ArrowPlayer = world.player_spawner.get_player(1)
+	player.set_physics_process(false)
+	player.team = Teams.Team.BLUE
+	player.position = Vector2(-50, 88)
+	expect(is_equal_approx(player.headshot_damage_multiplier, 1.5), "Headshot multiplier is a 1.5 export on the shooter")
+	var sounds: Array[bool] = []
+	var listener := func(headshot: bool) -> void: sounds.append(headshot)
+	world.projectile_spawner.hit_sound_played.connect(listener)
+
+	var enemy := soldier(Teams.Team.ORANGE, Vector2(20, 88), 20)
+	enemy.set_physics_process(false)
+	await ticks(2)
+	expect(Arrow.is_head_point(enemy, enemy.global_position + Vector2(-6, -6)), "Creep head zone includes the top band")
+	expect(not Arrow.is_head_point(enemy, enemy.global_position + Vector2(-6, -2)), "Creep head zone excludes the torso")
+	world.projectile_spawner.spawn_arrow({"position": Vector2(-40, 85), "velocity": Vector2(600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
+	await ticks(10)
+	expect(is_equal_approx(enemy.health.current, 165.0), "Body hit on a creep deals base damage")
+	expect(sounds == [false], "Body hit plays the click for the shooter exactly once")
+	await reset_creeps()
+
+	enemy = soldier(Teams.Team.ORANGE, Vector2(20, 88), 20)
+	enemy.set_physics_process(false)
+	await ticks(2)
+	world.projectile_spawner.spawn_arrow({"position": Vector2(-40, 78), "velocity": Vector2(600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
+	await ticks(10)
+	expect(is_equal_approx(enemy.health.current, 147.5), "Headshot on a creep deals 35 * 1.5")
+	expect(sounds == [false, true], "Headshot plays the ping instead of the click")
+	await reset_creeps()
+
+	world.player_spawner.spawn_player(2)
+	var opponent: ArrowPlayer = world.player_spawner.get_player(2)
+	opponent.set_physics_process(false)
+	opponent.position = Vector2(20, 88)
+	await ticks(2)
+	expect(Arrow.is_head_point(opponent, opponent.global_position + Vector2(0, -7)) and not Arrow.is_head_point(opponent, opponent.global_position + Vector2(0, -3)), "Player head zone respects the 1.2 root scale")
+	var before := opponent.health.current
+	world.projectile_spawner.spawn_arrow({"position": Vector2(-40, 78), "velocity": Vector2(600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
+	await ticks(10)
+	expect(is_equal_approx(opponent.health.current, before - 52.5), "Headshot on a player uses the shooter's multiplier")
+	expect(sounds == [false, true, true], "Player headshot pings the shooter")
+	world.projectile_spawner.hit_sound_played.disconnect(listener)
 	world.player_spawner.clear_players()
 
 func preview() -> void:

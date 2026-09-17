@@ -19,6 +19,8 @@ shape = SubResource("RectangleShape2D_shaft")
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
 unique_name_in_owner = true
+z_index = 8
+z_as_relative = false
 position = Vector2(-5, 0)
 scale = Vector2(0.06, 0.06)
 polygon = PackedVector2Array(-49.000835, -8.383104, 175.99998, -8, 159.99998, -24, 215.99998, 0, 159.99998, 24.000004, 175.99998, 7.999996, -47.71962, 7.803403, -56.350563, 16.989393, -103.79989, 24.344969, -89.34042, 0.36597383, -104.00384, -23.53025, -55.533623, -16.11337)

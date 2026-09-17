@@ -54,6 +54,13 @@ func take_damage(amount: float, source: Node = null) -> bool:
 		if not Teams.are_enemies(source.team, get_parent().team):
 			return false
 		get_parent().server_register_hit(source.peer_id)
+	if get_parent() is FortressGate:
+		if not multiplayer.is_server() or not is_instance_valid(source):
+			return false
+		# The ram is neutral and only strikes the gate it is touching.
+		if not source is BatteringRam:
+			if not (source is Creep or source is ArrowPlayer) or not Teams.are_enemies(source.team, get_parent().team):
+				return false
 	if amount <= 0.0 or not is_alive():
 		return false
 	if not _is_local_authority():
@@ -114,7 +121,7 @@ func _flush_pending_damage(delta: float) -> void:
 @rpc("any_peer", "call_remote", "reliable")
 func _request_damage(amount: float, source_path: NodePath) -> void:
 	# Combat damage is decided locally by the server, never a client RPC.
-	if get_parent() is ArrowPlayer or get_parent() is Creep:
+	if get_parent() is ArrowPlayer or get_parent() is Creep or get_parent() is FortressGate:
 		return
 	if not networked or not is_multiplayer_authority():
 		return
