@@ -26,12 +26,26 @@ jobs:
           mkdir -v -p ~/.config/
           mv /root/.config/godot ~/.config/godot
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      - name: Import project
-        run: godot --headless --editor --import
       - name: Configure PlayFlow client
         env:
           PLAYFLOW_CLIENT_KEY: ${{ secrets.PLAYFLOW_CLIENT_KEY }}
-        run: python3 tools/configure_playflow_client.py
+        # The CI image has no python3; this mirrors tools/configure_playflow_client.py.
+        run: |
+          case "$PLAYFLOW_CLIENT_KEY" in
+            pfclient_*) ;;
+            *) echo 'PLAYFLOW_CLIENT_KEY must be a client key (pfclient_...).' >&2; exit 1 ;;
+          esac
+          cat > networking/playflow_config.tres <<EOF
+          [gd_resource type="Resource" load_steps=2 format=3]
+
+          [ext_resource type="Script" path="res://networking/playflow_config.gd" id="1"]
+
+          [resource]
+          script = ExtResource("1")
+          client_key = "$PLAYFLOW_CLIENT_KEY"
+          EOF
+      - name: Import project
+        run: godot --headless --editor --import
       - name: Web Build
         run: |
           mkdir -v -p builds/web
