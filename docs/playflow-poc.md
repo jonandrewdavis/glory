@@ -11,9 +11,11 @@ a transport/hosting proof, not an authoritative movement or CTF rules rewrite.
 2. Run `GODOT=/path/to/godot bash tools/prepare_playflow.sh`.
 3. Upload `builds/playflow-server.zip` in PlayFlow Builds. Set executable to
    `Server.x86_64` (at the ZIP root). No startup arguments are required.
-4. Configure a network port named `godot_websocket`, internal port **8080**,
-   protocol **TCP**, **TLS enabled**. Godot listens without TLS; PlayFlow
-   terminates it. Configure the port before starting the instance.
+4. The client's start request includes a `port_configs` override for a port
+   named `godot_websocket`, internal port **8080**, protocol **TCP**, **TLS
+   enabled**, so no dashboard port setup is required. Godot listens without
+   TLS; PlayFlow terminates it. The same port is also set as the project
+   default for servers started from the dashboard.
 5. Upload the build under the `default` tag. Click **Play** in the client.
    It joins a running instance, waits for an existing launching instance, or
    requests one `small`, `us-east` instance with a 3600-second TTL using the
@@ -41,9 +43,11 @@ local testing; it is public by design and also extractable from the web build.
 For native local runs, `PLAYFLOW_CLIENT_KEY` overrides the resource.
 
 The private `pf_...` key is never needed by Godot or the web build. Do not add
-it to the client resource, project settings, ZIP, or workflow. Only the optional
-operator start script reads `PLAYFLOW_API_KEY`. CI does not upload, start,
-restart, or stop live instances.
+it to the client resource, project settings, or ZIP. It lives only in the
+GitHub Actions secret **PLAYFLOW_API_KEY**, which `tools/upload_playflow.sh`
+uses after the server export to upload the ZIP as the next `default` build and
+wait until it is ready. Running instances keep their build; the next server
+start uses the new version. CI does not start, restart, or stop live instances.
 
 ## Local transport smoke test
 

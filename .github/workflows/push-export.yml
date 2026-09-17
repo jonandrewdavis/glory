@@ -58,6 +58,10 @@ jobs:
           retention-days: 1
       - name: Build PlayFlow server ZIP
         run: bash tools/prepare_playflow.sh
+      - name: Upload PlayFlow server build
+        env:
+          PLAYFLOW_API_KEY: ${{ secrets.PLAYFLOW_API_KEY }}
+        run: bash tools/upload_playflow.sh
       - name: Upload PlayFlow server
         uses: actions/upload-artifact@v4
         with:

@@ -160,8 +160,10 @@ func _handle_list(data: Variant) -> void:
 	start_requested = true
 	status_changed.emit("Starting a server...")
 	_send_request("/start", HTTPClient.METHOD_POST, JSON.stringify({
-		"name": "glory-poc", "region": "us-east", "compute_size": "small",
-		"ttl": 3600, "version_tag": "default"
+		"name": "glory", "region": "us-east", "compute_size": "small",
+		"ttl": 3600, "version_tag": "default",
+		# Explicit port so the project needs no dashboard port setup; the web client requires TLS.
+		"port_configs": [{"name": "godot_websocket", "internal_port": PORT, "protocol": "tcp", "tls_enabled": true}]
 	}), RequestKind.START)
 
 func _handle_server(server: Dictionary) -> void:

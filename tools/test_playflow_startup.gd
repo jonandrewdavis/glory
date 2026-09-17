@@ -66,7 +66,7 @@ func _run() -> void:
 	empty.reply(PlayFlowBackend.RequestKind.LIST, {"servers": []})
 	var post: Dictionary = empty.sent[-1]
 	check(post.path == "/start" and post.method == HTTPClient.METHOD_POST, "Start absent instance")
-	check(JSON.parse_string(post.body) == {"name": "glory-poc", "region": "us-east", "compute_size": "small", "ttl": 3600.0, "version_tag": "default"}, "Free tier startup parameters")
+	check(JSON.parse_string(post.body) == {"name": "glory", "region": "us-east", "compute_size": "small", "ttl": 3600.0, "version_tag": "default", "port_configs": [{"name": "godot_websocket", "internal_port": 8080.0, "protocol": "tcp", "tls_enabled": true}]}, "Free tier startup parameters")
 	check(empty.client_key.begins_with("pfclient_"), "Use public client key")
 	empty.reply(PlayFlowBackend.RequestKind.START, server("launching"), 201)
 	empty.reply(PlayFlowBackend.RequestKind.DETAILS, server())
