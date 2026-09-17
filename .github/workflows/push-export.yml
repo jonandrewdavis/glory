@@ -7,9 +7,9 @@ on:
 
 env:
   GODOT_VERSION: 4.7
-  EXPORT_NAME: mage-fight-arena
+  EXPORT_NAME: glory
   ITCH_USER: androodev
-  ITCH_GAME: mage-fight-arena
+  ITCH_GAME: glory
 
 jobs:
   export-web:

@@ -1,4 +1,4 @@
-# Mouse Mage Arena
+# Glory
 
 ## Intro:
 

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_vrk18")
-app_id = "7QC+k:EDJFr(hzh"
+app_id = "k>;qhdI1iX1eTl?"
 mqtt_broker_url = "wss://59cbdb4646164f55b0cec54b722b6380.s1.eu.hivemq.cloud:8884/mqtt"
 mqtt_username = "androodev"
 mqtt_password = "androodev123"
