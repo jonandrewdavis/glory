@@ -4,7 +4,7 @@ A round ends when either keep's gate falls. The winning team's name shows for
 five seconds, the current level reloads (ram back to centre, gates at full
 health, soldiers cleared and a fresh wave queued), and every player is
 re-spawned at their team spawn with full health. Round wins are tracked as
-"Blue N - M Orange"; kills and deaths in the scoreboard persist across rounds
+"Blue N - M Orange"; kills, deaths and assists in the scoreboard persist across rounds
 and reset only when the session ends.
 Spawn-band ownership resets before round respawns. On Fortress2 each team returns
 to its active outpost; see [respawns.md](respawns.md) for territory and death waits.
@@ -59,13 +59,15 @@ movement synchronizer, then spawns a uniquely named incarnation after acknowledg
 
 ## HUD
 
-`scenes/gameplay/ui/round_hud.tscn` sits in the UI layer. Along the top it draws
-a blue and an orange gate health bar with the numeric value, the round score
-between them, and beneath them a thin ram track: the blue gate is the left end,
+`scenes/gameplay/ui/round_hud.tscn` sits in the UI layer. Along the top its Control nodes show
+a blue and an orange gate health bar with numeric values, and beneath them a thin
+ram track: the blue gate is the left end,
 the orange gate the right end, the fill runs from the centre to the ram's route
 progress in the colour of the team that has pushed it, and the marker is tinted
 by whichever team is pushing right now. The winner banner appears mid-screen
-while a round is ended.
+while a round is ended. The round score still updates but its Label remains
+intentionally hidden. The converted respawn strip/countdown also remain hidden
+under the root of `respawn_hud.tscn`; no runtime update reveals that root.
 
 ## Checks
 

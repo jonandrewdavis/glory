@@ -215,13 +215,10 @@ func _on_damaged(_amount: float, _source: Node) -> void:
 	if multiplayer.is_server():
 		hit_serial += 1
 
-func _on_died(source: Node) -> void:
+func _on_died(_source: Node) -> void:
 	if not multiplayer.is_server() or state == State.DEAD:
 		return
 	state = State.DEAD
-	if source is ArrowPlayer:
-		# Zero denotes a non-player victim, so only the killer's score changes.
-		World.scoreboard.record_kill(source.peer_id, 0)
 	_target = null
 	velocity = Vector2.ZERO
 	collision_layer = 0
@@ -240,13 +237,12 @@ func _process(delta: float) -> void:
 		_flash_left = 0.15
 	_flash_left = maxf(0.0, _flash_left - delta)
 	sprite.self_modulate = Color(1.6, 0.5, 0.5) if _flash_left > 0.0 else Teams.color(team)
-	queue_redraw()
+	_update_indicators()
 
-func _draw() -> void:
-	if not is_node_ready() or state == State.DEAD:
-		return
-	var offset := _display_position - global_position
-	draw_line(offset + Vector2(-5, 9), offset + Vector2(5, 9), Teams.color(team), 2.0)
-	if health.current < health.max_value:
-		draw_rect(Rect2(offset + Vector2(-7, -13), Vector2(14, 2)), Color(0.1, 0.1, 0.1))
-		draw_rect(Rect2(offset + Vector2(-7, -13), Vector2(14 * health.ratio(), 2)), Teams.color(team))
+func _update_indicators() -> void:
+	$Indicators.visible = state != State.DEAD
+	$Indicators.position = _display_position - global_position
+	$Indicators/TeamMarker.color = Teams.color(team)
+	$Indicators/HealthBar.visible = health.current < health.max_value
+	$Indicators/HealthBar.value = health.ratio()
+	$Indicators/HealthBar.modulate = Teams.color(team)

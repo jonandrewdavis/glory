@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bu7iqocnq8lxa" path="res://scenes/gameplay/ui/round_hud.gd" id="1"]
 
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/indicator_bar.tscn" id="bar"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/respawn_hud.tscn" id="respawns"]
+
 [node name="RoundHud" type="Control" unique_id=759428580]
 layout_mode = 3
 anchors_preset = 15
@@ -52,3 +55,70 @@ theme_override_font_sizes/font_size = 40
 text = "Blue wins the round!"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Siege" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 16.0
+offset_right = 260.0
+offset_bottom = 39.0
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Gates" type="HBoxContainer" parent="Siege"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 80
+
+[node name="Blue" parent="Siege/Gates" instance=ExtResource("bar")]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="Siege/Gates/Blue"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 11
+theme_override_constants/outline_size = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[node name="Orange" parent="Siege/Gates" instance=ExtResource("bar")]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="Siege/Gates/Orange"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 11
+theme_override_constants/outline_size = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Track" type="ColorRect" parent="Siege"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.05, 0.06, 0.08, 0.85)
+
+[node name="Fill" type="ColorRect" parent="Siege/Track"]
+offset_bottom = 5.0
+mouse_filter = 2
+
+[node name="Marker" type="ColorRect" parent="Siege/Track"]
+offset_top = -2.0
+offset_right = 4.0
+offset_bottom = 7.0
+mouse_filter = 2
+
+[node name="RespawnHud" parent="." instance=ExtResource("respawns")]
+visible = false
+layout_mode = 1

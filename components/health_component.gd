@@ -55,7 +55,6 @@ func take_damage(amount: float, source: Node = null) -> bool:
 			return false
 		if get_parent().is_spawn_protected():
 			return false
-		get_parent().server_register_hit(source.peer_id)
 	if get_parent() is FortressGate:
 		if not multiplayer.is_server() or not is_instance_valid(source):
 			return false
@@ -86,6 +85,8 @@ func kill(source: Node = null) -> void:
 func respawn() -> void:
 	_respawn_timer.stop()
 	_last_source = null
+	if get_parent() is ArrowPlayer:
+		get_parent().recent_attackers.clear()
 	refill()
 
 func _can_regen() -> bool:
@@ -103,6 +104,9 @@ func _is_local_authority() -> bool:
 	return not networked or is_multiplayer_authority()
 
 func _apply_damage(amount: float, source: Node) -> void:
+	# Record before _lose: setting current emits died synchronously.
+	if get_parent() is ArrowPlayer:
+		get_parent().server_register_hit(source.peer_id)
 	_last_source = source
 	var lost := _lose(amount)
 	if lost > 0.0:

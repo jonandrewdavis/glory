@@ -1,0 +1,20 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/radial_progress.tscn" id="ring"]
+
+[node name="SpawnFlag" type="Node2D"]
+
+[node name="Pole" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 0, -28)
+width = 1.5
+default_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="Flag" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, -28, 19, -28, 15, -17, 0, -17)
+
+[node name="Active" parent="." instance=ExtResource("ring")]
+stroke_width = 1.5
+visible = false
+offset_left = -8.5
+offset_top = -39.5
+offset_right = 24.5
+offset_bottom = -6.5

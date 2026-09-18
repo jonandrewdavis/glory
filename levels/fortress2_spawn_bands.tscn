@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/gameplay/spawn_band.gd" id="1"]
+
+[ext_resource type="PackedScene" path="res://scenes/gameplay/spawn_flag.tscn" id="flag"]
 
 [node name="SpawnBands" type="Node2D"]
 
@@ -137,3 +139,20 @@ position = Vector2(176, -176)
 
 [node name="Point2" type="Marker2D" parent="Zone6/Points"]
 position = Vector2(64, -176)
+
+[node name="SpawnFlag" parent="Zone1" instance=ExtResource("flag")]
+
+
+[node name="SpawnFlag" parent="Zone2" instance=ExtResource("flag")]
+
+
+[node name="SpawnFlag" parent="Zone3" instance=ExtResource("flag")]
+
+
+[node name="SpawnFlag" parent="Zone4" instance=ExtResource("flag")]
+
+
+[node name="SpawnFlag" parent="Zone5" instance=ExtResource("flag")]
+
+
+[node name="SpawnFlag" parent="Zone6" instance=ExtResource("flag")]

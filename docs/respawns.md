@@ -3,7 +3,7 @@
 `World/RespawnManager` owns player death deadlines, band ownership and spawn
 selection on the server. `HealthComponent` still owns health, but player
 auto-respawn is disabled. The manager replaces a dead player when its wait ends;
-scoreboard kills/deaths persist. Each incarnation has a unique node path so
+scoreboard kills/deaths/assists persist; each new life starts with empty damage history. Each incarnation has a unique node path so
 late movement packets cannot move its replacement.
 Remote owners acknowledge stopping their old movement synchronizer before
 replacement. This adds one network round trip after the countdown, without
@@ -49,7 +49,11 @@ changes hands. The destination is selected at respawn, not at death.
 
 For example, Orange must pass **Blue's** outer tower center (x=-608), not its
 own tower, to claim band 4. Its next respawn then uses the central-right band.
-The HUD highlights the active bands, and small world flags show ownership.
+Node-based world flags track ownership but remain hidden by the existing
+SpawnBand root visibility setting. The HUD band strip and respawn
+countdown have been converted to Controls but intentionally remain hidden under
+`scenes/gameplay/ui/respawn_hud.tscn` (root `visible = false`). Child updates do
+not reveal that root; enable it in the scene only when the feature should be shown.
 
 ## Map authoring
 

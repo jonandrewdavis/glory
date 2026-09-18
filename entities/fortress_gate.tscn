@@ -3,6 +3,8 @@
 [ext_resource type="Script" path="res://entities/fortress_gate.gd" id="1"]
 [ext_resource type="Script" path="res://components/health_component.gd" id="2"]
 
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/indicator_bar.tscn" id="bar"]
+
 [sub_resource type="RectangleShape2D" id="timber"]
 size = Vector2(48, 96)
 
@@ -33,3 +35,8 @@ replication_config = SubResource("sync")
 public_visibility = false
 
 [node name="StuckArrows" type="Node2D" parent="."]
+
+[node name="HealthBar" parent="." instance=ExtResource("bar")]
+visible = false
+offset_right = 48.0
+offset_bottom = 3.0

@@ -36,8 +36,8 @@ headshots and deal `headshot_damage_multiplier` times damage (1.5 on
 `headshot_ping.mp3` for a headshot and `click.mp3` for any other damaging arrow
 hit; creep melee plays no sound.
 Player shields do not damage creeps, and creeps never target players. Creep
-kills award one scoreboard kill to the player who deals the killing blow. Earlier
-damage grants no credit, and creep-on-creep kills add no player kills or deaths.
+deaths grant no player kills, deaths or assists and do not appear in the kill feed.
+Their team markers and damaged-only health bars are scene nodes.
 
 A living creep contributes one member to its team inside the ram's existing
 160-pixel detection radius. Death immediately removes collision, combat, and

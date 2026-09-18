@@ -3,8 +3,9 @@
 [ext_resource type="Script" uid="uid://cesmuf7fepyl" path="res://player/arrow_player/arrow_player.gd" id="1_co4h1"]
 [ext_resource type="Texture2D" uid="uid://cr02jb2w6nmil" path="res://assets/sprites/archer_sprite.png" id="2_sheet"]
 [ext_resource type="Script" uid="uid://6yjmbrjl8cp0" path="res://components/health_component.gd" id="3_health"]
-[ext_resource type="Script" uid="uid://jk8lexroerip" path="res://player/arrow_player/readiness_indicator.gd" id="4_readiness"]
+[ext_resource type="PackedScene" uid="uid://cyft3x7myph7r" path="res://player/arrow_player/readiness_indicator.tscn" id="4_readiness"]
 [ext_resource type="Script" uid="uid://cria8dvrsfl47" path="res://player/arrow_player/aim_reticle.gd" id="5_aim"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/radial_progress.tscn" id="6_ring"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
 radius = 6.0
@@ -275,8 +276,8 @@ properties/4/path = NodePath("ArrowContainer:rotation")
 properties/4/spawn = true
 properties/4/replication_mode = 1
 properties/5/path = NodePath("ReadinessIndicator:display_state")
-properties/5/spawn = true
-properties/5/replication_mode = 2
+properties/5/spawn = false
+properties/5/replication_mode = 0
 properties/6/path = NodePath("ShieldContainer:visible")
 properties/6/spawn = true
 properties/6/replication_mode = 2
@@ -309,13 +310,13 @@ level_speeds = Array[float]([650.0, 850.0, 1200.0])
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1966345579]
 shape = SubResource("CapsuleShape2D_body")
 
-[node name="HeadHitbox" type="Area2D" parent="."]
+[node name="HeadHitbox" type="Area2D" parent="." unique_id=935684861]
 collision_layer = 0
 collision_mask = 0
 monitoring = false
 monitorable = false
 
-[node name="HeadShape" type="CollisionShape2D" parent="HeadHitbox"]
+[node name="HeadShape" type="CollisionShape2D" parent="HeadHitbox" unique_id=415907280]
 unique_name_in_owner = true
 position = Vector2(0, -6)
 shape = SubResource("RectangleShape2D_head")
@@ -339,8 +340,8 @@ script = ExtResource("5_aim")
 [node name="HealthComponent" type="Node" parent="." unique_id=1752970858]
 unique_name_in_owner = true
 script = ExtResource("3_health")
-networked = true
 auto_respawn = false
+networked = true
 regen_enabled = false
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=347798596]
@@ -360,10 +361,17 @@ position = Vector2(8, 0)
 scale = Vector2(0.06, 0.06)
 polygon = PackedVector2Array(-49.000835, -8.383104, 175.99998, -8, 159.99998, -24, 215.99998, 0, 159.99998, 24.000004, 175.99998, 7.999996, -47.71962, 7.803403, -56.350563, 16.989393, -103.79989, 24.344969, -89.34042, 0.36597383, -104.00384, -23.53025, -55.533623, -16.11337)
 
-[node name="ReadinessIndicator" type="Node2D" parent="." unique_id=1470063130]
+[node name="ReadinessIndicator" parent="." unique_id=2036011001 instance=ExtResource("4_readiness")]
 unique_name_in_owner = true
 visible = false
-script = ExtResource("4_readiness")
+
+[node name="SpawnProtection" parent="." unique_id=901542003 instance=ExtResource("6_ring")]
+visible = false
+offset_left = -15.5
+offset_top = -15.5
+offset_right = 15.5
+offset_bottom = 15.5
+tint_progress = Color(0.8, 0.95, 1, 0.65)
 
 [node name="ShieldContainer" type="Node2D" parent="." unique_id=1612113249]
 unique_name_in_owner = true

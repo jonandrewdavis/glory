@@ -1,11 +1,14 @@
 class_name Scoreboard
 extends Node
-## Host-authoritative kills/deaths/team table, replicated to every peer.
+## Host-authoritative player K/D/A table, replicated to every peer.
 
 signal changed
+signal player_killed(event: Dictionary)
 
-## peer_id (int) -> {team: int, kills: int, deaths: int}
+## peer_id (int) -> {team: int, kills: int, deaths: int, assists: int}
 var entries: Dictionary = {}
+var _event_id := 0
+var _last_event_id := 0
 const SWITCH_COOLDOWN := 60.0
 var _switch_deadlines: Dictionary = {}
 var local_switch_deadline := 0
@@ -48,6 +51,7 @@ func _server_switch(peer_id: int, target: int) -> void:
 	_switch_deadlines[peer_id] = Time.get_ticks_msec() + int(SWITCH_COOLDOWN * 1000)
 	var entry: Dictionary = entries[peer_id].duplicate()
 	entry.team = target
+	_forget_attacker(peer_id)
 	_sync_entry.rpc(peer_id, entry)
 	World.projectile_spawner.remove_owned_projectiles(peer_id)
 	World.player_spawner.replace_player(peer_id)
@@ -74,20 +78,44 @@ func assign_team(peer_id: int) -> int:
 	var team: int = Teams.Team.BLUE
 	if team_size(Teams.Team.ORANGE) < team_size(Teams.Team.BLUE):
 		team = Teams.Team.ORANGE
-	_sync_entry.rpc(peer_id, {"team": team, "kills": 0, "deaths": 0})
+	_sync_entry.rpc(peer_id, {"team": team, "kills": 0, "deaths": 0, "assists": 0})
 	return team
 
-func record_kill(killer_id: int, victim_id: int) -> void:
-	if entries.has(victim_id):
-		var victim: Dictionary = entries[victim_id].duplicate()
-		victim.deaths += 1
-		_sync_entry.rpc(victim_id, victim)
-	if killer_id != victim_id and entries.has(killer_id):
+func record_kill(killer_id: int, victim_id: int, assist_ids: Array[int] = []) -> void:
+	if not multiplayer.is_server() or not entries.has(victim_id):
+		return
+	var updates: Dictionary = {}
+	var victim: Dictionary = entries[victim_id].duplicate()
+	victim.deaths += 1
+	updates[victim_id] = victim
+	var event: Dictionary = {}
+	if Teams.are_enemies(get_team(killer_id), get_team(victim_id)):
 		var killer: Dictionary = entries[killer_id].duplicate()
 		killer.kills += 1
-		_sync_entry.rpc(killer_id, killer)
+		updates[killer_id] = killer
+		var awarded := 0
+		for id in assist_ids:
+			if awarded == 2:
+				break
+			if updates.has(id) or not Teams.are_enemies(get_team(id), get_team(victim_id)):
+				continue
+			var assistant_entry: Dictionary = entries[id].duplicate()
+			assistant_entry.assists = int(assistant_entry.get("assists", 0)) + 1
+			updates[id] = assistant_entry
+			awarded += 1
+		_event_id += 1
+		event = {"id": _event_id, "killer_id": killer_id, "victim_id": victim_id,
+			"killer_name": MultiplayerService.get_username(killer_id),
+			"victim_name": MultiplayerService.get_username(victim_id), "team": get_team(killer_id)}
+	_sync_combat.rpc(updates, event)
+
+func _forget_attacker(peer_id: int) -> void:
+	for player in get_tree().get_nodes_in_group("players"):
+		if player is ArrowPlayer:
+			player.recent_attackers.erase(peer_id)
 
 func remove_player(peer_id: int) -> void:
+	_forget_attacker(peer_id)
 	_switch_deadlines.erase(peer_id)
 	if entries.has(peer_id):
 		_erase_entry.rpc(peer_id)
@@ -104,14 +132,9 @@ func team_size(team: int) -> int:
 			n += 1
 	return n
 
-func team_kills(team: int) -> int:
-	var n := 0
-	for entry in entries.values():
-		if entry.team == team:
-			n += entry.kills
-	return n
-
 func clear() -> void:
+	_event_id = 0
+	_last_event_id = 0
 	_switch_deadlines.clear()
 	local_switch_deadline = 0
 	switch_message = ""
@@ -119,6 +142,15 @@ func clear() -> void:
 	changed.emit()
 
 # --- RPCs (authority = host) ---------------------------------------------
+
+@rpc("authority", "call_local", "reliable")
+func _sync_combat(updates: Dictionary, event: Dictionary) -> void:
+	for id in updates:
+		entries[id] = updates[id]
+	changed.emit()
+	if not event.is_empty() and int(event.id) > _last_event_id:
+		_last_event_id = int(event.id)
+		player_killed.emit(event)
 
 @rpc("authority", "call_local", "reliable")
 func _sync_entry(peer_id: int, entry: Dictionary) -> void:

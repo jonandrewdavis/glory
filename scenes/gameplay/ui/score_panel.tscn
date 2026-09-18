@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/gameplay/ui/score_panel.gd" id="script"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/score_row.tscn" id="row"]
+
+[sub_resource type="StyleBoxFlat" id="Panel"]
+bg_color = Color(0.035, 0.045, 0.065, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.36, 0.45, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+
+[node name="ScorePanel" type="VBoxContainer"]
+offset_right = 320.0
+mouse_filter = 2
+theme_override_constants/separation = 10
+theme_override_font_sizes/font_size = 16
+script = ExtResource("script")
+
+[node name="Scoreboard" type="PanelContainer" parent="."]
+theme_override_styles/panel = SubResource("Panel")
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Scoreboard"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Table" type="VBoxContainer" parent="Scoreboard/Margin"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HeaderMargin" type="MarginContainer" parent="Scoreboard/Margin/Table"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Header" parent="Scoreboard/Margin/Table/HeaderMargin" instance=ExtResource("row")]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Scoreboard/Margin/Table"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Scoreboard/Margin/Table/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="KillFeed" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4

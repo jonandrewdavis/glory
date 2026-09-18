@@ -8,9 +8,6 @@ extends Node2D
 enum AttackState { IDLE, WINDUP, STRIKE }
 signal route_advanced(previous: float, current: float, pushing_direction: int)
 
-const BAR_SIZE := Vector2(60, 4)
-const BAR_OFFSET := Vector2(-30, -74)
-
 @export var speed := 14.0
 @export var detection_radius := 160.0
 @export var windup_time := 8.0
@@ -109,7 +106,6 @@ func _physics_process(delta: float) -> void:
 		route_advanced.emit(previous_distance, distance, direction)
 		_advance_attack(delta)
 	position = _curve.sample_baked(maxf(distance, 0))
-	queue_redraw()
 
 func _advance_attack(delta: float) -> void:
 	if attack_state == AttackState.STRIKE:
@@ -145,15 +141,15 @@ func _process(delta: float) -> void:
 	if attack_state == AttackState.STRIKE:
 		lunge = sin(attack_progress * PI) * 10.0 * (-1.0 if distance <= route_length() * 0.5 else 1.0)
 	sprite.position.x = lunge
-	queue_redraw()
+	_update_indicators()
 
-func _draw() -> void:
+func _update_indicators() -> void:
 	var offset := _display_position - position
+	$Indicators.position = offset
 	var tint := Teams.color(Teams.Team.BLUE if direction > 0 else Teams.Team.ORANGE) if direction != 0 else Color.GRAY
-	draw_arc(offset + Vector2(0, -24), detection_radius, 0, TAU, 64, Color(tint, 0.18), 1.0)
-	if attack_state == AttackState.IDLE:
-		return
-	var origin := offset + BAR_OFFSET
-	var fill := Color(1.0, 0.45, 0.2) if attack_state == AttackState.STRIKE else Color.WHITE
-	draw_rect(Rect2(origin - Vector2.ONE, BAR_SIZE + Vector2.ONE * 2), Color(0.03, 0.05, 0.09, 0.9))
-	draw_rect(Rect2(origin, Vector2(BAR_SIZE.x * attack_progress, BAR_SIZE.y)), fill)
+	$Indicators/Radius.position = Vector2(-detection_radius, -24 - detection_radius)
+	$Indicators/Radius.size = Vector2.ONE * detection_radius * 2
+	$Indicators/Radius.tint_progress = Color(tint, 0.18)
+	$Indicators/Attack.visible = attack_state != AttackState.IDLE
+	$Indicators/Attack.value = attack_progress
+	$Indicators/Attack.modulate = Color(1.0, 0.45, 0.2) if attack_state == AttackState.STRIKE else Color.WHITE

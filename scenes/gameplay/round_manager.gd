@@ -2,7 +2,7 @@ class_name RoundManager
 extends Node
 ## Host-authoritative round table. A round ends when either keep gate falls;
 ## the winner shows for BANNER_SECONDS, then the level reloads and every player
-## is re-spawned. Scoreboard kills and deaths are untouched.
+## is re-spawned. Scoreboard kills, deaths and assists are untouched.
 
 signal changed
 signal round_ended(winner: int)

@@ -35,7 +35,7 @@ func _run() -> void:
 			World.player_spawner.get_player(1).set_physics_process(false)
 		else:
 			# A roster-only Blue teammate makes the joining player Orange.
-			World.scoreboard.entries[99] = {"team": Teams.Team.BLUE, "kills": 0, "deaths": 0}
+			World.scoreboard.entries[99] = {"team": Teams.Team.BLUE, "kills": 0, "deaths": 0, "assists": 0}
 		push_ram_to(-608)
 		print("RESPAWN_SERVER_READY")
 	else:

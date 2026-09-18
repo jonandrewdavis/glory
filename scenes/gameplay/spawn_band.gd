@@ -12,7 +12,11 @@ const NEUTRAL := -1
 	set(value):
 		bounds = value
 		queue_redraw()
-@export var flag_position := Vector2(0, -48)
+@export var flag_position := Vector2(0, -48):
+	set(value):
+		flag_position = value
+		if is_node_ready():
+			_update_flag()
 @export var blue_capture_at_end := false
 @export var orange_capture_at_start := false
 var controlling_team := NEUTRAL
@@ -21,6 +25,7 @@ var active := false
 func _ready() -> void:
 	add_to_group("spawn_bands")
 	controlling_team = initial_owner
+	_update_flag()
 	queue_redraw()
 	hide()
 
@@ -36,6 +41,7 @@ func spawn_markers() -> Array[Marker2D]:
 func set_control(team: int, is_active: bool) -> void:
 	controlling_team = team
 	active = is_active
+	_update_flag()
 	queue_redraw()
 
 func capture_distance(ram: BatteringRam, team: int) -> float:
@@ -71,8 +77,12 @@ func _draw() -> void:
 	if Engine.is_editor_hint():
 		draw_rect(bounds, Color(tint, 0.12))
 		draw_rect(bounds, Color(tint, 0.6), false, 1.0)
-	var base := flag_position
-	draw_line(base, base + Vector2(0, -28), Color(0.85, 0.85, 0.85), 1.5)
-	draw_polygon(PackedVector2Array([base + Vector2(0, -28), base + Vector2(19, -28), base + Vector2(15, -17), base + Vector2(0, -17)]), PackedColorArray([tint]))
-	if active:
-		draw_arc(base + Vector2(8, -23), 15, 0, TAU, 24, Color.WHITE, 1.5)
+
+func _update_flag() -> void:
+	var flag := get_node_or_null("SpawnFlag")
+	if flag == null:
+		return
+	flag.position = flag_position
+	var team := initial_owner if Engine.is_editor_hint() else controlling_team
+	flag.get_node("Flag").color = Color.GRAY if team == NEUTRAL else Teams.color(team)
+	flag.get_node("Active").visible = active

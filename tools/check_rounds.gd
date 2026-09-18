@@ -183,7 +183,9 @@ func check_round_end() -> void:
 	var orange := gate(Teams.Team.ORANGE)
 	var blue := gate(Teams.Team.BLUE)
 	var old_player: ArrowPlayer = world.player_spawner.get_player(1)
-	world.scoreboard.record_kill(1, 0)
+	world.scoreboard.assign_team(99)
+	world.scoreboard.record_kill(1, 99)
+	world.scoreboard.remove_player(99)
 	var kills: int = world.scoreboard.entries[1].kills
 	var blue_creep := soldier(Teams.Team.BLUE, Vector2(-50, 88), -50)
 	blue_creep.set_physics_process(false)

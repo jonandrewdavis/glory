@@ -81,7 +81,7 @@ func check() -> void:
 	travel_until_block()
 	travel_until_block()
 	expect(latest._finished and shooter.health.current == before_health - 25.0, "Unshielded original shooter takes reflected damage")
-	expect(shooter._server_last_hit_by == blocker.peer_id, "Reflected damage credits blocker")
+	expect(shooter.recent_attackers == [blocker.peer_id], "Reflected damage credits blocker")
 	World.projectile_spawner.clear_projectiles()
 	before_health = shooter.health.current
 	var endpoint_data := {"position": START, "velocity": LAUNCH, "trajectory_time": 0.05,

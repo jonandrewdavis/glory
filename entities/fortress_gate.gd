@@ -19,7 +19,8 @@ func side() -> int:
 
 func _ready() -> void:
 	$CollisionShape2D.position = Vector2(side() * HITBOX_INSET, 0)
-	health.changed.connect(func(_current: float, _max_value: float) -> void: queue_redraw())
+	health.changed.connect(_update_health_bar)
+	_update_health_bar(health.current, health.max_value)
 	if multiplayer.is_server():
 		World.level_loader.peer_level_ready.connect(_on_peer_level_ready)
 		for id: int in World.level_loader.ready_peers:
@@ -44,9 +45,8 @@ func closest_point(point: Vector2) -> Vector2:
 func attach_stuck_arrow(node: StuckArrow, impact_pos: Vector2, impact_rot: float) -> void:
 	node.attach_to(stuck_arrows, impact_pos, impact_rot)
 
-func _draw() -> void:
-	if not is_node_ready() or health.current >= health.max_value:
-		return
-	var origin := Vector2(side() * HITBOX_INSET - BAR_SIZE.x * 0.5, -HITBOX_SIZE.y * 0.5 - 8)
-	draw_rect(Rect2(origin, BAR_SIZE), Color(0.1, 0.1, 0.1))
-	draw_rect(Rect2(origin, Vector2(BAR_SIZE.x * health.ratio(), BAR_SIZE.y)), Teams.color(team))
+func _update_health_bar(_current: float, _maximum: float) -> void:
+	$HealthBar.visible = health.current < health.max_value
+	$HealthBar.position = Vector2(side() * HITBOX_INSET - BAR_SIZE.x * 0.5, -HITBOX_SIZE.y * 0.5 - 8)
+	$HealthBar.value = health.ratio()
+	$HealthBar.modulate = Teams.color(team)

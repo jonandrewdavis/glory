@@ -67,7 +67,7 @@ var fire_cooldown_left := 0.0
 
 # Host-only bookkeeping.
 var _server_last_fire_msec := -100000
-var _server_last_hit_by := 0
+var recent_attackers: Array[int] = []
 
 @onready var sprite: AnimatedSprite2D = %AnimatedSprite2D
 @onready var health: HealthComponent = %HealthComponent
@@ -170,7 +170,7 @@ func _physics_process(delta: float) -> void:
 			_server_check_shield()
 	if is_multiplayer_authority():
 		_owner_physics(delta)
-	queue_redraw()
+	$SpawnProtection.visible = is_spawn_protected() and not is_dead
 
 func is_spawn_protected() -> bool:
 	return spawn_protection_left > 0.0
@@ -178,10 +178,6 @@ func is_spawn_protected() -> bool:
 func end_spawn_protection() -> void:
 	if not is_inside_tree() or multiplayer.is_server():
 		spawn_protection_left = 0.0
-
-func _draw() -> void:
-	if is_spawn_protected() and not is_dead:
-		draw_arc(Vector2.ZERO, 14, 0, TAU, 28, Color(0.8, 0.95, 1.0, 0.65), 1.2)
 
 func _owner_physics(delta: float) -> void:
 	if not is_on_floor():
@@ -462,7 +458,12 @@ func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
 
 ## Host only; called by the arrow before applying damage.
 func server_register_hit(shooter_id: int) -> void:
-	_server_last_hit_by = shooter_id
+	if not multiplayer.is_server():
+		return
+	recent_attackers.erase(shooter_id)
+	recent_attackers.push_front(shooter_id)
+	if recent_attackers.size() > 3:
+		recent_attackers.resize(3)
 
 # --- Shield ----------------------------------------------------------------
 
@@ -508,6 +509,7 @@ func _on_died(_source: Node) -> void:
 	shield_container.hide()
 
 func _on_respawned() -> void:
+	recent_attackers.clear()
 	is_dead = false
 	_clear_stuck_arrows()
 	sprite.play("idle")
@@ -518,9 +520,10 @@ func _on_respawned() -> void:
 		capture_mouse()
 
 ## Host only.
-func _on_died_server(_source: Node) -> void:
-	World.scoreboard.record_kill(_server_last_hit_by, peer_id)
-	_server_last_hit_by = 0
+func _on_died_server(source: Node) -> void:
+	var killer_id: int = source.peer_id if source is ArrowPlayer else 0
+	World.scoreboard.record_kill(killer_id, peer_id, recent_attackers.slice(1))
+	recent_attackers.clear()
 	World.respawn_manager.schedule(self)
 
 func _teleport_to_spawn() -> void:

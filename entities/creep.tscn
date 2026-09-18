@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://entities/creep.gd" id="1"]
 [ext_resource type="Script" path="res://components/health_component.gd" id="2"]
+
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/indicator_bar.tscn" id="bar"]
 
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(12, 16)
@@ -70,3 +72,19 @@ replication_interval = 0.05
 delta_interval = 0.05
 replication_config = SubResource("sync")
 public_visibility = false
+
+[node name="Indicators" type="Node2D" parent="."]
+
+[node name="TeamMarker" type="ColorRect" parent="Indicators"]
+offset_left = -5.0
+offset_top = 8.0
+offset_right = 5.0
+offset_bottom = 10.0
+mouse_filter = 2
+
+[node name="HealthBar" parent="Indicators" instance=ExtResource("bar")]
+visible = false
+offset_left = -7.0
+offset_top = -13.0
+offset_right = 7.0
+offset_bottom = -11.0

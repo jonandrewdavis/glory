@@ -142,7 +142,7 @@ func check_death_and_protection() -> void:
 	blue.set_physics_process(false)
 	orange.set_physics_process(false)
 	expect(blue.is_spawn_protected() and orange.is_spawn_protected(), "Fresh spawns receive protection")
-	expect(not orange.health.take_damage(100, blue) and orange._server_last_hit_by == 0, "Protection rejects damage before kill attribution")
+	expect(not orange.health.take_damage(100, blue) and orange.recent_attackers.is_empty(), "Protection rejects damage before kill attribution")
 	orange.position = ram.position
 	blue.position = Vector2(-1200, -176)
 	ram._physics_process(0.1)
@@ -158,7 +158,7 @@ func check_death_and_protection() -> void:
 	expect(manager.pending.has(2) and manager.seconds_left(2) == 2.0, "Death schedules a two-second wait for a small team")
 	var old_serial := orange.spawn_serial
 	for id in range(10, 24):
-		World.scoreboard.entries[id] = {"team": Teams.Team.ORANGE, "kills": 0, "deaths": 0}
+		World.scoreboard.entries[id] = {"team": Teams.Team.ORANGE, "kills": 0, "deaths": 0, "assists": 0}
 	expect(manager.seconds_left(2) == 2.0 and manager.settings.delay_for_population(World.scoreboard.team_size(Teams.Team.ORANGE)) == 5.25, "Joining players do not change an existing death deadline")
 	manager.schedule(orange)
 	expect(manager.pending.size() == 1, "Duplicate death scheduling does not reset the wait")
@@ -226,7 +226,7 @@ func preview() -> void:
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("/tmp/respawn-bands-initial.png")
-	World.scoreboard.entries[99] = {"team": Teams.Team.BLUE, "kills": 0, "deaths": 0}
+	World.scoreboard.entries[99] = {"team": Teams.Team.BLUE, "kills": 0, "deaths": 0, "assists": 0}
 	World.player_spawner.spawn_player(1)
 	var player := World.player_spawner.get_player(1)
 	player.set_physics_process(false)
