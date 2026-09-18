@@ -35,6 +35,8 @@ func _request_team(target: int) -> void:
 func _server_switch(peer_id: int, target: int) -> void:
 	if not multiplayer.is_server() or not entries.has(peer_id):
 		return
+	if MultiplayerService.presence.is_peer_away(peer_id):
+		return
 	var remaining := maxi(0, int(_switch_deadlines.get(peer_id, 0)) - Time.get_ticks_msec())
 	if remaining > 0:
 		_switch_result.rpc_id(peer_id, "Please wait before changing teams.", remaining)
@@ -119,6 +121,20 @@ func remove_player(peer_id: int) -> void:
 	_switch_deadlines.erase(peer_id)
 	if entries.has(peer_id):
 		_erase_entry.rpc(peer_id)
+
+func reassign_player(old_id: int, new_id: int) -> void:
+	if entries.has(old_id):
+		var entry: Dictionary = entries[old_id].duplicate()
+		_erase_entry.rpc(old_id)
+		_sync_entry.rpc(new_id, entry)
+	if _switch_deadlines.has(old_id):
+		_switch_deadlines[new_id] = _switch_deadlines[old_id]
+		_switch_deadlines.erase(old_id)
+	for player in get_tree().get_nodes_in_group("players"):
+		if player is ArrowPlayer:
+			var index: int = player.recent_attackers.find(old_id)
+			if index >= 0:
+				player.recent_attackers[index] = new_id
 
 # --- Read API -------------------------------------------------------------
 

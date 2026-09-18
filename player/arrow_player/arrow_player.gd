@@ -52,6 +52,9 @@ var has_authoritative_spawn := false
 var spawn_revision := 0
 var spawn_serial := 0
 var spawn_protection_left := 0.0
+var network_away := false
+var initial_health := -1.0
+var _away_position := Vector2.ZERO
 
 var is_blocking := false
 var block_time_left := 0.0
@@ -105,6 +108,15 @@ func _ready() -> void:
 	health.respawned.connect(_on_respawned)
 	if multiplayer.is_server():
 		health.died.connect(_on_died_server)
+	if initial_health >= 0.0:
+		# Restore without emitting a second kill or scheduling a second death.
+		health._initialized = false
+		health.current = initial_health
+		health._initialized = true
+	if not health.is_alive():
+		_on_died(null)
+	if network_away:
+		_away_position = position
 
 	var is_owner := is_multiplayer_authority()
 	z_index = 2 if is_owner else 1
@@ -125,6 +137,9 @@ func _ready() -> void:
 			_teleport_to_spawn()
 	else:
 		physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	if is_owner and MultiplayerService.presence.blocks_input():
+		$MultiplayerSynchronizer.replication_config = SceneReplicationConfig.new()
+		clear_away_actions()
 
 func _apply_team_colors() -> void:
 	var color := Teams.color(team)
@@ -159,16 +174,20 @@ func _physics_process(delta: float) -> void:
 		hide()
 		return
 	show()
+	if multiplayer.is_server() and MultiplayerService.presence.is_peer_away(peer_id):
+		set_network_away(true)
+		position = _away_position
+		clear_away_actions()
 	if multiplayer.is_server():
 		# Loading a map must not use up a remote player's protection window.
-		if peer_id == 1 or World.level_loader.ready_peers.has(peer_id) or multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+		if peer_id == 1 or World.level_loader.ready_peers.has(peer_id) or MultiplayerService.presence.is_peer_away(peer_id) or multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
 			spawn_protection_left = maxf(0, spawn_protection_left - delta)
 		# Follows replicated state, so it works for remote copies too.
 		if shield_area.monitoring != shield_container.visible:
 			shield_area.monitoring = shield_container.visible
 		if shield_area.monitoring and health.is_alive():
 			_server_check_shield()
-	if is_multiplayer_authority():
+	if is_multiplayer_authority() and not network_away and not MultiplayerService.presence.blocks_input():
 		_owner_physics(delta)
 	$SpawnProtection.visible = is_spawn_protected() and not is_dead
 
@@ -314,7 +333,7 @@ func _is_paused() -> bool:
 	return World.ui_layer != null and World.ui_layer.is_paused()
 
 func capture_mouse() -> void:
-	if is_multiplayer_authority() and not _is_paused():
+	if is_multiplayer_authority() and not _is_paused() and not MultiplayerService.presence.blocks_input():
 		if World.ui_layer == null or not World.ui_layer.exiting:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -434,6 +453,8 @@ func request_fire(aim: Vector2, level: int, elapsed: float) -> void:
 
 ## Host only.
 func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
+	if MultiplayerService.presence.is_peer_away(peer_id):
+		return
 	if level < 0 or level >= LEVEL_COUNT or not is_finite(elapsed):
 		return
 	if elapsed < minimum_preparation_time(level) or not aim.is_finite():
@@ -486,9 +507,29 @@ func _end_block() -> void:
 
 ## Host only. Enemy arrows overlapping the raised shield are reflected.
 func _server_check_shield() -> void:
+	if network_away:
+		return
 	for area in shield_area.get_overlapping_areas():
 		if area is Arrow:
 			area.server_touched_shield(self, area.global_position)
+
+func set_network_away(value: bool) -> void:
+	if value and not network_away:
+		_away_position = position
+	network_away = value
+	if value:
+		clear_away_actions()
+
+func clear_away_actions() -> void:
+	velocity = Vector2.ZERO
+	shield_cooldown_left = maxf(shield_cooldown_left, shield_cooldown)
+	fire_cooldown_left = maxf(fire_cooldown_left, FIRE_COOLDOWN)
+	_reset_jump()
+	_cancel_preparation()
+	is_blocking = false
+	block_time_left = 0.0
+	shield_container.hide()
+	shield_collision.set_deferred("disabled", true)
 
 # --- Death / respawn -------------------------------------------------------
 

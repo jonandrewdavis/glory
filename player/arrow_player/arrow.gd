@@ -61,6 +61,13 @@ func _update_flight_state() -> void:
 	velocity = (initial_velocity + GRAVITY * elapsed) * flight_direction / travel_time_multiplier
 	rotation = velocity.angle()
 
+func restore_flight(time: float) -> void:
+	elapsed = clampf(time, 0.0, LIFETIME)
+	_prev_elapsed = elapsed
+	_update_flight_state()
+	_prev_position = global_position
+	trail.clear_points()
+
 func _ready() -> void:
 	add_to_group("projectiles")
 	polygon.color = Teams.color(team)
@@ -146,6 +153,8 @@ func _sweep(from: Vector2, to: Vector2) -> void:
 func server_touched_shield(blocker: Node, at: Vector2) -> void:
 	if _finished or blocker == null or not Teams.are_enemies(team, blocker.get("team")):
 		return
+	if blocker is ArrowPlayer and MultiplayerService.presence.is_peer_away(blocker.peer_id):
+		return
 	World.projectile_spawner.reflect_arrow(self, blocker, at)
 	blocked.emit(self, blocker)
 	_finish()
@@ -166,7 +175,7 @@ static func ignored_rids(tree: SceneTree, shooter_id: int, shooter_team: int) ->
 			rids.append(body.get_rid())
 	for area in tree.get_nodes_in_group("shields"):
 		var blocker: Node = area.owner
-		if blocker == null or blocker.get("peer_id") == shooter_id or blocker.get("team") == shooter_team:
+		if blocker == null or blocker.get("peer_id") == shooter_id or blocker.get("team") == shooter_team or (blocker is ArrowPlayer and MultiplayerService.presence.is_peer_away(blocker.peer_id)):
 			rids.append(area.get_rid())
 	for gate in tree.get_nodes_in_group("fortress_gates"):
 		if gate is FortressGate and not gate.is_alive():

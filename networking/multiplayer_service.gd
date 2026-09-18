@@ -31,12 +31,16 @@ var status_text := ""
 var in_lobby := false
 var pending := false
 var leaving := false
+var presence: WebPresence
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(func(peer_id: int) -> void: usernames.erase(peer_id))
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	presence = preload("res://networking/web_presence.gd").new()
+	presence.name = "WebPresence"
+	add_child(presence)
 	GGT_GameConfig.username_changed.connect(func(_value: String) -> void: _submit_local_username())
 	if is_dedicated_server():
 		set_backend(BackendType.PLAYFLOW, false)
@@ -97,7 +101,7 @@ func host_game(options: HostOptions) -> void:
 		backend.host_game(options)
 
 func join_game(address: Variant) -> void:
-	if in_lobby or pending:
+	if in_lobby or pending or leaving:
 		return
 	kick_reason = ""
 	pending = true
@@ -113,13 +117,24 @@ func _on_lobby_joined() -> void:
 	pending = false
 	in_lobby = true
 	_submit_local_username()
+	if presence.recovering:
+		return
 	lobby_joined.emit()
 
 func _on_join_lobby_failed(reason: String) -> void:
+	if presence.recovering:
+		pending = false
+		backend.leave_game()
+		if reason == "Session expired. Please join again.":
+			_end_game(reason)
+		else:
+			presence.retry()
+		return
 	if not pending:
 		_on_status_changed(reason)
 		return
 	pending = false
+	presence.reset()
 	backend.leave_game()
 	join_lobby_failed.emit(reason)
 
@@ -128,8 +143,17 @@ func leave_game() -> void:
 		return
 	leaving = true
 	var was_in_lobby := in_lobby
+	var releasing := kick_reason.is_empty() and presence.release()
 	in_lobby = false
 	pending = false
+	# Let the server acknowledge voluntary departure before closing the socket.
+	# Forced exits do not wait; a lost release is bounded by the session grace.
+	if releasing:
+		get_tree().multiplayer_poll = true
+		var deadline := Time.get_ticks_msec() + 500
+		while not presence.release_acknowledged and Time.get_ticks_msec() < deadline:
+			await get_tree().process_frame
+	presence.reset()
 	backend.leave_game()
 	banlist.clear()
 	usernames.clear()
@@ -145,6 +169,10 @@ func _end_game(reason: String) -> void:
 	leave_game()
 
 func _on_server_disconnected() -> void:
+	if leaving:
+		return
+	if presence.begin_recovery("connection lost"):
+		return
 	if pending:
 		_on_join_lobby_failed(DISCONNECT_REASON)
 	else:
@@ -171,6 +199,7 @@ func get_lobby_address() -> String:
 
 func kick_player(peer_id: int) -> void:
 	if is_host() and peer_id != multiplayer.get_unique_id():
+		presence.forget_peer(peer_id)
 		_kick_player_rpc.rpc_id(peer_id, backend.get_uid(peer_id) not in banlist)
 
 @rpc("authority", "call_remote", "reliable")
@@ -184,8 +213,16 @@ func ban_player(peer_id: int) -> void:
 		kick_player(peer_id)
 
 func _on_peer_connected(peer_id: int) -> void:
+	if multiplayer.is_server():
+		presence.server_connected(peer_id)
 	if is_host() and (not backend.get_joinable() or banlist.has(backend.get_uid(peer_id))):
 		kick_player(peer_id)
+
+func _on_peer_disconnected(peer_id: int) -> void:
+	if multiplayer.is_server():
+		presence.server_disconnected(peer_id)
+	if not presence.keep_peer(peer_id):
+		usernames.erase(peer_id)
 
 func get_username(peer_id: int) -> String:
 	return usernames.get(peer_id, backend.get_username(peer_id))

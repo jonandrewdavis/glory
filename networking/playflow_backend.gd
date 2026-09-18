@@ -5,7 +5,10 @@ extends MultiplayerBackend
 const API_URL := "https://api.computeflow.cloud/api/v3/servers"
 const PORT := 8080
 const CAPACITY := 30
-const PROTOCOL := "glory-playflow-1"
+const PROTOCOL := "glory-playflow-2"
+# Initial experimental headroom: validate against max_queue_packets/poll gaps.
+const RECEIVE_BYTES := 2 * 1024 * 1024
+const RECEIVE_PACKETS := 16384
 const CONFIG = preload("res://networking/playflow_config.tres")
 const JOIN_TIMEOUT_MSEC := 90000
 const POLL_SECONDS := 2.0
@@ -46,6 +49,8 @@ func host_game(_options: HostOptions) -> void:
 		return
 	_configure_auth()
 	var peer := WebSocketMultiplayerPeer.new()
+	peer.inbound_buffer_size = RECEIVE_BYTES
+	peer.max_queued_packets = RECEIVE_PACKETS
 	var error := peer.create_server(PORT, "0.0.0.0")
 	if error != OK:
 		join_lobby_failed.emit("Cannot listen on port %d: %s" % [PORT, error_string(error)])
@@ -198,11 +203,13 @@ static func server_url(server: Dictionary) -> String:
 	return ""
 
 func _connect_url(url: String) -> void:
-	if OS.has_feature("web") and not url.begins_with("wss://"):
+	if OS.has_feature("web") and not url.begins_with("wss://") and not (OS.is_debug_build() and url.begins_with("ws://127.0.0.1:")):
 		_fail("The web client requires a secure wss:// address.")
 		return
 	_configure_auth()
 	var peer := WebSocketMultiplayerPeer.new()
+	peer.inbound_buffer_size = RECEIVE_BYTES
+	peer.max_queued_packets = RECEIVE_PACKETS
 	var error := peer.create_client(url)
 	if error != OK:
 		_fail("Could not connect: " + error_string(error))
@@ -213,34 +220,51 @@ func _connect_url(url: String) -> void:
 
 func _on_authenticating(id: int) -> void:
 	if not api.is_server():
-		api.send_auth(id, PROTOCOL.to_utf8_buffer())
+		api.send_auth(id, JSON.stringify({"protocol": PROTOCOL,
+			"resume_token": MultiplayerService.presence.resume_token}).to_utf8_buffer())
 
 func _on_auth(id: int, data: PackedByteArray) -> void:
 	if api.is_server():
 		if reservations.has(id):
 			return
 		var reason := ""
-		if data.get_string_from_utf8() != PROTOCOL:
+		var decoder := JSON.new()
+		var message: Variant = null
+		if data.size() <= 512 and decoder.parse(data.get_string_from_utf8()) == OK:
+			message = decoder.data
+		var token := str(message.get("resume_token", "")) if message is Dictionary else ""
+		var presence := MultiplayerService.presence
+		if not message is Dictionary or message.get("protocol", "") != PROTOCOL:
 			reason = "Client/server version mismatch. Refresh the game."
+		elif not token.is_empty() and not presence.can_resume(token):
+			reason = "Session expired. Please join again."
 		elif not joinable:
 			reason = "Server is loading. Try again shortly."
-		elif api.get_peers().size() + reservations.size() >= CAPACITY:
+		elif token.is_empty() and presence.sessions.size() >= CAPACITY:
 			reason = "Server is full (30/30 players)."
+		if reason.is_empty():
+			token = presence.reserve(id, token)
+			if token.is_empty():
+				reason = "Session is already reconnecting. Try again shortly."
 		if not reason.is_empty():
 			api.send_auth(id, reason.to_utf8_buffer())
 			# Leave time to deliver the reason; auth_timeout disconnects non-cooperative clients.
 			return
 		reservations[id] = true
-		api.send_auth(id, "OK".to_utf8_buffer())
+		api.send_auth(id, JSON.stringify({"ok": true, "resume_token": token}).to_utf8_buffer())
 		api.complete_auth(id)
 	elif id == 1 and joining:
-		if data.get_string_from_utf8() == "OK":
+		var decoder := JSON.new()
+		var response: Variant = decoder.data if decoder.parse(data.get_string_from_utf8()) == OK else null
+		if response is Dictionary and response.get("ok", false) and str(response.get("resume_token", "")).length() == 64:
+			MultiplayerService.presence.resume_token = str(response.resume_token)
 			api.complete_auth(id)
 		else:
 			_fail_for_attempt.call_deferred(data.get_string_from_utf8(), attempt)
 
 func _on_auth_failed(id: int) -> void:
 	reservations.erase(id)
+	MultiplayerService.presence.admissions.erase(id)
 	if joining:
 		_fail_for_attempt.call_deferred("PlayFlow admission timed out or the server disconnected.", attempt)
 

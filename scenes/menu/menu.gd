@@ -69,6 +69,8 @@ func _ready() -> void:
 		MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
 		for node in [%ServiceRow, %MatchmakeButton, %HostButton, %JoinButton]:
 			node.hide()
+		# Debug web exports keep Join for local ws://127.0.0.1 server testing.
+		%JoinButton.visible = OS.has_feature("web") and OS.is_debug_build()
 	_focus_default()
 	if not MultiplayerService.kick_reason.is_empty():
 		_show_failure(MultiplayerService.kick_reason)
