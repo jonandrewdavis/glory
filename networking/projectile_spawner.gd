@@ -90,6 +90,7 @@ func remove_owned_projectiles(peer_id: int) -> void:
 
 ## Host only. Reverse the same trajectory without resetting its bounds or speed.
 func reflect_arrow(arrow: Arrow, blocker: ArrowPlayer, at: Vector2) -> Arrow:
+	blocker.end_spawn_protection()
 	return spawn_arrow({
 		"position": arrow.origin,
 		"velocity": arrow.initial_velocity,

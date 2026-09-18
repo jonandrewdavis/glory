@@ -19,4 +19,6 @@ func _ready() -> void:
 func _update_team() -> void:
 	var team := World.scoreboard.get_team(peer_id)
 	%UsernameLabel.modulate = Teams.color(team)
-	%UsernameLabel.text = "%s — %s" % [MultiplayerService.get_username(peer_id), Teams.display_name(team, World.scoreboard.get_team(multiplayer.get_unique_id()))]
+	if multiplayer:
+		%UsernameLabel.text = "%s — %s" % [MultiplayerService.get_username(peer_id), Teams.display_name(team, World.scoreboard.get_team(multiplayer.get_unique_id()))]
+	

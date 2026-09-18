@@ -42,6 +42,9 @@ func _server_switch(peer_id: int, target: int) -> void:
 	var player: ArrowPlayer = World.player_spawner.get_player(peer_id)
 	if player == null:
 		return
+	if not player.health.is_alive():
+		_switch_result.rpc_id(peer_id, "You can change teams after respawning.", 0)
+		return
 	_switch_deadlines[peer_id] = Time.get_ticks_msec() + int(SWITCH_COOLDOWN * 1000)
 	var entry: Dictionary = entries[peer_id].duplicate()
 	entry.team = target

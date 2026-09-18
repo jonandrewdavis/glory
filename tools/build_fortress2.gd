@@ -43,6 +43,8 @@ func _build() -> void:
 	build_center()
 	build_ram()
 	build_spawns()
+	# Load after autoloads initialize: spawn bands reference the runtime World.
+	attach(level, load("res://levels/fortress2_spawn_bands.tscn").instantiate(), "SpawnBands")
 	preload("res://tools/fortress2_defenses.gd").apply(level)
 	var packed := PackedScene.new()
 	var error := packed.pack(level)

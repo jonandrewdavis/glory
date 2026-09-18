@@ -294,6 +294,9 @@ properties/9/replication_mode = 2
 properties/0/path = NodePath("HealthComponent:current")
 properties/0/spawn = true
 properties/0/replication_mode = 2
+properties/1/path = NodePath(".:spawn_protection_left")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [node name="ArrowPlayer" type="CharacterBody2D" unique_id=2068560485 groups=["players"]]
 z_index = 1
@@ -337,6 +340,7 @@ script = ExtResource("5_aim")
 unique_name_in_owner = true
 script = ExtResource("3_health")
 networked = true
+auto_respawn = false
 regen_enabled = false
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=347798596]
@@ -344,6 +348,7 @@ replication_interval = 0.033
 replication_config = SubResource("SceneReplicationConfig_player")
 
 [node name="HealthSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=337667337]
+replication_interval = 0.1
 replication_config = SubResource("SceneReplicationConfig_health")
 
 [node name="ArrowContainer" type="Node2D" parent="." unique_id=1326967956]

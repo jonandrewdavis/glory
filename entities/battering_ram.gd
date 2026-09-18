@@ -6,6 +6,7 @@ extends Node2D
 ## resets the wind-up; every strike needs a fresh wind-up.
 
 enum AttackState { IDLE, WINDUP, STRIKE }
+signal route_advanced(previous: float, current: float, pushing_direction: int)
 
 const BAR_SIZE := Vector2(60, 4)
 const BAR_OFFSET := Vector2(-30, -74)
@@ -51,6 +52,13 @@ static func majority(blue: int, orange: int) -> int:
 func route_length() -> float:
 	return _curve.get_baked_length()
 
+func route_distance_at(world_point: Vector2) -> float:
+	# Route coordinates are relative to the ram's parent, not its moving origin.
+	return _curve.get_closest_offset(get_parent().to_local(world_point))
+
+func route_position_at(route_distance: float) -> Vector2:
+	return get_parent().to_global(_curve.sample_baked(route_distance))
+
 ## 0 at the blue gate, 1 at the orange gate.
 func progress() -> float:
 	var length := route_length()
@@ -73,10 +81,11 @@ func gate_in_contact() -> FortressGate:
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
+		var previous_distance := distance
 		blue_count = 0
 		orange_count = 0
 		for player in get_tree().get_nodes_in_group("players"):
-			if not player is ArrowPlayer or not player.health.is_alive():
+			if not player is ArrowPlayer or not player.health.is_alive() or player.is_spawn_protected():
 				continue
 			if global_position.distance_squared_to(player.global_position) > detection_radius * detection_radius:
 				continue
@@ -97,6 +106,7 @@ func _physics_process(delta: float) -> void:
 		# A strike locks the ram against the gate until the blow lands.
 		if attack_state != AttackState.STRIKE:
 			distance = clampf(distance + direction * speed * delta, 0, route_length())
+		route_advanced.emit(previous_distance, distance, direction)
 		_advance_attack(delta)
 	position = _curve.sample_baked(maxf(distance, 0))
 	queue_redraw()

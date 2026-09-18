@@ -47,6 +47,11 @@ const LEVEL_ACTIONS := [&"select_arrow_level_1", &"select_arrow_level_2", &"sele
 var peer_id := 0
 var team: int = Teams.Team.BLUE
 var spawn_index := 0
+var authoritative_spawn := Vector2.ZERO
+var has_authoritative_spawn := false
+var spawn_revision := 0
+var spawn_serial := 0
+var spawn_protection_left := 0.0
 
 var is_blocking := false
 var block_time_left := 0.0
@@ -78,9 +83,11 @@ var _server_last_hit_by := 0
 @onready var stuck_arrows: Node2D = %StuckArrows
 ## Editor-visible headshot band; no physics layers, tested by Arrow.is_head_point().
 @onready var head_shape: CollisionShape2D = %HeadShape
+@onready var _movement_replication: SceneReplicationConfig = $MultiplayerSynchronizer.replication_config
 
 func _enter_tree() -> void:
-	peer_id = name.to_int()
+	if peer_id <= 0:
+		peer_id = name.to_int()
 	set_multiplayer_authority(peer_id)
 	get_node("HealthComponent").set_multiplayer_authority(1)
 	get_node("HealthSynchronizer").set_multiplayer_authority(1)
@@ -147,14 +154,34 @@ func _clear_stuck_arrows() -> void:
 # --- Physics --------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
+	# An owner can receive the replacement while its new map is still loading.
+	if has_authoritative_spawn and (not World.level_loader.is_level_ready() or spawn_revision != World.level_loader.revision):
+		hide()
+		return
+	show()
 	if multiplayer.is_server():
+		# Loading a map must not use up a remote player's protection window.
+		if peer_id == 1 or World.level_loader.ready_peers.has(peer_id) or multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+			spawn_protection_left = maxf(0, spawn_protection_left - delta)
 		# Follows replicated state, so it works for remote copies too.
 		if shield_area.monitoring != shield_container.visible:
 			shield_area.monitoring = shield_container.visible
-		if shield_area.monitoring:
+		if shield_area.monitoring and health.is_alive():
 			_server_check_shield()
 	if is_multiplayer_authority():
 		_owner_physics(delta)
+	queue_redraw()
+
+func is_spawn_protected() -> bool:
+	return spawn_protection_left > 0.0
+
+func end_spawn_protection() -> void:
+	if not is_inside_tree() or multiplayer.is_server():
+		spawn_protection_left = 0.0
+
+func _draw() -> void:
+	if is_spawn_protected() and not is_dead:
+		draw_arc(Vector2.ZERO, 14, 0, TAU, 28, Color(0.8, 0.95, 1.0, 0.65), 1.2)
 
 func _owner_physics(delta: float) -> void:
 	if not is_on_floor():
@@ -421,6 +448,7 @@ func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
 	if now - _server_last_fire_msec < int(FIRE_COOLDOWN * 1000.0 * 0.8):
 		return
 	_server_last_fire_msec = now
+	end_spawn_protection()
 	aim = aim.normalized()
 	World.projectile_spawner.spawn_arrow({
 		"position": global_position,
@@ -472,6 +500,8 @@ func _on_died(_source: Node) -> void:
 	sprite.play("death")
 	arrow_container.hide()
 	if is_multiplayer_authority():
+		# Stop movement packets while dead, before this incarnation is despawned.
+		$MultiplayerSynchronizer.replication_config = SceneReplicationConfig.new()
 		_cancel_preparation()
 		if is_blocking:
 			_end_block()
@@ -482,8 +512,8 @@ func _on_respawned() -> void:
 	_clear_stuck_arrows()
 	sprite.play("idle")
 	if is_multiplayer_authority():
+		$MultiplayerSynchronizer.replication_config = _movement_replication
 		_update_readiness_indicator()
-		spawn_index = randi() % PlayerSpawner.SPAWN_SLOTS
 		_teleport_to_spawn()
 		capture_mouse()
 
@@ -491,9 +521,10 @@ func _on_respawned() -> void:
 func _on_died_server(_source: Node) -> void:
 	World.scoreboard.record_kill(_server_last_hit_by, peer_id)
 	_server_last_hit_by = 0
+	World.respawn_manager.schedule(self)
 
 func _teleport_to_spawn() -> void:
-	global_position = Teams.spawn_position(get_tree(), team, spawn_index)
+	global_position = authoritative_spawn if has_authoritative_spawn else Teams.spawn_position(get_tree(), team, spawn_index)
 	velocity = Vector2.ZERO
 	_reset_jump()
 	_clear_drop_through()

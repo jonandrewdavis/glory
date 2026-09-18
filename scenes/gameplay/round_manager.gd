@@ -16,7 +16,6 @@ var winner := -1
 var round_number := 0
 ## Bumped on level clearing and clear(); cancels a pending restart.
 var _generation := 0
-var _respawn_on_load := false
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -41,9 +40,8 @@ func _on_level_loaded() -> void:
 		if gate is FortressGate:
 			gate.health.died.connect(_on_gate_died.bind(gate))
 	_sync_round.rpc(wins, Phase.PLAYING, -1, round_number + 1)
-	if _respawn_on_load:
-		_respawn_on_load = false
-		respawn_all()
+	# Also relocate existing players on a manually selected map change.
+	respawn_all()
 
 func _on_gate_died(_source: Node, gate: FortressGate) -> void:
 	if not multiplayer.is_server() or phase != Phase.PLAYING:
@@ -60,7 +58,6 @@ func _restart_after_banner() -> void:
 	await get_tree().create_timer(BANNER_SECONDS).timeout
 	if token != _generation or session != World.session or not multiplayer.is_server() or phase != Phase.ENDED:
 		return
-	_respawn_on_load = true
 	World.level_loader.spawn_level(World.level_loader.current_key)
 
 ## Host only. Full re-instance at the team spawn, as team switching does.
@@ -77,7 +74,6 @@ func wins_for(team: int) -> int:
 
 func clear() -> void:
 	_generation += 1
-	_respawn_on_load = false
 	wins = {Teams.Team.BLUE: 0, Teams.Team.ORANGE: 0}
 	phase = Phase.PLAYING
 	winner = -1

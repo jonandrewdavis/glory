@@ -7,7 +7,7 @@ and outer keep bases y=-160. Blue occupies negative x and orange positive x.
 The compact map retains:
 
 - Oak terrain, smooth world-layer ramps, and blue/orange edge tinting.
-- A short keep on each end with an open, noncolliding wooden gate facade,
+- A short keep on each end with a wooden gate solid to both teams' players,
   two balconies, battlements, and 32-pixel one-way climbing steps.
 - A smaller forward outpost per team with a firing shelf and parapet cover.
 - One shared server-driven battering ram using the same `fortress_rams` group.
@@ -17,8 +17,17 @@ The compact map retains:
 The map is deliberately less dense than Fortress1. It keeps the recognizable
 siege and vertical-combat elements while reducing travel time and visual noise.
 Each keep carries a `FortressGate` objective (`{Blue,Orange}/Keep/FortressGate`,
-5000 health, physics layer 7 `gates` with no mask) behind its facade; both
-ground entrances stay open. See `docs/rounds.md`.
+5000 health, physics layer 7 `gates` with no mask) behind its facade. A separate
+48-by-96 solid `GateAccess/TimberBarrier` on layer 6 (mask 0) blocks players
+from both directions until the level resets, without changing arrow damage,
+creep movement, or ram behavior. See `docs/rounds.md`.
+
+Seven broad exterior stair platforms lead toward each gate, from absolute
+x=864, y=-64 to x=1008, y=-256, then onto the lower balcony at y=-288.
+Each is 96 pixels wide, with 24-pixel horizontal offsets and 32-pixel rises.
+Three interior steps at absolute x=1136, 1112, and 1088 (y=-192, -224, -256)
+give players the same easy route back out. Both staircases use the existing
+arrow-transparent one-way stone tiles. The timber itself cannot be dropped through.
 
 All keep and outpost climbing steps, roof decks, balconies, and firing shelves
 use arrow-transparent one-way stone platforms (oak tile alternative 2).

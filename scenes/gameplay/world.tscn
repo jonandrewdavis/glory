@@ -13,6 +13,7 @@
 [ext_resource type="AudioStream" uid="uid://cnws8v1klrw8d" path="res://assets/sounds/click.mp3" id="9_click"]
 [ext_resource type="AudioStream" uid="uid://cb68uol3xh1wk" path="res://assets/sounds/headshot_ping.mp3" id="10_ping"]
 [ext_resource type="Script" uid="uid://cf51xspf1tie0" path="res://scenes/gameplay/round_manager.gd" id="11_rounds"]
+[ext_resource type="Script" path="res://scenes/gameplay/respawn_manager.gd" id="12_respawns"]
 
 [node name="World" type="Node" unique_id=43387356]
 script = ExtResource("1_4np77")
@@ -45,6 +46,10 @@ bus = &"SFX"
 [node name="Scoreboard" type="Node" parent="." unique_id=1242417043]
 unique_name_in_owner = true
 script = ExtResource("4_score")
+
+[node name="RespawnManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("12_respawns")
 
 [node name="RoundManager" type="Node" parent="." unique_id=977954723]
 unique_name_in_owner = true

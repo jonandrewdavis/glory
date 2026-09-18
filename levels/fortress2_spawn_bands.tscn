@@ -1,0 +1,139 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/gameplay/spawn_band.gd" id="1"]
+
+[node name="SpawnBands" type="Node2D"]
+
+[node name="Zone1" type="Node2D" parent="."]
+position = Vector2(-1040, 0)
+script = ExtResource("1")
+band_id = &"blue_fortress"
+order = 1
+initial_owner = 0
+permanent = true
+bounds = Rect2(-240, -480, 480, 592)
+flag_position = Vector2(-120, -384)
+
+[node name="Points" type="Node2D" parent="Zone1"]
+
+[node name="Point1" type="Marker2D" parent="Zone1/Points"]
+position = Vector2(-176, -176)
+
+[node name="Point2" type="Marker2D" parent="Zone1/Points"]
+position = Vector2(-64, -176)
+
+[node name="Zone2" type="Node2D" parent="."]
+position = Vector2(-600, 0)
+script = ExtResource("1")
+band_id = &"blue_outpost"
+order = 2
+initial_owner = 0
+permanent = false
+bounds = Rect2(-200, -480, 400, 592)
+flag_position = Vector2(-8, -160)
+orange_capture_at_start = true
+
+[node name="Points" type="Node2D" parent="Zone2"]
+
+[node name="Point1" type="Marker2D" parent="Zone2/Points"]
+position = Vector2(-40, -48)
+
+[node name="Point2" type="Marker2D" parent="Zone2/Points"]
+position = Vector2(40, -48)
+
+[node name="BlueCapture" type="Marker2D" parent="Zone2"]
+position = Vector2(-8, -32)
+
+[node name="Zone3" type="Node2D" parent="."]
+position = Vector2(-200, 0)
+script = ExtResource("1")
+band_id = &"center_left"
+order = 3
+initial_owner = -1
+permanent = false
+bounds = Rect2(-200, -480, 400, 592)
+flag_position = Vector2(72, -24)
+
+[node name="Points" type="Node2D" parent="Zone3"]
+
+[node name="Point1" type="Marker2D" parent="Zone3/Points"]
+position = Vector2(56, -40)
+
+[node name="Point2" type="Marker2D" parent="Zone3/Points"]
+position = Vector2(104, -40)
+
+[node name="Point3" type="Marker2D" parent="Zone3/Points"]
+position = Vector2(-88, 56)
+
+[node name="BlueCapture" type="Marker2D" parent="Zone3"]
+position = Vector2(808, -32)
+
+[node name="OrangeCapture" type="Marker2D" parent="Zone3"]
+position = Vector2(-600, -32)
+
+[node name="Zone4" type="Node2D" parent="."]
+position = Vector2(200, 0)
+script = ExtResource("1")
+band_id = &"center_right"
+order = 4
+initial_owner = -1
+permanent = false
+bounds = Rect2(-200, -480, 400, 592)
+flag_position = Vector2(-72, -24)
+
+[node name="Points" type="Node2D" parent="Zone4"]
+
+[node name="Point1" type="Marker2D" parent="Zone4/Points"]
+position = Vector2(-56, -40)
+
+[node name="Point2" type="Marker2D" parent="Zone4/Points"]
+position = Vector2(-104, -40)
+
+[node name="Point3" type="Marker2D" parent="Zone4/Points"]
+position = Vector2(88, 56)
+
+[node name="BlueCapture" type="Marker2D" parent="Zone4"]
+position = Vector2(600, -32)
+
+[node name="OrangeCapture" type="Marker2D" parent="Zone4"]
+position = Vector2(-808, -32)
+
+[node name="Zone5" type="Node2D" parent="."]
+position = Vector2(600, 0)
+script = ExtResource("1")
+band_id = &"orange_outpost"
+order = 5
+initial_owner = 1
+permanent = false
+bounds = Rect2(-200, -480, 400, 592)
+flag_position = Vector2(8, -160)
+blue_capture_at_end = true
+
+[node name="Points" type="Node2D" parent="Zone5"]
+
+[node name="Point1" type="Marker2D" parent="Zone5/Points"]
+position = Vector2(40, -48)
+
+[node name="Point2" type="Marker2D" parent="Zone5/Points"]
+position = Vector2(-40, -48)
+
+[node name="OrangeCapture" type="Marker2D" parent="Zone5"]
+position = Vector2(8, -32)
+
+[node name="Zone6" type="Node2D" parent="."]
+position = Vector2(1040, 0)
+script = ExtResource("1")
+band_id = &"orange_fortress"
+order = 6
+initial_owner = 1
+permanent = true
+bounds = Rect2(-240, -480, 480, 592)
+flag_position = Vector2(120, -384)
+
+[node name="Points" type="Node2D" parent="Zone6"]
+
+[node name="Point1" type="Marker2D" parent="Zone6/Points"]
+position = Vector2(176, -176)
+
+[node name="Point2" type="Marker2D" parent="Zone6/Points"]
+position = Vector2(64, -176)

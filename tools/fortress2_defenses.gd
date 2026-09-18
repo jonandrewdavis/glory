@@ -33,3 +33,43 @@ static func apply(level: Node2D) -> void:
 		var wall := PackedVector2Array([Vector2(left, -384), Vector2(left + 16, -384), Vector2(left + 16, -320), Vector2(left, -320)])
 		keep.get_node("GateWall/Collision").polygon = wall
 		keep.get_node("GateStone").polygon = wall
+		_gate_access(level, keep, side)
+
+static func _gate_access(level: Node2D, keep: Node, side: int) -> void:
+	# Replace only generated access geometry, making repeated upgrades safe.
+	var previous := keep.get_node_or_null("GateAccess")
+	if previous:
+		previous.free()
+	var access := Node2D.new()
+	access.name = "GateAccess"
+	keep.add_child(access)
+	access.owner = level
+	var barrier := StaticBody2D.new()
+	barrier.name = "TimberBarrier"
+	barrier.collision_layer = 32
+	barrier.collision_mask = 0
+	barrier.position = Vector2(side * 1032, -208)
+	access.add_child(barrier)
+	barrier.owner = level
+	var collider := CollisionShape2D.new()
+	collider.name = "CollisionShape2D"
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(48, 96)
+	collider.shape = shape
+	barrier.add_child(collider)
+	collider.owner = level
+	for i in range(7):
+		var step := TileMapLayer.new()
+		step.name = "Step%d" % (i + 1)
+		step.tile_set = preload("res://assets/sprites/oak_tileset.tres")
+		step.modulate = keep.get_node("LowerBalcony").modulate
+		step.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		step.position = Vector2(side * (864 + 24 * i) - 48, -64 - 32 * i)
+		step.add_to_group("fortress_one_way_platforms", true)
+		step.add_to_group("fortress_arrow_transparent_platforms", true)
+		for x in range(6):
+			step.set_cell(Vector2i(x, 0), 0, Vector2i(8 + x % 3, 0), 2)
+		access.add_child(step)
+		step.owner = level
+	for i in range(3):
+		keep.get_node("Climb%d" % (i + 1)).position = Vector2(side * (1136 - 24 * i) - 48, -192 - 32 * i)

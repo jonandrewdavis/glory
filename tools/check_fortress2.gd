@@ -6,6 +6,8 @@ const DT := 1.0 / 60.0
 var level: Node2D
 var pawn: CharacterBody2D
 var failures := 0
+var player_scale := Vector2.ONE
+var player_half_height := 8.0
 
 func _initialize() -> void:
 	# Autoload scene history expects a current scene before its _ready runs.
@@ -91,20 +93,22 @@ func _check() -> void:
 	pawn.collision_layer = 2
 	var archer: Node = load("res://player/arrow_player/arrow_player.tscn").instantiate()
 	pawn.collision_mask = archer.collision_mask
-	archer.free()
+	player_scale = archer.scale
 	var collider := CollisionShape2D.new()
-	var capsule := CapsuleShape2D.new()
-	capsule.radius = 6
-	capsule.height = 16
-	collider.shape = capsule
+	collider.shape = archer.get_node("CollisionShape2D").shape.duplicate()
+	player_half_height = collider.shape.height * player_scale.y * 0.5
+	archer.free()
 	pawn.add_child(collider)
 	root.add_child(pawn)
 	Engine.physics_ticks_per_second = 6000
 	Engine.time_scale = 100
 	Engine.max_physics_steps_per_frame = 1000
 	for marker in level.get_node("SpawnPoints").get_children():
+		# Creep markers intentionally lie in timber: only players are blocked.
+		pawn.collision_mask = 17 if str(marker.name).begins_with("Creep") else 33
 		await teleport(marker.position)
 		expect(pawn.is_on_floor() and absf(pawn.position.x - marker.position.x) < 1, "%s safe spawn" % marker.name)
+	pawn.collision_mask = 33
 	for side in [-1, 1]:
 		await teleport(Vector2(side * 352, 80))
 		for frame in range(260):
@@ -117,11 +121,8 @@ func _check() -> void:
 				break
 		expect(absf(pawn.position.x) > 992 and pawn.position.y < -162, "Side %d upper ramp" % side)
 		await ascent(side, 608, -32, 4, "outpost")
-		await ascent(side, 1160, -160, 7, "keep")
-		await teleport(Vector2(side * 960, -176))
-		for frame in range(150):
-			await tick(side)
-		expect(absf(pawn.position.x) > 1080, "Side %d open gate entry" % side)
+		await ascent(side, 1160, -288, 3, "upper keep")
+		await check_gate_access(side)
 		for direction in [-1, 1]:
 			await teleport(Vector2(side * 728, -8))
 			for frame in range(110):
@@ -131,13 +132,52 @@ func _check() -> void:
 	expect(get_nodes_in_group("spawn_blue").size() == 4 and get_nodes_in_group("spawn_orange").size() == 4, "Four spawns per team")
 	expect(get_nodes_in_group("fortress_keeps").size() == 2, "Two keeps")
 	expect(get_nodes_in_group("fortress_outposts").size() == 2, "Two outposts")
-	expect(get_nodes_in_group("fortress_gates").size() == 2, "Two open gate facades")
+	expect(get_nodes_in_group("fortress_gates").size() == 2, "Two damageable gate objectives")
 	expect(get_nodes_in_group("fortress_rams").size() == 1, "One shared ram")
 	await check_center()
 	await check_defenses()
 	await load("res://tools/check_fortress_platforms.gd").run(self, level)
 	print("Fortress2 checks completed; failures=", failures)
 	quit(1 if failures else 0)
+
+func stair_jump(target_x: float, surface_y: float, description: String) -> void:
+	await tick(0, true)
+	for frame in range(45):
+		var direction := clampf((target_x - pawn.position.x) / 6.0, -1.0, 1.0)
+		await tick(direction)
+	expect(pawn.is_on_floor() and absf(pawn.position.y - (surface_y - player_half_height)) < 1, description)
+
+func check_gate_access(side: int) -> void:
+	# Same capsule and scale as the playable archer; legacy map checks use unit scale.
+	pawn.scale = player_scale
+	for outside in [true, false]:
+		await teleport(Vector2(side * (984 if outside else 1080), -176))
+		for frame in range(150):
+			await tick(side if outside else -side)
+		expect(absf(pawn.position.x) < 1008 if outside else absf(pawn.position.x) > 1056,
+			"Side %d gate blocks %s" % [side, "entry" if outside else "exit"])
+	await teleport(Vector2(side * 848, -42))
+	for i in range(7):
+		await stair_jump(side * (864 + 24 * i), -64 - 32 * i, "Side %d exterior stair %d" % [side, i + 1])
+	await stair_jump(side * 1048, -288, "Side %d balcony arrival" % side)
+	for frame in range(65):
+		await tick(side)
+	expect(absf(pawn.position.x) > 1100 and pawn.is_on_floor(), "Side %d enters keep above gate" % side)
+	# Walk off the interior end, then climb back without teleporting between steps.
+	for frame in range(90):
+		await tick(side)
+	for frame in range(90):
+		await tick(-side if absf(pawn.position.x) > 1136 else 0)
+	for i in range(3):
+		await stair_jump(side * (1136 - 24 * i), -192 - 32 * i, "Side %d interior stair %d" % [side, i + 1])
+	await stair_jump(side * 1064, -288, "Side %d return balcony" % side)
+	for frame in range(65):
+		await tick(-side)
+	expect(absf(pawn.position.x) < 1000 and pawn.is_on_floor(), "Side %d exits above gate" % side)
+	var barrier := level.get_node(("Blue" if side < 0 else "Orange") + "/Keep/GateAccess/TimberBarrier")
+	expect(not barrier.is_in_group("fortress_one_way_platforms") and not barrier.get_node("CollisionShape2D").one_way_collision,
+		"Side %d timber cannot be dropped through" % side)
+	pawn.scale = Vector2.ONE
 
 func check_defenses() -> void:
 	var space := level.get_world_2d().direct_space_state
@@ -193,3 +233,11 @@ func preview() -> void:
 	await RenderingServer.frame_post_draw
 	var error := root.get_texture().get_image().save_png("/tmp/fortress2-overview.png")
 	print("Preview: ", error_string(error), " /tmp/fortress2-overview.png")
+	if "--gate-preview" in OS.get_cmdline_user_args():
+		camera.zoom = Vector2(3, 3)
+		for side in [-1, 1]:
+			camera.position = Vector2(side * 1032, -208)
+			for frame in range(6):
+				await process_frame
+			await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png("/tmp/fortress2-gate-%s.png" % ("blue" if side < 0 else "orange"))

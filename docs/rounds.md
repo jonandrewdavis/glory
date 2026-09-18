@@ -6,6 +6,8 @@ health, soldiers cleared and a fresh wave queued), and every player is
 re-spawned at their team spawn with full health. Round wins are tracked as
 "Blue N - M Orange"; kills and deaths in the scoreboard persist across rounds
 and reset only when the session ends.
+Spawn-band ownership resets before round respawns. On Fortress2 each team returns
+to its active outpost; see [respawns.md](respawns.md) for territory and death waits.
 
 ## Gates
 
@@ -52,6 +54,8 @@ every player through `PlayerSpawner.replace_player`. A level change from the
 pause menu or a session exit cancels the pending restart; level changes keep
 round wins, session exit clears them. Late joiners receive the current round
 state on connection.
+For remote replacements the server first asks the owner to stop its previous
+movement synchronizer, then spawns a uniquely named incarnation after acknowledgment.
 
 ## HUD
 

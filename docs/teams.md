@@ -11,6 +11,8 @@ Cooldowns last for the current connection and clear on disconnect or session exi
 
 Player health belongs to the server. Only opposing players can cause damage;
 client damage RPCs, friendly fire, self damage, and unattributed damage are rejected.
+Respawn waits scale with team population; the ram captures forward spawn bands.
+See [respawns.md](respawns.md) for timing, capture milestones and map authoring.
 
 The shared ram has no collision objects. Living players and creeps inside the
 circular radius determine its direction: Blue pushes right, Orange pushes left,

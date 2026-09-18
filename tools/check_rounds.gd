@@ -162,6 +162,7 @@ func check_ram() -> void:
 	expect(r.attack_state == BatteringRam.AttackState.STRIKE, "Eight seconds of contact begins a strike")
 	world.player_spawner.spawn_player(2)
 	var pusher: ArrowPlayer = world.player_spawner.get_player(2)
+	pusher.end_spawn_protection()
 	pusher.set_physics_process(false)
 	pusher.team = Teams.Team.ORANGE
 	pusher.position = r.position
@@ -211,7 +212,8 @@ func check_round_end() -> void:
 	expect(get_nodes_in_group("creeps").size() == 6, "A fresh creep wave spawns")
 	var player: ArrowPlayer = world.player_spawner.get_player(1)
 	expect(player != null and player != old_player and player.health.current == player.health.max_value, "Players are re-spawned with full health")
-	expect(player.global_position.distance_to(Teams.spawn_position(get_tree(), player.team, player.spawn_index)) < 4.0, "Players return to their team spawn")
+	var active: SpawnBand = world.respawn_manager.active_band(player.team)
+	expect(active != null and active.bounds.has_point(active.to_local(player.global_position)), "Players return to their active team band")
 	expect(world.scoreboard.entries[1].kills == kills, "Kill scoreboard persists across rounds")
 	world.creep_spawner.set_physics_process(false)
 	await reset_creeps()
