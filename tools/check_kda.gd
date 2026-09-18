@@ -4,6 +4,7 @@ var failures := 0
 var events: Array[Dictionary] = []
 var players: Array[ArrowPlayer] = []
 var panel: Control
+var feed: Control
 var hud: RoundHud
 var health_hud: PlayerHealthBar
 
@@ -49,7 +50,9 @@ func _run() -> void:
 	panel.offset_right = -24
 	panel.offset_top = 24
 	screen.add_child(panel)
-	panel.set_process(false)
+	feed = load("res://scenes/gameplay/ui/kill_feed.tscn").instantiate()
+	screen.add_child(feed)
+	feed.set_process(false)
 	hud = load("res://scenes/gameplay/ui/round_hud.tscn").instantiate()
 	screen.add_child(hud)
 	health_hud = load("res://scenes/gameplay/ui/player_health_bar.tscn").instantiate()
@@ -110,13 +113,13 @@ func _run() -> void:
 	for i in 7:
 		board.record_kill(2, 5)
 	await get_tree().process_frame
-	expect(panel._feed.size() == 5, "Kill feed retains only five newest entries")
-	var line: Label = panel._feed[0].line
+	expect(feed._feed.size() == 5, "Kill feed retains only five newest entries")
+	var line: Label = feed._feed[0].line
 	expect(line.text == "%s killed %s" % [MultiplayerService.get_username(2), MultiplayerService.get_username(5)] and line.modulate == Teams.color(Teams.Team.BLUE), "Feed contains plain killer/victim text colored by killer team")
-	panel._process(7.5)
+	feed._process(7.5)
 	expect(is_equal_approx(line.modulate.a, 0.5), "Feed fades during its final second")
-	panel._process(0.6)
-	expect(panel._feed.is_empty(), "Feed expires after eight seconds")
+	feed._process(0.6)
+	expect(feed._feed.is_empty(), "Feed expires after eight seconds")
 	expect(not hud.score_label.visible and not hud.get_node("RespawnHud").visible, "Round score and converted respawn UI remain hidden")
 	var respawns := hud.get_node("RespawnHud")
 	expect(respawns.get_node("Zones").get_child_count() == 6, "Hidden respawn UI contains six working node-based zones")
@@ -133,12 +136,12 @@ func _run() -> void:
 	indicator._process(0)
 	expect(indicator.get_node("Progress") is TextureProgressBar and is_equal_approx(indicator.get_node("Progress").value, 0.5), "Replicated charge snapshot drives radial progress node")
 	board.record_kill(5, 2)
-	expect(panel._feed[0].line.modulate == Teams.color(Teams.Team.ORANGE), "Orange kills use Orange team color")
+	expect(feed._feed[0].line.modulate == Teams.color(Teams.Team.ORANGE), "Orange kills use Orange team color")
 	MultiplayerService.in_lobby = true
 	var actual_ui: UILayer = load("res://scenes/gameplay/ui/ui_layer.tscn").instantiate()
 	add_child(actual_ui)
 	await get_tree().process_frame
-	expect(actual_ui.get_node("PlayerUI/HudRoot/ScorePanel").get_node("%Rows").get_child_count() == board.entries.size() + 2, "Integrated gameplay UI shows all player rows")
+	expect(actual_ui.get_node("PauseLayer/PauseRoot/PlayersPanel/ScorePanel").get_node("%Rows").get_child_count() == board.entries.size() + 2, "Pause layer scoreboard shows all player rows")
 	expect(not actual_ui.get_node("PlayerUI/HudRoot/RoundHud/RespawnHud").visible, "Integrated gameplay UI keeps respawns hidden")
 	actual_ui.hide()
 	if "--preview" in OS.get_cmdline_user_args():
@@ -148,7 +151,7 @@ func _run() -> void:
 	MultiplayerService.in_lobby = false
 	World.clear()
 	await get_tree().process_frame
-	expect(panel._feed.is_empty(), "Session clear removes feed")
+	expect(feed._feed.is_empty(), "Session clear removes feed")
 	expect(not respawns.visible and not hud.score_label.visible, "Reset does not reveal hidden UI")
 	canvas.queue_free()
 	await get_tree().process_frame

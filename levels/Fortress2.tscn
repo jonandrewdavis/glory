@@ -1,12 +1,13 @@
 [gd_scene format=4 uid="uid://ca5d083cqiujj"]
 
 [ext_resource type="TileSet" uid="uid://bin3kwb33d1rx" path="res://assets/sprites/oak_tileset.tres" id="1_qpxgy"]
-[ext_resource type="PackedScene" path="res://entities/fortress_gate.tscn" id="2_qhvww"]
+[ext_resource type="PackedScene" uid="uid://b270gx3lh8fcq" path="res://entities/fortress_gate.tscn" id="2_qhvww"]
 [ext_resource type="Texture2D" uid="uid://chbqnxxrutwoh" path="res://assets/sprites/oak_woods_tileset.png" id="4_do133"]
 [ext_resource type="PackedScene" uid="uid://i452p60lnj1i" path="res://entities/battering_ram.tscn" id="4_tjucf"]
 [ext_resource type="Shader" uid="uid://cj7n52jac3g6u" path="res://assets/shaders/Fortress2.gdshader" id="4_wir7t"]
 [ext_resource type="Script" uid="uid://h3frprlklkb" path="res://scenes/gameplay/sky_parallax.gd" id="5_skypx"]
 [ext_resource type="PackedScene" path="res://levels/fortress2_spawn_bands.tscn" id="6_bands"]
+[ext_resource type="Texture2D" uid="uid://cu4w0syhjm8ls" path="res://assets/img/door.png" id="6_tjucf"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_aq2gn"]
 shader = ExtResource("4_wir7t")
@@ -811,52 +812,21 @@ tile_set = ExtResource("1_qpxgy")
 polygon = PackedVector2Array(-1024, -384, -1008, -384, -1008, -320, -1024, -320)
 
 [node name="GateStone" type="Polygon2D" parent="Blue/Keep" unique_id=2019812793]
+visible = false
 color = Color(0.3456, 0.435, 0.51, 1)
 polygon = PackedVector2Array(-1024, -384, -1008, -384, -1008, -320, -1024, -320)
-
-[node name="MainGate" type="Node2D" parent="Blue/Keep" unique_id=1301555418]
-
-[node name="GateTimber" type="Polygon2D" parent="Blue/Keep/MainGate" unique_id=2137029144]
-color = Color(0.39, 0.27, 0.17, 1)
-polygon = PackedVector2Array(-1056, -256, -1008, -256, -1008, -160, -1056, -160)
-
-[node name="Plank1016" type="Line2D" parent="Blue/Keep/MainGate" unique_id=2015433625]
-points = PackedVector2Array(-1016, -252, -1016, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="Plank1028" type="Line2D" parent="Blue/Keep/MainGate" unique_id=1202177445]
-points = PackedVector2Array(-1028, -252, -1028, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="Plank1040" type="Line2D" parent="Blue/Keep/MainGate" unique_id=878769835]
-points = PackedVector2Array(-1040, -252, -1040, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="Plank1052" type="Line2D" parent="Blue/Keep/MainGate" unique_id=658075771]
-points = PackedVector2Array(-1052, -252, -1052, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="IronBand240" type="Polygon2D" parent="Blue/Keep/MainGate" unique_id=1147637168]
-color = Color(0.39600003, 0.4959, 0.59, 1)
-polygon = PackedVector2Array(-1056, -240, -1008, -240, -1008, -234, -1056, -234)
-
-[node name="IronBand184" type="Polygon2D" parent="Blue/Keep/MainGate" unique_id=364802521]
-color = Color(0.39600003, 0.4959, 0.59, 1)
-polygon = PackedVector2Array(-1056, -184, -1008, -184, -1008, -178, -1056, -178)
 
 [node name="FortressGate" parent="Blue/Keep" unique_id=332301694 instance=ExtResource("2_qhvww")]
 position = Vector2(-1006, -208)
 
 [node name="FlagPole" type="Line2D" parent="Blue/Keep" unique_id=1601439627]
+visible = false
 points = PackedVector2Array(-1160, -384, -1160, -432)
 width = 2.0
 default_color = Color(0.72, 0.87, 1, 1)
 
 [node name="TeamFlag" type="Polygon2D" parent="Blue/Keep" unique_id=758174276]
+visible = false
 color = Color(0.72, 0.87, 1, 1)
 polygon = PackedVector2Array(-1192, -432, -1160, -432, -1160, -416, -1192, -416)
 
@@ -873,6 +843,7 @@ shape = SubResource("RectangleShape2D_do133")
 [node name="ForwardOutpost" type="Node2D" parent="Blue" unique_id=533562207 groups=["fortress_outposts"]]
 
 [node name="Watchtower" type="Polygon2D" parent="Blue/ForwardOutpost" unique_id=534321326]
+visible = false
 z_index = -2
 color = Color(0.23040001, 0.30449998, 0.39, 1)
 polygon = PackedVector2Array(-664, -160, -552, -160, -552, -32, -664, -32)
@@ -948,13 +919,6 @@ position = Vector2(-616, -96)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="LowBarricade" type="TileMapLayer" parent="Blue/ForwardOutpost" unique_id=1820910143]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-552, -48)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = SubResource("TileSet_tbwgg")
-
 [node name="BridgeInner" type="TileMapLayer" parent="Blue" unique_id=1473167317 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
@@ -969,13 +933,6 @@ position = Vector2(-808, -32)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="TrenchStone" type="TileMapLayer" parent="Blue" unique_id=1077851621 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-744, -16)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
 [node name="PerchStep" type="TileMapLayer" parent="Blue" unique_id=600727078 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
@@ -987,7 +944,7 @@ tile_set = ExtResource("1_qpxgy")
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
 position = Vector2(-920, -96)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgA=")
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgD//wAAAAAIAAAAAgD+/wAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
 [node name="Orange" type="Node2D" parent="." unique_id=930031842]
@@ -1180,53 +1137,22 @@ tile_set = ExtResource("1_qpxgy")
 polygon = PackedVector2Array(1008, -384, 1024, -384, 1024, -320, 1008, -320)
 
 [node name="GateStone" type="Polygon2D" parent="Orange/Keep" unique_id=1085376105]
+visible = false
 color = Color(0.48, 0.41, 0.3366, 1)
 polygon = PackedVector2Array(1008, -384, 1024, -384, 1024, -320, 1008, -320)
-
-[node name="MainGate" type="Node2D" parent="Orange/Keep" unique_id=217448004]
-
-[node name="GateTimber" type="Polygon2D" parent="Orange/Keep/MainGate" unique_id=1951697398]
-color = Color(0.39, 0.27, 0.17, 1)
-polygon = PackedVector2Array(1008, -256, 1056, -256, 1056, -160, 1008, -160)
-
-[node name="Plank1016" type="Line2D" parent="Orange/Keep/MainGate" unique_id=1693524055]
-points = PackedVector2Array(1016, -252, 1016, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="Plank1028" type="Line2D" parent="Orange/Keep/MainGate" unique_id=857807051]
-points = PackedVector2Array(1028, -252, 1028, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="Plank1040" type="Line2D" parent="Orange/Keep/MainGate" unique_id=496767667]
-points = PackedVector2Array(1040, -252, 1040, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="Plank1052" type="Line2D" parent="Orange/Keep/MainGate" unique_id=997318487]
-points = PackedVector2Array(1052, -252, 1052, -164)
-width = 2.0
-default_color = Color(0.18, 0.14, 0.12, 1)
-
-[node name="IronBand240" type="Polygon2D" parent="Orange/Keep/MainGate" unique_id=748116904]
-color = Color(0.55, 0.46739998, 0.3894, 1)
-polygon = PackedVector2Array(1008, -240, 1056, -240, 1056, -234, 1008, -234)
-
-[node name="IronBand184" type="Polygon2D" parent="Orange/Keep/MainGate" unique_id=1969250075]
-color = Color(0.55, 0.46739998, 0.3894, 1)
-polygon = PackedVector2Array(1008, -184, 1056, -184, 1056, -178, 1008, -178)
 
 [node name="FortressGate" parent="Orange/Keep" unique_id=1379693155 instance=ExtResource("2_qhvww")]
 position = Vector2(1006, -208)
 team = 1
 
 [node name="FlagPole" type="Line2D" parent="Orange/Keep" unique_id=343255199]
+visible = false
 points = PackedVector2Array(1160, -384, 1160, -432)
 width = 2.0
 default_color = Color(1, 0.82, 0.66, 1)
 
 [node name="TeamFlag" type="Polygon2D" parent="Orange/Keep" unique_id=1987207404]
+visible = false
 color = Color(1, 0.82, 0.66, 1)
 polygon = PackedVector2Array(1160, -432, 1192, -432, 1192, -416, 1160, -416)
 
@@ -1239,6 +1165,16 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=1973611605]
 shape = SubResource("RectangleShape2D_tbwgg")
+
+[node name="Door" type="Sprite2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=1754105562]
+position = Vector2(-2071, -9.000008)
+scale = Vector2(-0.1, 0.1)
+texture = ExtResource("6_tjucf")
+
+[node name="Door2" type="Sprite2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=9189201]
+position = Vector2(7.999996, -9.000008)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("6_tjucf")
 
 [node name="ForwardOutpost" type="Node2D" parent="Orange" unique_id=2095412058 groups=["fortress_outposts"]]
 
@@ -1318,13 +1254,6 @@ position = Vector2(504, -96)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="LowBarricade" type="TileMapLayer" parent="Orange/ForwardOutpost" unique_id=849273581]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(536, -48)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = SubResource("TileSet_tbwgg")
-
 [node name="BridgeInner" type="TileMapLayer" parent="Orange" unique_id=979286355 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
@@ -1339,13 +1268,6 @@ position = Vector2(760, -32)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="TrenchStone" type="TileMapLayer" parent="Orange" unique_id=608208176 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(720, -16)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
 [node name="PerchStep" type="TileMapLayer" parent="Orange" unique_id=1957062227 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
@@ -1357,7 +1279,7 @@ tile_set = ExtResource("1_qpxgy")
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
 position = Vector2(824, -96)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgA=")
+tile_map_data = PackedByteArray("AAABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAIAAAAAgAGAAAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
 [node name="Center" type="Node2D" parent="." unique_id=1429112789 groups=["fortress_center_towers"]]
@@ -1400,16 +1322,19 @@ tile_set = ExtResource("1_qpxgy")
 [node name="Tower" type="Node2D" parent="Center" unique_id=1027167086]
 
 [node name="Backdrop" type="Polygon2D" parent="Center/Tower" unique_id=544037388]
+visible = false
 z_index = -2
 color = Color(0.24, 0.26, 0.28, 1)
 polygon = PackedVector2Array(-72, -120, 72, -120, 72, -24, -72, -24)
 
 [node name="PostBlue" type="Polygon2D" parent="Center/Tower" unique_id=2137937]
+visible = false
 z_index = -1
 color = Color(0.42, 0.44, 0.46, 1)
 polygon = PackedVector2Array(-62, -120, -50, -120, -50, -24, -62, -24)
 
 [node name="PostOrange" type="Polygon2D" parent="Center/Tower" unique_id=1561703932]
+visible = false
 z_index = -1
 color = Color(0.42, 0.44, 0.46, 1)
 polygon = PackedVector2Array(50, -120, 62, -120, 62, -24, 50, -24)

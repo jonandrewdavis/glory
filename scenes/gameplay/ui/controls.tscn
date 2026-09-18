@@ -38,7 +38,12 @@ region = Rect2(448, 960, 64, 64)
 atlas = ExtResource("1_rw3g5")
 region = Rect2(832, 256, 64, 64)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_8x7gl"]
+atlas = ExtResource("1_rw3g5")
+region = Rect2(704, 192, 64, 64)
+
 [node name="Controls" type="VBoxContainer" unique_id=733643760]
+scale = Vector2(0.7, 0.7)
 theme_override_constants/separation = 6
 
 [node name="Row1" type="HBoxContainer" parent="." unique_id=1854221872]
@@ -169,3 +174,21 @@ theme_override_constants/outline_size = 3
 theme_override_constants/shadow_outline_size = 2
 theme_override_font_sizes/font_size = 21
 text = " Look at arrow"
+
+[node name="Row8" type="HBoxContainer" parent="." unique_id=1527691900]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Key_shift" type="TextureRect" parent="Row8" unique_id=1363820242]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+texture = SubResource("AtlasTexture_8x7gl")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Row8" unique_id=268341341]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 2
+theme_override_font_sizes/font_size = 21
+text = "Menu (Capture mouse)"

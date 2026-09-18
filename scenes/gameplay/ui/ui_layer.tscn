@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://barl4q1kugrmm" path="res://scenes/gameplay/ui/pause-layer/pause-layer.tscn" id="3_n2icj"]
 [ext_resource type="PackedScene" uid="uid://hl64wi1aexpn" path="res://scenes/gameplay/ui/round_hud.tscn" id="4_round"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/ui/player_health_bar.tscn" id="5_health"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/score_panel.tscn" id="6_score"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/kill_feed.tscn" id="6_feed"]
 
 [node name="UILayer" type="CanvasLayer" unique_id=959767118]
 script = ExtResource("1_oq6q8")
@@ -37,7 +37,7 @@ layout_mode = 1
 anchors_preset = 0
 mouse_filter = 2
 
-[node name="ScorePanel" parent="PlayerUI/HudRoot" instance=ExtResource("6_score")]
+[node name="KillFeed" parent="PlayerUI/HudRoot" instance=ExtResource("6_feed")]
 layout_mode = 1
 anchor_left = 1.0
 anchor_right = 1.0

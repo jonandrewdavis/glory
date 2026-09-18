@@ -20,6 +20,12 @@ func _ready() -> void:
 func _on_sensitivity_changed(value: float) -> void:
 	sensitivity = value * 100.0
 
+func set_direction(value: Vector2) -> void:
+	direction = value.normalized()
+	_mouse_offset = direction * mouse_radius
+	position = direction * radius
+	queue_redraw()
+
 func apply_mouse_motion(motion: Vector2) -> void:
 	_mouse_offset = (_mouse_offset + motion * (sensitivity / 100.0)).limit_length(mouse_radius)
 	# Preserve the last valid aim when passing exactly through the origin.

@@ -3,9 +3,9 @@
 [ext_resource type="Theme" uid="uid://brfyamk8dn0ef" path="res://resources/theme/theme_casual_pop.tres" id="1_y1o0p"]
 [ext_resource type="PackedScene" uid="uid://c2jxemjmao00b" path="res://addons/ggt-core/settings/settings_menu.tscn" id="3_e0arn"]
 [ext_resource type="Script" uid="uid://cvc42inud8fxx" path="res://scenes/menu/menu.gd" id="5"]
+[ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="controls"]
 [ext_resource type="PackedScene" path="res://scenes/menu/host_panel.tscn" id="host"]
 [ext_resource type="PackedScene" path="res://scenes/menu/join_panel.tscn" id="join"]
-[ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="controls"]
 
 [node name="Menu" type="Control" unique_id=1641158152]
 layout_mode = 3
@@ -83,19 +83,20 @@ size_flags_horizontal = 3
 
 [node name="StatusLabel" type="Label" parent="MainContainer/Control/VBoxContainer" unique_id=101626082]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme_type_variation = &"LabelSmall"
 autowrap_mode = 2
 
-[node name="UsernameRow" type="HBoxContainer" parent="MainContainer/Control/VBoxContainer"]
+[node name="UsernameRow" type="HBoxContainer" parent="MainContainer/Control/VBoxContainer" unique_id=137991309]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MainContainer/Control/VBoxContainer/UsernameRow"]
+[node name="Label" type="Label" parent="MainContainer/Control/VBoxContainer/UsernameRow" unique_id=665667659]
 layout_mode = 2
 text = "Username"
 
-[node name="UsernameEdit" type="LineEdit" parent="MainContainer/Control/VBoxContainer/UsernameRow"]
+[node name="UsernameEdit" type="LineEdit" parent="MainContainer/Control/VBoxContainer/UsernameRow" unique_id=521368363]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -172,7 +173,7 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Controls" parent="Help/MarginContainer" instance=ExtResource("controls")]
+[node name="Controls" parent="Help/MarginContainer" unique_id=894763039 instance=ExtResource("controls")]
 layout_mode = 2
 size_flags_vertical = 4
 

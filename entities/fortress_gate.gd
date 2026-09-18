@@ -19,8 +19,6 @@ func side() -> int:
 
 func _ready() -> void:
 	$CollisionShape2D.position = Vector2(side() * HITBOX_INSET, 0)
-	health.changed.connect(_update_health_bar)
-	_update_health_bar(health.current, health.max_value)
 	if multiplayer.is_server():
 		World.level_loader.peer_level_ready.connect(_on_peer_level_ready)
 		for id: int in World.level_loader.ready_peers:
@@ -44,9 +42,3 @@ func closest_point(point: Vector2) -> Vector2:
 ## Same contract as ArrowPlayer and Creep so ProjectileSpawner can stick arrows.
 func attach_stuck_arrow(node: StuckArrow, impact_pos: Vector2, impact_rot: float) -> void:
 	node.attach_to(stuck_arrows, impact_pos, impact_rot)
-
-func _update_health_bar(_current: float, _maximum: float) -> void:
-	$HealthBar.visible = health.current < health.max_value
-	$HealthBar.position = Vector2(side() * HITBOX_INSET - BAR_SIZE.x * 0.5, -HITBOX_SIZE.y * 0.5 - 8)
-	$HealthBar.value = health.ratio()
-	$HealthBar.modulate = Teams.color(team)

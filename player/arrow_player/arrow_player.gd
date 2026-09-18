@@ -19,6 +19,9 @@ const FIRE_COOLDOWN := 0.5
 @export var drop_through_time := 0.25
 
 var _facing := 1
+## Local-only: the owner's last aim, carried into its next incarnation.
+static var _carried_aim := Vector2.ZERO
+static var _carried_facing := 1
 var _coyote_left := 0.0
 var _jump_buffer_left := 0.0
 var _jump_consumed := false
@@ -127,6 +130,10 @@ func _ready() -> void:
 				other.refresh_team_fade()
 	if is_owner:
 		physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_INHERIT
+		if _carried_aim != Vector2.ZERO:
+			aim_reticle.set_direction(_carried_aim)
+			_facing = _carried_facing
+			sprite.flip_h = _facing < 0
 		_teleport_to_spawn()
 		World.camera_rig.set_local_player(self)
 		capture_mouse()
@@ -246,6 +253,11 @@ func _owner_physics(delta: float) -> void:
 		sprite.flip_h = _facing < 0
 		if not is_preparing:
 			sprite.play("walk" if absf(velocity.x) > 5.0 else "idle")
+
+func _exit_tree() -> void:
+	if is_multiplayer_authority():
+		_carried_aim = aim_reticle.direction
+		_carried_facing = _facing
 
 func get_facing_direction() -> int:
 	return _facing
