@@ -22,12 +22,11 @@ Each keep carries a `FortressGate` objective (`{Blue,Orange}/Keep/FortressGate`,
 from both directions until the level resets, without changing arrow damage,
 creep movement, or ram behavior. See `docs/rounds.md`.
 
-Seven broad exterior stair platforms lead toward each gate, from absolute
-x=864, y=-64 to x=1008, y=-256, then onto the lower balcony at y=-288.
-Each is 96 pixels wide, with 24-pixel horizontal offsets and 32-pixel rises.
 Three interior steps at absolute x=1136, 1112, and 1088 (y=-192, -224, -256)
-give players the same easy route back out. Both staircases use the existing
-arrow-transparent one-way stone tiles. The timber itself cannot be dropped through.
+give defenders an easy route out through the lower balcony at y=-288.
+These 96-pixel-wide platforms use the existing arrow-transparent one-way stone
+tiles. There is no exterior staircase for attackers. The timber itself cannot
+be dropped through.
 
 All keep and outpost climbing steps, roof decks, balconies, and firing shelves
 use arrow-transparent one-way stone platforms (oak tile alternative 2).

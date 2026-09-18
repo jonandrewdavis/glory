@@ -156,18 +156,8 @@ func check_gate_access(side: int) -> void:
 			await tick(side if outside else -side)
 		expect(absf(pawn.position.x) < 1008 if outside else absf(pawn.position.x) > 1056,
 			"Side %d gate blocks %s" % [side, "entry" if outside else "exit"])
-	await teleport(Vector2(side * 848, -42))
-	for i in range(7):
-		await stair_jump(side * (864 + 24 * i), -64 - 32 * i, "Side %d exterior stair %d" % [side, i + 1])
-	await stair_jump(side * 1048, -288, "Side %d balcony arrival" % side)
-	for frame in range(65):
-		await tick(side)
-	expect(absf(pawn.position.x) > 1100 and pawn.is_on_floor(), "Side %d enters keep above gate" % side)
-	# Walk off the interior end, then climb back without teleporting between steps.
-	for frame in range(90):
-		await tick(side)
-	for frame in range(90):
-		await tick(-side if absf(pawn.position.x) > 1136 else 0)
+	# Defenders climb out from inside; attackers have no exterior staircase.
+	await teleport(Vector2(side * 1136, -176))
 	for i in range(3):
 		await stair_jump(side * (1136 - 24 * i), -192 - 32 * i, "Side %d interior stair %d" % [side, i + 1])
 	await stair_jump(side * 1064, -288, "Side %d return balcony" % side)

@@ -870,55 +870,6 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Blue/Keep/GateAccess/TimberBarrier" unique_id=411664770]
 shape = SubResource("RectangleShape2D_do133")
 
-[node name="Step1" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=530736824 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-912, -64)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step2" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=1631255845 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-936, -96)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step3" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=783759511 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-960, -128)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step4" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=1542578711 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-984, -160)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step5" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=626458430 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1008, -192)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step6" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=218684219 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1032, -224)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step7" type="TileMapLayer" parent="Blue/Keep/GateAccess" unique_id=847754075 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1056, -256)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
 [node name="ForwardOutpost" type="Node2D" parent="Blue" unique_id=533562207 groups=["fortress_outposts"]]
 
 [node name="Watchtower" type="Polygon2D" parent="Blue/ForwardOutpost" unique_id=534321326]
@@ -1288,55 +1239,6 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=1973611605]
 shape = SubResource("RectangleShape2D_tbwgg")
-
-[node name="Step1" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=1981435793 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(816, -64)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step2" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=1397988972 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(840, -96)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step3" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=1691119064 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(864, -128)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step4" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=2112003404 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(888, -160)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step5" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=780820787 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(912, -192)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step6" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=1864531271 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(936, -224)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Step7" type="TileMapLayer" parent="Orange/Keep/GateAccess" unique_id=1434944224 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(960, -256)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
 
 [node name="ForwardOutpost" type="Node2D" parent="Orange" unique_id=2095412058 groups=["fortress_outposts"]]
 
