@@ -45,14 +45,13 @@ The experiment applies to PlayFlow only; Tube/ENet behavior is unchanged.
   there is currently no combat delay or return-at-spawn restriction.
 - A disconnected actor remains motionless for 120 seconds.
   Shield, charge, movement and firing are disabled. Ordinary deaths, respawns,
-  rounds and protection expiration still occur on the server during this grace.
+  rounds still occur on the server during this grace.
 - Return always reconnects to the same server, resetting transport and Godot
   replication caches. A server-issued random 256-bit bearer token maps the new
   peer ID to the existing session. It is held only in memory and never logged.
   Reloading the page or restarting the server does not preserve that token/state.
-- The player retains team, K/D/A, current health, position, remaining protection,
-  pending respawn and team-switch cooldown. Reconnection itself grants no heal
-  or protection. Existing attack attribution is migrated to the new peer ID.
+- The player retains team, K/D/A, current health, position,
+  pending respawn and team-switch cooldown. Reconnection itself grants no heal. Existing attack attribution is migrated to the new peer ID.
 - Input stays disabled behind “Resuming session...” until the new level and
   local actor exist and a current-revision snapshot has been applied. The
   snapshot supplies scoreboard, names, rounds, respawn state and projectile

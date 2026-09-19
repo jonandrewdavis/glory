@@ -16,6 +16,11 @@ func _ready() -> void:
 	_mouse_offset = direction * mouse_radius
 	position = direction * radius
 	hide()
+	# Only the owner aims; remote copies and the dedicated server never draw this.
+	if not get_parent().is_multiplayer_authority():
+		set_process(false)
+		set_physics_process(false)
+		set_process_unhandled_input(false)
 
 func _on_sensitivity_changed(value: float) -> void:
 	sensitivity = value * 100.0

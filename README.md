@@ -5,9 +5,29 @@ Rewards:
 - Giant fucking ballista. top of fortress, every 1 min. annhilaters shit on hits path, penetration, skewers people.
 - Hot oil
 
-
 # Features
 
 - Arrows persist in players, as pincusion, healthbars
-- Game is about not dying, getting bakc in the battle, in replacement would be more about respawn time
--
+
+## Phase 2:
+
+- Server restart & dump players
+- Better Mouse re-capture logic ... ugh
+- Going back to base to heal
+- Fix respawn not swapping teams when Ram retreats
+- Hit sound when you take damage
+- A "Mirror" icon show on the arrow 
+- Player Interpolation.
+- Network audit, server CPU
+- Randomize teams after game ends?
+- Better fortress defense positions
+- Resize names (based on number of players)
+
+
+Phase 3:
+
+- Scale testing
+- Buy server?
+- Healer creep
+- Full CSP, reconcillation, rollback, Netfox??
+ 

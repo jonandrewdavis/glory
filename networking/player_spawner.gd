@@ -30,8 +30,7 @@ func spawn_player(id: int) -> void:
 	_serial += 1
 	spawn({"peer_id": id, "team": team, "spawn_index": index,
 		"position": World.respawn_manager.spawn_position(team, index),
-		"revision": World.level_loader.revision, "serial": _serial,
-		"protection": World.respawn_manager.settings.protection_seconds})
+		"revision": World.level_loader.revision, "serial": _serial})
 
 func _spawn_player(data: Variant) -> Node:
 	var player: ArrowPlayer = ARROW_PLAYER.instantiate()
@@ -44,7 +43,6 @@ func _spawn_player(data: Variant) -> Node:
 	player.has_authoritative_spawn = data.has("position")
 	player.spawn_revision = data.get("revision", 0)
 	player.spawn_serial = data.get("serial", 0)
-	player.spawn_protection_left = maxf(0, data.get("protection", 0.0))
 	player.network_away = data.get("away", false)
 	player.initial_health = data.get("health", -1.0)
 	player.position = player.authoritative_spawn
@@ -99,7 +97,7 @@ func _process(_delta: float) -> void:
 				multiplayer.multiplayer_peer.disconnect_peer(id)
 
 ## Runs before the normal peer-connected spawn handler. Preserve the living or
-## dead incarnation's state, without granting health, protection, or a new team.
+## dead incarnation's state, without granting health or a new team.
 func restore_session(old_id: int, new_id: int) -> void:
 	if _replacement_requests.has(old_id):
 		_replace_now(old_id)
@@ -110,7 +108,7 @@ func restore_session(old_id: int, new_id: int) -> void:
 	var remaining: float = World.respawn_manager.seconds_left(old_id)
 	var data := {"peer_id": new_id, "team": player.team, "spawn_index": player.spawn_index,
 		"position": player.global_position, "revision": World.level_loader.revision,
-		"health": player.health.current, "protection": player.spawn_protection_left, "away": true}
+		"health": player.health.current, "away": true}
 	var attackers := player.recent_attackers.duplicate()
 	var last_fire := player._server_last_fire_msec
 	World.respawn_manager.cancel(old_id)

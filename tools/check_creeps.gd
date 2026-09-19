@@ -268,7 +268,6 @@ func check_arrows_and_ram() -> void:
 	await ticks(2)
 	world.player_spawner.spawn_player(1)
 	var player: ArrowPlayer = world.player_spawner.get_player(1)
-	player.end_spawn_protection()
 	player.set_physics_process(false)
 	player.team = Teams.Team.BLUE
 	player.position = Vector2(-50, 88)
@@ -303,7 +302,6 @@ func check_arrows_and_ram() -> void:
 	await reset_creeps()
 	world.player_spawner.spawn_player(2)
 	var opponent: ArrowPlayer = world.player_spawner.get_player(2)
-	opponent.end_spawn_protection()
 	opponent.set_physics_process(false)
 	opponent.position = Vector2(20, 88)
 	player.position = Vector2(-50, 88)
@@ -346,7 +344,6 @@ func check_headshots() -> void:
 
 	world.player_spawner.spawn_player(2)
 	var opponent: ArrowPlayer = world.player_spawner.get_player(2)
-	opponent.end_spawn_protection()
 	opponent.set_physics_process(false)
 	opponent.position = Vector2(20, 88)
 	await ticks(2)

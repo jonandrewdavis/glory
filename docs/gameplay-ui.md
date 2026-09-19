@@ -3,8 +3,8 @@
 Reusable `scenes/gameplay/ui/radial_progress.tscn` uses a TextureProgressBar with
 a radial GradientTexture2D whose alpha forms a ring. Each instance owns its gradient;
 the stroke width stays constant in local pixels as the Control resizes.
-Readiness uses a 180-degree fill, the existing atomic display_state replication,
-a dim track and a Label for the selected level. Protection, ram radius and active
+Readiness uses a 180-degree fill, an owner-only display_state snapshot (never replicated),
+a dim track and a Label for the selected level. Ram radius and active
 spawn flags use the same ring resource at full progress.
 
 `indicator_bar.tscn` supplies shared ProgressBar styling for gate, creep, ram and

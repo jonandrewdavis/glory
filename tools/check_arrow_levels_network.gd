@@ -5,7 +5,6 @@ var failures := 0
 var stage := 0
 var local_player: ArrowPlayer
 var received := 0
-var observed_ready := false
 var started := 0
 var reflection_source: Arrow
 
@@ -45,9 +44,6 @@ func _process(_delta: float) -> void:
 		push_error("Arrow network check timed out")
 		get_tree().quit(1)
 	if multiplayer.is_server():
-		for player: ArrowPlayer in World.player_spawner.get_children():
-			if player.readiness_indicator.display_state == Vector4(stage, 1, 1, 1):
-				observed_ready = true
 		return
 	if stage == 0 and local_player == null and World.level_loader.is_level_ready():
 		local_player = World.player_spawner.get_player(multiplayer.get_unique_id())
@@ -85,23 +81,15 @@ func _on_arrow(arrow: Arrow) -> void:
 		expect(arrow.global_position.is_equal_approx(Arrow.flight_position(arrow.origin, arrow.initial_velocity, 0.4)), "Network reflection starts at matching position")
 		expect(arrow.velocity.is_equal_approx((arrow.initial_velocity + Arrow.GRAVITY * 0.4) * arrow.flight_direction / 1.75), "Network reflection starts at matching velocity")
 	received += 1
-	if multiplayer.is_server():
-		if shot_stage < 3:
-			expect(observed_ready, "Remote readiness snapshot arrives before release")
-	else:
+	if not multiplayer.is_server():
 		_ack.rpc_id(1, failures)
 
 @rpc("any_peer", "call_remote", "reliable")
 func _ack(client_failures: int) -> void:
 	if not multiplayer.is_server():
 		return
-	var sender := multiplayer.get_remote_sender_id()
 	failures += client_failures
 	await get_tree().create_timer(0.6).timeout
-	var player := World.player_spawner.get_player(sender)
-	if player != null and stage < 3:
-		expect(player.readiness_indicator.display_state == Vector4(stage, 0, 0, 0), "Release replicates idle selected-level indicator")
-	observed_ready = false
 	stage += 1
 	if stage < 3:
 		_next.rpc(stage)

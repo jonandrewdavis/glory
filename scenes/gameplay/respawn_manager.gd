@@ -12,6 +12,7 @@ var _rotations: Dictionary = {}
 var _ram: BatteringRam
 var _broadcast_left := 0.0
 var _warned_empty: Dictionary = {}
+var _thresholds: Dictionary = {}
 
 func _ready() -> void:
 	var loader: LevelLoader = get_node("../LevelLoader")
@@ -30,6 +31,7 @@ func clear() -> void:
 	_client_waits.clear()
 	_rotations.clear()
 	_warned_empty.clear()
+	_thresholds.clear()
 	changed.emit()
 
 func _on_level_loaded() -> void:
@@ -48,10 +50,21 @@ func _on_level_loaded() -> void:
 	if multiplayer.is_server():
 		if _ram:
 			_ram.route_advanced.connect(_on_route_advanced)
+			for band in bands:
+				_thresholds[band.band_id] = {
+					Teams.Team.BLUE: band.capture_distance(_ram, Teams.Team.BLUE),
+					Teams.Team.ORANGE: band.capture_distance(_ram, Teams.Team.ORANGE),
+				}
 			_validate_milestones()
 	_refresh_bands()
 
 func _validate_milestones() -> void:
+	for band in bands:
+		var marks: Dictionary = _thresholds[band.band_id]
+		if not band.permanent and marks[Teams.Team.ORANGE] >= marks[Teams.Team.BLUE]:
+			push_warning("Spawn band %s: the Orange milestone must come before the Blue milestone on the ram route." % band.band_id)
+	if owners_at(_ram.distance) != owners:
+		push_warning("Spawn band initial owners disagree with the ram's starting position; they change on its first move.")
 	for team in [Teams.Team.BLUE, Teams.Team.ORANGE]:
 		var fortresses := bands.filter(func(band: SpawnBand) -> bool: return band.permanent and band.initial_owner == team)
 		if not bands.is_empty() and fortresses.is_empty():
@@ -63,7 +76,7 @@ func _validate_milestones() -> void:
 		for band: SpawnBand in ordered:
 			if band.permanent:
 				continue
-			var distance := band.capture_distance(_ram, team)
+			var distance: float = _thresholds[band.band_id][team]
 			var marker := band.get_node_or_null("BlueCapture" if team == Teams.Team.BLUE else "OrangeCapture") as Marker2D
 			if marker and marker.global_position.distance_to(_ram.route_position_at(maxf(0, distance))) > 16:
 				push_warning("Spawn band %s capture marker is more than 16 pixels from the ram route." % band.band_id)
@@ -86,30 +99,37 @@ func _refresh_bands() -> void:
 		band.set_control(int(owners.get(band.band_id, SpawnBand.NEUTRAL)), band == blue or band == orange)
 	changed.emit()
 
-func _on_route_advanced(previous: float, current: float, direction: int) -> void:
+func _on_route_advanced(previous: float, current: float, _direction: int) -> void:
 	if not multiplayer.is_server() or World.round_manager.phase != RoundManager.Phase.PLAYING or previous == current:
 		return
-	var team := Teams.Team.BLUE if direction > 0 else Teams.Team.ORANGE
-	if direction == 0 or signf(current - previous) != direction:
-		return
-	var ordered := bands.duplicate()
-	if team == Teams.Team.ORANGE:
-		ordered.reverse()
-	var altered := false
-	for band: SpawnBand in ordered:
-		if owners.get(band.band_id) == team:
-			continue
-		if band.permanent:
-			break
-		var threshold := band.capture_distance(_ram, team)
-		var crossed := threshold >= 0.0 and (previous <= threshold and current >= threshold if direction > 0 else previous >= threshold and current <= threshold)
-		if not crossed:
-			break
-		owners[band.band_id] = team
-		altered = true
-	if altered:
+	var next := owners_at(current)
+	if next != owners:
+		owners = next
 		_refresh_bands()
 		_broadcast()
+
+## Ownership is a pure function of where the ram stands: each team holds the
+## unbroken run of bands outward from its fortress whose milestones the ram is
+## at or past. Runs stop at the first band not held, so teams never interleave.
+func owners_at(distance: float) -> Dictionary:
+	var result := {}
+	for band in bands:
+		result[band.band_id] = SpawnBand.NEUTRAL
+	for team in [Teams.Team.BLUE, Teams.Team.ORANGE]:
+		var ordered := bands.duplicate()
+		if team == Teams.Team.ORANGE:
+			ordered.reverse()
+		for band: SpawnBand in ordered:
+			if not _holds(band, team, distance):
+				break
+			result[band.band_id] = team
+	return result
+
+func _holds(band: SpawnBand, team: int, distance: float) -> bool:
+	if band.permanent:
+		return band.initial_owner == team
+	var mark: float = _thresholds[band.band_id][team]
+	return mark >= 0.0 and (distance >= mark if team == Teams.Team.BLUE else distance <= mark)
 
 func schedule(player: ArrowPlayer) -> void:
 	if not multiplayer.is_server() or player.health.is_alive() or World.round_manager.phase != RoundManager.Phase.PLAYING or pending.has(player.peer_id):

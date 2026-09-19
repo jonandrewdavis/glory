@@ -22,6 +22,10 @@ var session := 0
 func _ready() -> void:
 	MultiplayerService.lobby_joined.connect(_on_lobby_joined)
 	MultiplayerService.game_exited.connect(clear)
+	if MultiplayerService.is_dedicated_server():
+		# Nobody watches a dedicated server: skip cameras and the debug overlay.
+		camera_rig.process_mode = Node.PROCESS_MODE_DISABLED
+		DebugMenu.process_mode = Node.PROCESS_MODE_DISABLED
 	if OS.is_debug_build() and (get_tree().current_scene == self):
 		host_debug_world()
 		

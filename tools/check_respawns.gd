@@ -51,7 +51,7 @@ func _run() -> void:
 	check_curve()
 	check_captures()
 	await check_points()
-	await check_death_and_protection()
+	await check_death()
 	await check_lifecycle()
 	World.clear()
 	await ticks()
@@ -71,21 +71,29 @@ func check_captures() -> void:
 	push_to(at_x(-608))
 	expect(manager.active_band(Teams.Team.ORANGE).order == 4, "Orange captures center-right at the Blue outer tower center")
 	push_to(at_x(-500, 0))
-	expect(manager.active_band(Teams.Team.ORANGE).order == 4, "Retreat retains captured ownership")
+	expect(manager.active_band(Teams.Team.ORANGE).order == 5 and manager.owners[&"center_right"] == SpawnBand.NEUTRAL, "Pushing the ram back over a milestone releases that band")
 	push_to(at_x(-800))
 	expect(manager.active_band(Teams.Team.ORANGE).order == 3, "Orange advances to center-left at its second milestone")
+	expect(manager.active_band(Teams.Team.BLUE).order == 1, "Blue falls back to its fortress once the ram is past its outpost")
+	push_to(at_x(-700))
+	expect(manager.active_band(Teams.Team.ORANGE).order == 4, "Orange loses only center-left when pushed back over its second milestone")
 	push_to(0)
 	expect(manager.active_band(Teams.Team.ORANGE).order == 2 and manager.active_band(Teams.Team.BLUE).order == 1, "Orange captures the outpost but not Blue's fortress")
 	push_to(at_x(-608))
-	expect(manager.active_band(Teams.Team.BLUE).order == 2, "Blue reclaims its outpost at its own tower")
+	expect(manager.active_band(Teams.Team.BLUE).order == 2 and manager.active_band(Teams.Team.ORANGE).order == 4, "Blue reclaims its outpost at its own tower")
+	push_to(at_x(0))
+	expect(manager.active_band(Teams.Team.BLUE).order == 2 and manager.active_band(Teams.Team.ORANGE).order == 5, "A centered ram restores the starting territory")
 	push_to(at_x(608))
-	expect(manager.active_band(Teams.Team.BLUE).order == 3 and manager.active_band(Teams.Team.ORANGE).order == 4, "Blue recaptures center-left at Orange's tower")
+	expect(manager.active_band(Teams.Team.BLUE).order == 3 and manager.active_band(Teams.Team.ORANGE).order == 5, "Blue captures center-left at Orange's tower")
 	push_to(at_x(800))
 	expect(manager.active_band(Teams.Team.BLUE).order == 4, "Blue captures center-right at its second milestone")
+	push_to(at_x(700))
+	expect(manager.active_band(Teams.Team.BLUE).order == 3 and manager.active_band(Teams.Team.ORANGE).order == 6, "Blue loses center-right when pushed back over its second milestone")
 	push_to(ram.route_length())
 	expect(manager.active_band(Teams.Team.BLUE).order == 5 and manager.active_band(Teams.Team.ORANGE).order == 6, "Blue captures the outpost but not Orange's fortress")
 	push_to(at_x(608))
-	expect(manager.active_band(Teams.Team.ORANGE).order == 5, "Orange reclaims its outpost at its own tower")
+	expect(manager.active_band(Teams.Team.BLUE).order == 3 and manager.active_band(Teams.Team.ORANGE).order == 5, "Orange reclaims its outpost at its own tower")
+	check_contiguous()
 	reset_ownership()
 	push_to(ram.route_length())
 	expect(manager.active_band(Teams.Team.BLUE).order == 5, "One large movement processes all crossed milestones")
@@ -97,6 +105,32 @@ func check_captures() -> void:
 	expect(owners == manager.owners, "Round-end freezes capture decisions")
 	World.round_manager.phase = RoundManager.Phase.PLAYING
 	reset_ownership()
+
+## Sweeps the whole route both ways: Blue must hold a prefix and Orange a suffix.
+func check_contiguous() -> void:
+	var valid := true
+	var steps := 400
+	for i in range(0, steps * 2 + 1):
+		var t := float(i if i <= steps else steps * 2 - i) / steps
+		push_to(t * ram.route_length())
+		valid = valid and is_contiguous(manager.owners) and manager.owners == manager.owners_at(ram.distance)
+	expect(valid, "Blue and Orange bands never interleave anywhere on the route, in either direction")
+	var saved: Dictionary = manager._thresholds.duplicate(true)
+	manager._thresholds[&"center_left"] = {Teams.Team.BLUE: 0.0, Teams.Team.ORANGE: -1.0}
+	manager._thresholds[&"blue_outpost"] = {Teams.Team.BLUE: -1.0, Teams.Team.ORANGE: ram.route_length()}
+	expect(is_contiguous(manager.owners_at(ram.route_length() * 0.5)), "Misauthored milestones still cannot interleave teams")
+	manager._thresholds = saved
+
+func is_contiguous(owners: Dictionary) -> bool:
+	var sequence: Array = manager.bands.map(func(band: SpawnBand) -> int: return owners[band.band_id])
+	var last_blue := sequence.rfind(Teams.Team.BLUE)
+	var first_orange := sequence.find(Teams.Team.ORANGE)
+	for i in sequence.size():
+		if sequence[i] != Teams.Team.BLUE and i < last_blue:
+			return false
+		if sequence[i] != Teams.Team.ORANGE and first_orange != -1 and i > first_orange:
+			return false
+	return true
 
 func check_points() -> void:
 	var pawn := CharacterBody2D.new()
@@ -132,7 +166,7 @@ func check_points() -> void:
 	expect(manager.bands[5].bounds.has_point(manager.bands[5].to_local(fallback)), "Missing points fall back to permanent fortress")
 	active.add_child(container)
 
-func check_death_and_protection() -> void:
+func check_death() -> void:
 	reset_ownership()
 	World.player_spawner.spawn_player(1)
 	World.player_spawner.spawn_player(2)
@@ -141,13 +175,7 @@ func check_death_and_protection() -> void:
 	var orange := World.player_spawner.get_player(2)
 	blue.set_physics_process(false)
 	orange.set_physics_process(false)
-	expect(blue.is_spawn_protected() and orange.is_spawn_protected(), "Fresh spawns receive protection")
-	expect(not orange.health.take_damage(100, blue) and orange.recent_attackers.is_empty(), "Protection rejects damage before kill attribution")
-	orange.position = ram.position
 	blue.position = Vector2(-1200, -176)
-	ram._physics_process(0.1)
-	expect(ram.orange_count == 0, "Protected player cannot push ram")
-	orange.end_spawn_protection()
 	ram.distance = at_x(-608) + 0.5
 	ram.position = Vector2(-607, -32)
 	orange.position = ram.position
@@ -172,19 +200,10 @@ func check_death_and_protection() -> void:
 	expect(manager.bands[3].bounds.has_point(manager.bands[3].to_local(replacement.global_position)), "Orange respawns in newly captured center-right, not its old tower")
 	expect(World.scoreboard.entries[2].deaths == 1 and World.scoreboard.entries[1].kills == 1, "Replacement preserves kills and deaths")
 	replacement.server_fire(Vector2.LEFT, 0, replacement.minimum_preparation_time(0))
-	expect(not replacement.is_spawn_protected(), "An accepted shot ends protection")
-	replacement.spawn_protection_left = 2
 	var arrow := Arrow.new()
 	arrow.setup({"position": Vector2.ZERO, "velocity": Vector2.RIGHT * 100, "team": Teams.Team.BLUE})
 	World.projectile_spawner.reflect_arrow(arrow, replacement, Vector2.ZERO)
-	expect(not replacement.is_spawn_protected(), "Reflection ends protection")
 	arrow.free()
-	replacement.spawn_protection_left = 2
-	replacement._physics_process(1.99)
-	expect(replacement.is_spawn_protected(), "Protection lasts its full configured duration")
-	replacement._physics_process(0.02)
-	expect(not replacement.is_spawn_protected(), "Protection expires without an offensive action")
-	blue.end_spawn_protection()
 	blue.health.take_damage(blue.health.current, replacement)
 	var before := blue.team
 	# Allow switching by removing the synthetic population first.
@@ -230,7 +249,6 @@ func preview() -> void:
 	World.player_spawner.spawn_player(1)
 	var player := World.player_spawner.get_player(1)
 	player.set_physics_process(false)
-	player.end_spawn_protection()
 	var source := ArrowPlayer.new()
 	source.peer_id = 99
 	source.team = Teams.Team.BLUE

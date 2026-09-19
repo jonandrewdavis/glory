@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://6yjmbrjl8cp0" path="res://components/health_component.gd" id="3_health"]
 [ext_resource type="PackedScene" uid="uid://cyft3x7myph7r" path="res://player/arrow_player/readiness_indicator.tscn" id="4_readiness"]
 [ext_resource type="Script" uid="uid://cria8dvrsfl47" path="res://player/arrow_player/aim_reticle.gd" id="5_aim"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/radial_progress.tscn" id="6_ring"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
 radius = 6.0
@@ -275,42 +274,26 @@ properties/3/replication_mode = 2
 properties/4/path = NodePath("ArrowContainer:rotation")
 properties/4/spawn = true
 properties/4/replication_mode = 1
-properties/5/path = NodePath("ReadinessIndicator:display_state")
-properties/5/spawn = false
-properties/5/replication_mode = 0
-properties/6/path = NodePath("ShieldContainer:visible")
+properties/5/path = NodePath("ShieldContainer:visible")
+properties/5/spawn = true
+properties/5/replication_mode = 2
+properties/6/path = NodePath("ShieldContainer:rotation")
 properties/6/spawn = true
-properties/6/replication_mode = 2
-properties/7/path = NodePath("ShieldContainer:rotation")
+properties/6/replication_mode = 1
+properties/7/path = NodePath("ShieldContainer/ShieldArea/ShieldCollision:disabled")
 properties/7/spawn = true
-properties/7/replication_mode = 1
-properties/8/path = NodePath("ShieldContainer/ShieldArea/ShieldCollision:disabled")
+properties/7/replication_mode = 2
+properties/8/path = NodePath("ArrowContainer:scale")
 properties/8/spawn = true
 properties/8/replication_mode = 2
-properties/9/path = NodePath("ArrowContainer:scale")
-properties/9/spawn = true
-properties/9/replication_mode = 2
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_health"]
 properties/0/path = NodePath("HealthComponent:current")
 properties/0/spawn = true
 properties/0/replication_mode = 2
-properties/1/path = NodePath(".:spawn_protection_left")
+properties/1/path = NodePath(".:network_away")
 properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath(".:network_away")
-properties/2/spawn = true
-properties/2/replication_mode = 2
-
-[sub_resource type="Gradient" id="Gradient_0vhpx"]
-offsets = PackedFloat32Array(0, 0.8064516, 0.83870965, 0.9677419, 1)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_n6ufj"]
-gradient = SubResource("Gradient_0vhpx")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
+properties/1/replication_mode = 2
 
 [node name="ArrowPlayer" type="CharacterBody2D" unique_id=2068560485 groups=["players"]]
 z_index = 1
@@ -377,15 +360,6 @@ polygon = PackedVector2Array(-49.000835, -8.383104, 175.99998, -8, 159.99998, -2
 [node name="ReadinessIndicator" parent="." unique_id=2036011001 instance=ExtResource("4_readiness")]
 unique_name_in_owner = true
 visible = false
-
-[node name="SpawnProtection" parent="." unique_id=901542003 instance=ExtResource("6_ring")]
-visible = false
-offset_left = -15.5
-offset_top = -15.5
-offset_right = 15.5
-offset_bottom = 15.5
-texture_progress = SubResource("GradientTexture2D_n6ufj")
-tint_progress = Color(0.8, 0.95, 1, 0.65)
 
 [node name="ShieldContainer" type="Node2D" parent="." unique_id=1612113249]
 unique_name_in_owner = true

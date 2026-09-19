@@ -111,8 +111,8 @@ On only one instance of the game call `create_session()`, for example:
 
 
 func _on_button_pressed(): # User press create session button
-    tube_client.create_session()
-    label.text = tube_client.session_id
+	tube_client.create_session()
+	label.text = tube_client.session_id
 ```
 
 This player becomes the server (`is_server = true`) and can access the created session ID in the `session_id` property.
@@ -124,7 +124,7 @@ Other players can join by calling `join_session(session_id)`, for example:
 @onready var line_edit: LineEdit = $LineEdit # text user input for session id
 
 func _on_button_pressed(): # User press join session button
-    tube_client.join_session(line_edit.text)
+	tube_client.join_session(line_edit.text)
 ```
 
 When the session is successfully created or joined, the corresponding signals are emitted:
@@ -155,12 +155,12 @@ Tube adds `peer_count`, the number of connected peers including the server, and 
 
 ```GDScript
 func _on_create_button_pressed():
-    tube_client.create_session()
-    tube_client.publish_session({"name": "Andrew's game", "max_players": 4, "open": true})
+	tube_client.create_session()
+	tube_client.publish_session({"name": "Andrew's game", "max_players": 4, "open": true})
 
 
 func _on_game_started():
-    tube_client.publish_session({"name": "Andrew's game", "max_players": 4, "open": false})
+	tube_client.publish_session({"name": "Andrew's game", "max_players": 4, "open": false})
 ```
 
 Any client can list public sessions with `list_sessions()`, with or without a session. This is the lobby list.
@@ -169,13 +169,13 @@ Any client can list public sessions with `list_sessions()`, with or without a se
 
 ```GDScript
 func _on_list_button_pressed():
-    tube_client.list_sessions()
+	tube_client.list_sessions()
 
 
 func _on_tube_client_public_sessions_changed():
-    for session_id in tube_client.get_public_sessions():
-        var metadata = tube_client.get_public_sessions()[session_id]
-        print(session_id, " ", metadata.get("name"), " ", metadata.peer_count, "/", metadata.get("max_players"))
+	for session_id in tube_client.get_public_sessions():
+		var metadata = tube_client.get_public_sessions()[session_id]
+		print(session_id, " ", metadata.get("name"), " ", metadata.peer_count, "/", metadata.get("max_players"))
 ```
 
 `try_list_sessions()` is the `await` version of `list_sessions()`. It returns `false` on failure without emitting `error_raised`.
@@ -198,15 +198,15 @@ For example:
 
 ```GDScript
 func _on_some_input(): # Connected to some input.
-    transfer_some_input.rpc_id(1) # Send the input only to the server.
+	transfer_some_input.rpc_id(1) # Send the input only to the server.
 
 
 # Call local is required if the server is also a player.
 @rpc("any_peer", "call_local", "reliable")
 func transfer_some_input():
-    # The server knows who sent the input.
-    var sender_id = multiplayer.get_remote_sender_id()
-    # Process the input and affect game logic.
+	# The server knows who sent the input.
+	var sender_id = multiplayer.get_remote_sender_id()
+	# Process the input and affect game logic.
 ```
 
 To know more about how to configure and use it, you can watch [AndrooDev's Friendslop Co-Op Tutorial Part 2: Peer to Peer](https://www.youtube.com/watch?v=wgIqB6JNcro)

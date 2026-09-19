@@ -54,7 +54,6 @@ var authoritative_spawn := Vector2.ZERO
 var has_authoritative_spawn := false
 var spawn_revision := 0
 var spawn_serial := 0
-var spawn_protection_left := 0.0
 var network_away := false:
 	set(value):
 		if value == network_away:
@@ -112,6 +111,8 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	add_to_group("players")
+	if MultiplayerService.is_dedicated_server():
+		sprite.process_mode = Node.PROCESS_MODE_DISABLED
 	_apply_team_colors()
 	if is_multiplayer_authority():
 		_update_readiness_indicator()
@@ -206,9 +207,6 @@ func _physics_process(delta: float) -> void:
 		position = _away_position
 		clear_away_actions()
 	if multiplayer.is_server():
-		# Loading a map must not use up a remote player's protection window.
-		if peer_id == 1 or World.level_loader.ready_peers.has(peer_id) or MultiplayerService.presence.is_peer_away(peer_id) or multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
-			spawn_protection_left = maxf(0, spawn_protection_left - delta)
 		# Follows replicated state, so it works for remote copies too.
 		if shield_area.monitoring != shield_container.visible:
 			shield_area.monitoring = shield_container.visible
@@ -216,14 +214,6 @@ func _physics_process(delta: float) -> void:
 			_server_check_shield()
 	if is_multiplayer_authority() and not network_away and not MultiplayerService.presence.blocks_input():
 		_owner_physics(delta)
-	$SpawnProtection.visible = is_spawn_protected() and not is_dead
-
-func is_spawn_protected() -> bool:
-	return spawn_protection_left > 0.0
-
-func end_spawn_protection() -> void:
-	if not is_inside_tree() or multiplayer.is_server():
-		spawn_protection_left = 0.0
 
 func _owner_physics(delta: float) -> void:
 	if not is_on_floor():
@@ -497,7 +487,6 @@ func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
 	if now - _server_last_fire_msec < int(FIRE_COOLDOWN * 1000.0 * 0.8):
 		return
 	_server_last_fire_msec = now
-	end_spawn_protection()
 	aim = aim.normalized()
 	World.projectile_spawner.spawn_arrow({
 		"position": global_position,

@@ -162,7 +162,6 @@ func check_ram() -> void:
 	expect(r.attack_state == BatteringRam.AttackState.STRIKE, "Eight seconds of contact begins a strike")
 	world.player_spawner.spawn_player(2)
 	var pusher: ArrowPlayer = world.player_spawner.get_player(2)
-	pusher.end_spawn_protection()
 	pusher.set_physics_process(false)
 	pusher.team = Teams.Team.ORANGE
 	pusher.position = r.position

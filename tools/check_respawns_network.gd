@@ -67,7 +67,6 @@ func _process(_delta: float) -> void:
 		expect(player.team == Teams.Team.ORANGE, "Joining player is Orange")
 		expect(band.bounds.has_point(band.to_local(player.global_position)), "Late join spawns in captured central band")
 		expect(player.global_position.distance_to(player.authoritative_spawn) < 12, "Client applies the server-selected spawn position")
-		expect(player.is_spawn_protected(), "Spawn protection reaches joining client")
 		old_serial = player.spawn_serial
 		stage = 1
 		_ack_join.rpc_id(1)
@@ -79,7 +78,6 @@ func _process(_delta: float) -> void:
 		expect(band.bounds.has_point(band.to_local(player.global_position)), "Remote Orange respawns in band captured during its countdown")
 		expect(manager.seconds_left(player.peer_id) == 0, "Old countdown does not attach to replacement player")
 		expect(World.scoreboard.entries[player.peer_id].deaths == 1, "Death count survives network replacement")
-		expect(player.is_spawn_protected(), "Replacement protection is replicated")
 		old_revision = World.level_loader.revision
 		old_serial = player.spawn_serial
 		stage = 3
@@ -109,7 +107,6 @@ func _process(_delta: float) -> void:
 
 func kill_peer(id: int) -> void:
 	var player := World.player_spawner.get_player(id)
-	player.end_spawn_protection()
 	var attacker := ArrowPlayer.new()
 	attacker.team = Teams.Team.BLUE
 	attacker.peer_id = 1 if "--listen-host" in OS.get_cmdline_user_args() else 99

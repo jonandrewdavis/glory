@@ -85,7 +85,7 @@ func _run() -> void:
 	await wait_ready()
 	var restored: Dictionary = await command("state")
 	require(multiplayer.get_unique_id() != id, "Resume creates a fresh peer and replication cache")
-	require(restored.health == 37.0 and restored.protection == 0.0, "Resume grants no health or spawn protection")
+	require(restored.health == 37.0, "Resume grants no health")
 	require(restored.entry == original.entry and restored.position.distance_to(original.position) < 5, "Team, score and position survive reconnect")
 	require(restored.sessions == 2 and restored.players == 2 and not restored.away, "Resume replaces one session without duplicate actors")
 	require(not restored.arrow_ignored and not restored.afk_name, "Resuming restores arrow collision and removes AFK label")
@@ -170,13 +170,11 @@ func _control(action: String) -> void:
 			World.creep_spawner.clear_creeps()
 			player.health.regen_enabled = false
 			player.health.current = 37
-			player.spawn_protection_left = 0
 			player.shield_container.show()
 			World.scoreboard.entries[id].kills = 7
 		"fire":
 			player.server_fire(Vector2.RIGHT, 0, 2.0)
 		"kill":
-			player.spawn_protection_left = 0
 			var attacker := ArrowPlayer.new()
 			attacker.team = Teams.Team.ORANGE if player.team == Teams.Team.BLUE else Teams.Team.BLUE
 			attacker.peer_id = 99
@@ -204,7 +202,7 @@ func _control(action: String) -> void:
 		"arrow_ignored": Arrow.ignored_rids(get_tree(), -1, Teams.Team.ORANGE if player.team == Teams.Team.BLUE else Teams.Team.BLUE).has(player.get_rid()),
 		"afk_name": player.name_label.text.ends_with(" (AFK)"), "alpha": player.sprite.modulate.a,
 		"shield": player.shield_container.visible, "health": player.health.current,
-		"protection": player.spawn_protection_left, "entry": World.scoreboard.entries[id],
+		"entry": World.scoreboard.entries[id],
 		"position": player.global_position, "arrows": get_tree().get_nodes_in_group("projectiles").size(),
 		"sessions": MultiplayerService.presence.sessions.size(), "players": World.player_spawner.get_child_count(),
 		"revision": World.level_loader.revision, "remaining": World.respawn_manager.seconds_left(id)})

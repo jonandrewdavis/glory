@@ -108,7 +108,6 @@ func check() -> void:
 	travel_until_block()
 	expect(latest._finished and latest.elapsed == 0.0 and latest.global_position.is_equal_approx(START), "Missed return despawns at original launch point")
 	World.projectile_spawner.clear_projectiles()
-	blocker.spawn_protection_left = 0
 	blocker.set_network_away(true)
 	await get_tree().create_timer(0.4).timeout
 	expect(blocker.name_label.text.ends_with(" (AFK)") and is_equal_approx(blocker.sprite.modulate.a, 0.2), "AFK player fades and gains overhead label")

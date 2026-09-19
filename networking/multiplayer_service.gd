@@ -1,9 +1,9 @@
 extends Node
 
-enum BackendType {ENET, NODETUNNEL, TUBE, PLAYFLOW}
+enum BackendType {ENET = 0, TUBE = 2, PLAYFLOW = 3}
 const BACKEND_SCRIPTS := {BackendType.PLAYFLOW: preload("res://networking/playflow_backend.gd"), BackendType.TUBE: preload("res://networking/tube_backend.gd"), BackendType.ENET: preload("res://networking/enet_backend.gd")}
 const BACKEND_LABELS := {BackendType.PLAYFLOW: "PlayFlow (Dedicated)", BackendType.TUBE: "Online (Tube P2P)", BackendType.ENET: "ENet (Localhost)"}
-const BACKEND_ADDRESS_HINTS := {BackendType.PLAYFLOW: "auto or WebSocket URL", BackendType.TUBE: "Session code", BackendType.ENET: "IP address", BackendType.NODETUNNEL: "Room code"}
+const BACKEND_ADDRESS_HINTS := {BackendType.PLAYFLOW: "auto or WebSocket URL", BackendType.TUBE: "Session code", BackendType.ENET: "IP address"}
 const CONFIG_SECTION := "multiplayer"
 const CONFIG_KEY_BACKEND := "backend"
 const DISCONNECT_REASON := "Disconnected from the host."

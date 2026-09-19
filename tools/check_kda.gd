@@ -21,7 +21,6 @@ func fresh_victim() -> ArrowPlayer:
 	var victim := players[4]
 	World.respawn_manager.cancel(victim.peer_id)
 	victim.health.respawn()
-	victim.end_spawn_protection()
 	return victim
 
 func _run() -> void:
@@ -36,7 +35,6 @@ func _run() -> void:
 		World.player_spawner.spawn_player(id)
 		var player := World.player_spawner.get_player(id)
 		player.set_physics_process(false)
-		player.end_spawn_protection()
 		players.append(player)
 	World.scoreboard.player_killed.connect(func(event: Dictionary) -> void: events.append(event))
 	var canvas := CanvasLayer.new()
@@ -88,9 +86,6 @@ func _run() -> void:
 	World.respawn_manager.cancel(1)
 	victim = fresh_victim()
 	expect(not victim.health.take_damage(0, players[0]) and not victim.health.take_damage(-1, players[0]) and victim.recent_attackers.is_empty(), "Zero/negative damage cannot enter history")
-	victim.spawn_protection_left = 5
-	expect(not victim.health.take_damage(10, players[0]) and victim.recent_attackers.is_empty(), "Spawn protection rejects attribution")
-	victim.end_spawn_protection()
 	expect(not players[0].health.take_damage(10, players[1]) and players[0].recent_attackers.is_empty(), "Friendly damage rejects attribution")
 	victim.health.take_damage(10, players[0])
 	board.remove_player(1)
@@ -130,11 +125,11 @@ func _run() -> void:
 	victim.health.respawn()
 	expect(victim.recent_attackers.is_empty(), "Explicit respawn clears history even while alive")
 	var replication: SceneReplicationConfig = players[1].get_node("MultiplayerSynchronizer").replication_config
-	expect(replication.property_get_replication_mode(NodePath("ReadinessIndicator:display_state")) == SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE, "Charge indicator retains on-change replication")
+	expect(not replication.has_property(NodePath("ReadinessIndicator:display_state")), "Charge indicator is local and never replicated")
 	var indicator := players[1].readiness_indicator
 	indicator.display_state = Vector4(2, 1, 0.5, 1)
 	indicator._process(0)
-	expect(indicator.get_node("Progress") is TextureProgressBar and is_equal_approx(indicator.get_node("Progress").value, 0.5), "Replicated charge snapshot drives radial progress node")
+	expect(indicator.get_node("Progress") is TextureProgressBar and is_equal_approx(indicator.get_node("Progress").value, 0.5), "Charge snapshot drives radial progress node")
 	board.record_kill(5, 2)
 	expect(feed._feed[0].line.modulate == Teams.color(Teams.Team.ORANGE), "Orange kills use Orange team color")
 	MultiplayerService.in_lobby = true

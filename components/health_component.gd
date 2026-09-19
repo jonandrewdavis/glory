@@ -53,8 +53,6 @@ func take_damage(amount: float, source: Node = null) -> bool:
 			return false
 		if not Teams.are_enemies(source.team, get_parent().team):
 			return false
-		if get_parent().is_spawn_protected():
-			return false
 	if get_parent() is FortressGate:
 		if not multiplayer.is_server() or not is_instance_valid(source):
 			return false

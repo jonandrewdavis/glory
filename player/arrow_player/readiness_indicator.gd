@@ -1,8 +1,11 @@
 extends Node2D
-## Atomic replicated snapshot: zero-based level, preparing, fill, ready.
+## Owner-only, never replicated: zero-based level, preparing, fill, ready.
 @export var display_state := Vector4.ZERO
 
 const COLORS := [Color("63dfff"), Color("ffd166"), Color("ff914d")]
+
+func _ready() -> void:
+	set_process(get_parent().is_multiplayer_authority())
 
 func _process(_delta: float) -> void:
 	visible = not get_parent().is_dead

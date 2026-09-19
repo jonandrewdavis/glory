@@ -226,7 +226,7 @@ func check_shots() -> void:
 	probe._on_died(null)
 	probe._on_respawned()
 	probe.readiness_indicator._process(0.0)
-	expect(probe.readiness_indicator.display_state == Vector4(2, 0, 0, 0), "Remote respawn preserves the owner's replicated selection")
+	expect(probe.readiness_indicator.display_state == Vector4(2, 0, 0, 0), "Remote respawn leaves the indicator state untouched")
 
 	for invalid in [[-1, 10.0], [3, 10.0], [0, NAN], [0, INF]]:
 		probe.server_fire(Vector2.RIGHT, invalid[0], invalid[1])

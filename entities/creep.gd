@@ -9,6 +9,7 @@ const BODY_SIZE := Vector2(12, 16)
 const ATTACK_FPS := 10.0
 const STRIKE_TIME := 3.0 / ATTACK_FPS
 const ATTACK_DURATION := 6.0 / ATTACK_FPS
+const RETARGET_INTERVAL := 0.25 ## seconds between target scans
 const DEATH_DURATION := 3.0 ## corpse linger so stuck arrows stay visible
 const SHEETS := {
 	&"idle": preload("res://assets/sprites/Soldier/Soldier_Idle.png"),
@@ -38,6 +39,7 @@ var hit_serial := 0
 
 ## Enemy Creep, or the enemy FortressGate when no soldier is in reach.
 var _target: Node
+var _retarget_left := 0.0
 var _rng := RandomNumberGenerator.new()
 var _cooldown := 0.0
 var _swing_elapsed := -1.0
@@ -69,12 +71,16 @@ func _ready() -> void:
 	_display_position = global_position
 	_rng.randomize()
 	_cooldown = next_swing_interval()
+	# Staggered so a wave does not scan on the same tick.
+	_retarget_left = _rng.randf_range(0.0, RETARGET_INTERVAL)
 	health.died.connect(_on_died)
 	health.damaged.connect(_on_damaged)
 	if not multiplayer.is_server():
 		collision_layer = 0
 		collision_mask = 0
 	reset_physics_interpolation()
+	# _process is display smoothing only.
+	set_process(not MultiplayerService.is_dedicated_server())
 
 static func animation_frames() -> SpriteFrames:
 	if _frames != null:
@@ -114,7 +120,11 @@ func _physics_process(delta: float) -> void:
 		return
 	_cooldown = maxf(0.0, _cooldown - delta)
 	# A soldier hitting the gate keeps looking for enemy soldiers.
-	if not _can_hit(_target) or _target is FortressGate:
+	_retarget_left -= delta
+	if not _can_hit(_target):
+		_target = null
+	if (_target == null or _target is FortressGate) and _retarget_left <= 0.0:
+		_retarget_left = RETARGET_INTERVAL
 		_target = _find_target()
 	if _target != null:
 		# Striking the gate is part of holding at the marker.

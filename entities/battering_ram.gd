@@ -82,7 +82,7 @@ func _physics_process(delta: float) -> void:
 		blue_count = 0
 		orange_count = 0
 		for player in get_tree().get_nodes_in_group("players"):
-			if not player is ArrowPlayer or not player.health.is_alive() or player.is_spawn_protected():
+			if not player is ArrowPlayer or not player.health.is_alive():
 				continue
 			if global_position.distance_squared_to(player.global_position) > detection_radius * detection_radius:
 				continue
