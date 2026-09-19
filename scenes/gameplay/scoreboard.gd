@@ -181,4 +181,5 @@ func _sync_all(all_entries: Dictionary) -> void:
 @rpc("authority", "call_local", "reliable")
 func _erase_entry(peer_id: int) -> void:
 	entries.erase(peer_id)
+	MultiplayerService.usernames.erase(peer_id)
 	changed.emit()

@@ -74,11 +74,6 @@ try:
     clients[0][0].terminate()
     clients[0][0].wait(timeout=10)
     time.sleep(1)
-    reserved = launch(["tools/test_playflow_client.tscn", "--", "--expect-full"])
-    wait_for(reserved, "PROBE_REJECTED: Server is full (30/30 players).")
-    assert reserved[0].wait(timeout=10) == 0
-    print("Abrupt disconnect reserves its slot for 120 seconds; waiting for expiry.", flush=True)
-    time.sleep(122)
     replacement = launch(["tools/test_playflow_client.tscn"])
     wait_for(replacement, "PROBE_READY:")
     wait_for(replacement, "PROBE_BALANCED: 15 vs 15")
@@ -86,7 +81,7 @@ try:
     assert all(probe[0].poll() is None for probe in clients[1:])
     if errors:
         raise RuntimeError("Godot errors: " + "\n".join(errors[:20]))
-    print("PASS: 30 real clients, 31st rejected, reserved slot rejected, expired slot reused.")
+    print("PASS: 30 real clients, 31st rejected before spawn, disconnected slot reused.")
     if diagnostics:
         print(f"Diagnostics: {len(diagnostics)} addon-exit / forced-disconnect messages (see docs).")
 finally:

@@ -17,7 +17,14 @@ for (const disabled of [false, true]) {
       listeners.delete(name);
     },
   };
-  const window = {};
+  const windowListeners = new Map();
+  const window = {
+    addEventListener: (name, fn) => windowListeners.set(name, fn),
+    removeEventListener: (name, fn) => {
+      assert.equal(windowListeners.get(name), fn);
+      windowListeners.delete(name);
+    },
+  };
   const events = [];
   vm.runInNewContext(js, {
     document, window, URLSearchParams,
@@ -40,10 +47,15 @@ for (const disabled of [false, true]) {
   document.hidden = false;
   listeners.get('visibilitychange')();
   assert.deepEqual(events.pop(), ['visibility', false]);
+  windowListeners.get('pagehide')({ persisted: true });
+  assert.equal(events.length, 0, 'bfcache navigation keeps the session');
+  windowListeners.get('pagehide')({ persisted: false });
+  assert.deepEqual(events.pop(), ['pagehide', false]);
   window.gloryBackground.report('{"polls":7}');
   assert.equal(window.gloryNetworkDiagnostics.polls, 7);
   window.gloryBackground.stop();
   assert.equal(listeners.size, 0);
+  assert.equal(windowListeners.size, 0);
   assert.equal(timer, undefined);
 }
-console.log('PASS: JS bridge visibility, timer ownership, freeze, diagnostics, A/B disable, cleanup');
+console.log('PASS: JS bridge visibility, timer ownership, freeze, pagehide, diagnostics, A/B disable, cleanup');

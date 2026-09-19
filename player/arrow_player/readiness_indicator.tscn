@@ -3,6 +3,30 @@
 [ext_resource type="Script" uid="uid://jk8lexroerip" path="res://player/arrow_player/readiness_indicator.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/ui/radial_progress.tscn" id="2"]
 
+[sub_resource type="Gradient" id="Gradient_02i46"]
+offsets = PackedFloat32Array(0, 0.8636364, 0.8863636, 0.97727275, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_tw6mf"]
+gradient = SubResource("Gradient_02i46")
+width = 88
+height = 88
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_bfrny"]
+offsets = PackedFloat32Array(0, 0.8636364, 0.8863636, 0.97727275, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_vjcwo"]
+gradient = SubResource("Gradient_bfrny")
+width = 88
+height = 88
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [node name="ReadinessIndicator" type="Node2D" unique_id=2075674797]
 script = ExtResource("1")
 
@@ -13,6 +37,7 @@ offset_right = 22.0
 offset_bottom = 10.0
 radial_initial_angle = 270.0
 radial_fill_degrees = 180.0
+texture_progress = SubResource("GradientTexture2D_tw6mf")
 tint_progress = Color(0.2, 0.25, 0.3, 0.9)
 
 [node name="Progress" parent="." unique_id=2121282879 instance=ExtResource("2")]
@@ -22,9 +47,9 @@ offset_right = 22.0
 offset_bottom = 10.0
 radial_initial_angle = 270.0
 radial_fill_degrees = 180.0
+texture_progress = SubResource("GradientTexture2D_vjcwo")
 
 [node name="Level" type="Label" parent="." unique_id=1854305413]
-mouse_filter = 2
 offset_left = -12.0
 offset_top = -29.0
 offset_right = 12.0

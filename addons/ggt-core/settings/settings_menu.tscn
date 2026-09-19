@@ -16,8 +16,8 @@ script = ExtResource("1_25law")
 sound_master_slider = NodePath("MarginContainer/VBox/VolumeMaster/HSlider")
 sound_sfx_slider = NodePath("MarginContainer/VBox/VolumeSFX/HSlider")
 sound_music_slider = NodePath("MarginContainer/VBox/Volume3/SoundMusicSlider")
-ui_scale_slider = NodePath("MarginContainer/VBox/UIScale/HBoxContainer/UIScaleSlider")
-ui_scale_value = NodePath("MarginContainer/VBox/UIScale/HBoxContainer/UIScaleValue")
+ui_scale_slider = NodePath("MarginContainer/VBox/UIScaleBUGGED/HBoxContainer/UIScaleSlider")
+ui_scale_value = NodePath("MarginContainer/VBox/UIScaleBUGGED/HBoxContainer/UIScaleValue")
 v_sync_checkbox = NodePath("MarginContainer/VBox/GfxVSync/VSyncCheckbox")
 fps_limit_option_button = NodePath("MarginContainer/VBox/FPSLimit/FPSLimitOptionButton")
 fullscreen_checkbox = NodePath("MarginContainer/VBox/Fullscreen/FullscreenCheckbox")
@@ -38,7 +38,7 @@ layout_mode = 2
 [node name="LabelSettings" type="Label" parent="MarginContainer/VBox" unique_id=778602813]
 layout_mode = 2
 translation_context = &"menu"
-text = "Settings"
+text = "Glory"
 label_settings = SubResource("LabelSettings_r8yej")
 horizontal_alignment = 1
 
@@ -186,21 +186,23 @@ text = "GRAPHICS"
 label_settings = SubResource("LabelSettings_y1o0p")
 horizontal_alignment = 1
 
-[node name="UIScale" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=2085811889]
+[node name="UIScaleBUGGED" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=2085811889]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBox/UIScale" unique_id=1370347764]
+[node name="Label" type="Label" parent="MarginContainer/VBox/UIScaleBUGGED" unique_id=1370347764]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 translation_context = &"menu"
 text = "UI scale"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/UIScale" unique_id=1761079247]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox/UIScaleBUGGED" unique_id=1761079247]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="UIScaleSlider" type="HSlider" parent="MarginContainer/VBox/UIScale/HBoxContainer" unique_id=1757909015]
+[node name="UIScaleSlider" type="HSlider" parent="MarginContainer/VBox/UIScaleBUGGED/HBoxContainer" unique_id=1757909015]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 75.0
@@ -209,7 +211,7 @@ step = 5.0
 value = 125.0
 tick_count = 6
 
-[node name="UIScaleValue" type="Label" parent="MarginContainer/VBox/UIScale/HBoxContainer" unique_id=1209477800]
+[node name="UIScaleValue" type="Label" parent="MarginContainer/VBox/UIScaleBUGGED/HBoxContainer" unique_id=1209477800]
 custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
 text = "125%"
@@ -227,6 +229,7 @@ text = "Fullscreen"
 layout_mode = 2
 
 [node name="GfxVSync" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=799432458 groups=["settings_desktop_only"]]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBox/GfxVSync" unique_id=1771294107]
@@ -239,6 +242,7 @@ text = "VSync"
 layout_mode = 2
 
 [node name="FPSLimit" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=685382272]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBox/FPSLimit" unique_id=595383995]

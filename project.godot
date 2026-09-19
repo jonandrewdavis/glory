@@ -196,11 +196,6 @@ tertiary={
 ]
 }
 
-[internationalization]
-
-locale/translations=PackedStringArray("res://resources/localization/it.po")
-locale/translations_pot_files=PackedStringArray("res://scenes/menu/host_panel.tscn", "res://scenes/menu/join_panel.tscn", "res://scenes/menu/menu.tscn", "res://addons/ggt-core/settings/settings_menu.tscn", "res://scenes/gameplay/ui/pause-layer/pause-layer.tscn")
-
 [layer_names]
 
 2d_physics/layer_1="world"
@@ -213,6 +208,12 @@ locale/translations_pot_files=PackedStringArray("res://scenes/menu/host_panel.ts
 2d_physics/layer_5="creeps"
 2d_physics/layer_6="arrow_transparent_platforms"
 2d_physics/layer_7="gates"
+
+[networking]
+
+background_resume/enabled=false
+locale/translations=PackedStringArray("res://resources/localization/it.po")
+locale/translations_pot_files=PackedStringArray("res://scenes/menu/host_panel.tscn", "res://scenes/menu/join_panel.tscn", "res://scenes/menu/menu.tscn", "res://addons/ggt-core/settings/settings_menu.tscn", "res://scenes/gameplay/ui/pause-layer/pause-layer.tscn")
 
 [physics]
 

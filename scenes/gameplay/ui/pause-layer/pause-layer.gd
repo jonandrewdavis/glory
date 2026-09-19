@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-const PLAYER_ITEM := preload("res://scenes/gameplay/ui/pause-layer/player_list_item.tscn")
 var players: Dictionary = {}
 var team_buttons: Array[Button] = []
 var team_status: Label
@@ -26,16 +25,18 @@ func _ready() -> void:
 		if not %SettingsMenu.visible:
 			%ResumeButton.grab_focus())
 	%SettingsMenu.confirm_button_clicked.connect(func() -> void: %SettingsMenu.hide())
-	multiplayer.peer_connected.connect(_add_player)
-	multiplayer.peer_disconnected.connect(_remove_player)
-	_add_player(multiplayer.get_unique_id())
-	for peer_id in multiplayer.get_peers():
-		_add_player(peer_id)
 	%HostPanel.visible = MultiplayerService.is_host()
 	if MultiplayerService.is_host():
 		for key in LevelLoader.LEVEL_DICT:
 			%LevelOption.add_item(key)
 		%LobbyAddressLabel.text = "Address: " + MultiplayerService.get_lobby_address()
+
+	#multiplayer.peer_connected.connect(_add_player)
+	#multiplayer.peer_disconnected.connect(_remove_player)
+	#_add_player(multiplayer.get_unique_id())
+	#for peer_id in multiplayer.get_peers():
+		#_add_player(peer_id)
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_menu") and not event.is_echo():
@@ -57,8 +58,6 @@ func _update_teams() -> void:
 		button.modulate = Teams.color(team)
 		button.disabled = remaining > 0 or not board.can_join(peer_id, team)
 	team_status.text = "Switch available in %ds" % remaining if remaining > 0 else board.switch_message
-	if team_status.text.is_empty():
-		team_status.text = "Join a team with equal or fewer players."
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not event.is_echo():
@@ -82,20 +81,20 @@ func resume() -> void:
 	hide()
 	World.ui_layer.capture_player_mouse()
 
-func _add_player(peer_id: int) -> void:
-	if players.has(peer_id):
-		return
-	var item := PLAYER_ITEM.instantiate()
-	item.peer_id = peer_id
-	%PlayerList.add_child(item)
-	players[peer_id] = item
+#func _add_player(peer_id: int) -> void:
+	#if players.has(peer_id):
+		#return
+	#var item := PLAYER_ITEM.instantiate()
+	#item.peer_id = peer_id
+	#%PlayerList.add_child(item)
+	#players[peer_id] = item
 
-func _remove_player(peer_id: int) -> void:
-	if players.has(peer_id):
-		var item: Node = players[peer_id]
-		%PlayerList.remove_child(item)
-		item.queue_free()
-		players.erase(peer_id)
+#func _remove_player(peer_id: int) -> void:
+	#if players.has(peer_id):
+		#var item: Node = players[peer_id]
+		#%PlayerList.remove_child(item)
+		#item.queue_free()
+		#players.erase(peer_id)
 
 func _load_level() -> void:
 	World.change_level(%LevelOption.get_item_text(%LevelOption.selected))

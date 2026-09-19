@@ -153,13 +153,13 @@ func _sweep(from: Vector2, to: Vector2) -> void:
 func server_touched_shield(blocker: Node, at: Vector2) -> void:
 	if _finished or blocker == null or not Teams.are_enemies(team, blocker.get("team")):
 		return
-	if blocker is ArrowPlayer and MultiplayerService.presence.is_peer_away(blocker.peer_id):
+	if blocker is ArrowPlayer and blocker.network_away:
 		return
 	World.projectile_spawner.reflect_arrow(self, blocker, at)
 	blocked.emit(self, blocker)
 	_finish()
 
-## Own body, teammates, dead players, friendly shields and breached gates are
+## Own body, teammates, dead/AFK players, friendly shields and breached gates are
 ## transparent. A standing gate stops its defenders' arrows too (harmlessly), so
 ## nobody shoots out through closed timber.
 func _ignored_rids() -> Array[RID]:
@@ -168,14 +168,14 @@ func _ignored_rids() -> Array[RID]:
 static func ignored_rids(tree: SceneTree, shooter_id: int, shooter_team: int) -> Array[RID]:
 	var rids: Array[RID] = []
 	for body in tree.get_nodes_in_group("players"):
-		if body.get("peer_id") == shooter_id or body.get("team") == shooter_team or body.get("is_dead"):
+		if body.get("peer_id") == shooter_id or body.get("team") == shooter_team or body.get("is_dead") or (body is ArrowPlayer and body.network_away):
 			rids.append(body.get_rid())
 	for body in tree.get_nodes_in_group("creeps"):
 		if body is Creep and (body.team == shooter_team or not body.is_alive()):
 			rids.append(body.get_rid())
 	for area in tree.get_nodes_in_group("shields"):
 		var blocker: Node = area.owner
-		if blocker == null or blocker.get("peer_id") == shooter_id or blocker.get("team") == shooter_team or (blocker is ArrowPlayer and MultiplayerService.presence.is_peer_away(blocker.peer_id)):
+		if blocker == null or blocker.get("peer_id") == shooter_id or blocker.get("team") == shooter_team or (blocker is ArrowPlayer and blocker.network_away):
 			rids.append(area.get_rid())
 	for gate in tree.get_nodes_in_group("fortress_gates"):
 		if gate is FortressGate and not gate.is_alive():
@@ -195,6 +195,8 @@ static func is_head_point(victim: Node, point: Vector2) -> bool:
 
 ## Players and creeps alike; the shooter's headshot multiplier scales the damage.
 func _hit_body(body: Node, headshot: bool) -> HitOutcome:
+	if body is ArrowPlayer and body.network_away:
+		return HitOutcome.NONE
 	var shooter: ArrowPlayer = World.player_spawner.get_player(owner_id)
 	if shooter == null or shooter.team != team or not Teams.are_enemies(team, body.get("team")):
 		return HitOutcome.NONE

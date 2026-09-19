@@ -16,11 +16,14 @@ const JS := """
   const dispatch = kind => { if (callback) callback(kind, document.hidden); };
   const visibility = () => dispatch('visibility');
   const freeze = () => dispatch('freeze');
+  // Closing or navigating away: release the session instead of reserving it.
+  const pagehide = event => { if (!event.persisted) dispatch('pagehide'); };
   window.gloryBackground = {
     start(cb) {
       callback = cb;
       document.addEventListener('visibilitychange', visibility);
       document.addEventListener('freeze', freeze);
+      window.addEventListener('pagehide', pagehide);
       timer = setInterval(() => { if (document.hidden && !disabled) dispatch('tick'); }, 250);
       visibility();
     },
@@ -28,6 +31,7 @@ const JS := """
       clearInterval(timer);
       document.removeEventListener('visibilitychange', visibility);
       document.removeEventListener('freeze', freeze);
+      window.removeEventListener('pagehide', pagehide);
       callback = undefined;
     },
     report(json) { window.gloryNetworkDiagnostics = JSON.parse(json); }
@@ -37,6 +41,7 @@ const JS := """
 
 var hidden := false
 var recovering := false
+var experiment_enabled := false
 var resume_token := "" # Memory only; never log this bearer credential.
 var sessions: Dictionary = {} # server: token -> session, including disconnected actors
 var peer_tokens: Dictionary = {}
@@ -63,19 +68,26 @@ var stats := {"polls": 0, "max_poll_gap_ms": 0, "max_queue_packets": 0,
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	if OS.has_feature("web"):
+	experiment_enabled = bool(ProjectSettings.get_setting("networking/background_resume/enabled", false)) or "--background-networking" in OS.get_cmdline_user_args()
+	if OS.has_feature("web") and not experiment_enabled:
+		experiment_enabled = bool(JavaScriptBridge.eval("new URLSearchParams(location.search).get('background_networking') === '1'"))
+	if OS.has_feature("web") and experiment_enabled:
 		JavaScriptBridge.eval(JS)
 		_bridge = JavaScriptBridge.get_interface("gloryBackground")
 		_callback = JavaScriptBridge.create_callback(_browser_event)
 		_bridge.start(_callback)
 
 func enabled() -> bool:
-	return MultiplayerService.backend_type == MultiplayerService.BackendType.PLAYFLOW
+	return experiment_enabled and MultiplayerService.backend_type == MultiplayerService.BackendType.PLAYFLOW
 
 func blocks_input() -> bool:
 	return enabled() and (hidden or recovering)
 
 func _browser_event(args: Array) -> void:
+	if str(args[0]) == "pagehide":
+		# Best effort: the send is synchronous, but a lost release falls back to grace.
+		release()
+		return
 	set_hidden(bool(args[1]))
 	if str(args[0]) == "freeze":
 		_send_heartbeat(true)

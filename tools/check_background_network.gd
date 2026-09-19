@@ -8,7 +8,9 @@ var _started := 0
 
 func _ready() -> void:
 	_started = Time.get_ticks_msec()
-	if "--observer" in OS.get_cmdline_user_args():
+	if "--default-probe" in OS.get_cmdline_user_args():
+		_default_probe.call_deferred()
+	elif "--observer" in OS.get_cmdline_user_args():
 		_observe.call_deferred()
 	elif "--playflow-server" not in OS.get_cmdline_user_args():
 		_run.call_deferred()
@@ -23,9 +25,24 @@ func _process(_delta: float) -> void:
 	if Time.get_ticks_msec() - _started > 65000:
 		push_error("BACKGROUND_NETWORK_TIMEOUT")
 		get_tree().quit(1)
-	if not multiplayer.is_server() and MultiplayerService.presence.hidden and pumping and Time.get_ticks_msec() >= _pump_at:
+	if not multiplayer.is_server() and MultiplayerService.presence.enabled() and MultiplayerService.presence.hidden and pumping and Time.get_ticks_msec() >= _pump_at:
 		_pump_at = Time.get_ticks_msec() + 250
 		MultiplayerService.presence._poll_background()
+
+func _default_probe() -> void:
+	MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
+	MultiplayerService.join_game("ws://127.0.0.1:8080")
+	await wait_ready()
+	var presence := MultiplayerService.presence
+	require(not presence.experiment_enabled and presence.resume_token.is_empty(), "Default client has no background mode or resume credential")
+	presence.set_hidden(true)
+	require(get_tree().multiplayer_poll and not presence.blocks_input(), "Default-off mode does not alter polling or input")
+	presence.set_hidden(false)
+	require(not presence.recovering, "Default-off visibility changes do not reconnect")
+	require((await command("state")).sessions == 0, "Default client has no server-side retained session")
+	await MultiplayerService.leave_game()
+	print("BACKGROUND_DEFAULT_PASSED")
+	get_tree().quit()
 
 func require(value: bool, message: String) -> void:
 	if not value:
@@ -58,6 +75,9 @@ func _run() -> void:
 	await get_tree().create_timer(1.2).timeout
 	var away: Dictionary = await command("state")
 	require(away.away and not away.shield, "Server clears shields and marks hidden player away")
+	require(away.arrow_ignored and away.afk_name and away.alpha < 0.3, "Server AFK player is faded, labeled and transparent to enemy arrows")
+	var local_player := World.player_spawner.get_player(id)
+	require(local_player.network_away and local_player.name_label.text.ends_with(" (AFK)") and local_player.sprite.modulate.a < 0.3, "AFK state and appearance replicate to client")
 	await command("fire")
 	var blocked: Dictionary = await command("state")
 	require(blocked.arrows == 0, "Away player cannot fire")
@@ -68,6 +88,7 @@ func _run() -> void:
 	require(restored.health == 37.0 and restored.protection == 0.0, "Resume grants no health or spawn protection")
 	require(restored.entry == original.entry and restored.position.distance_to(original.position) < 5, "Team, score and position survive reconnect")
 	require(restored.sessions == 2 and restored.players == 2 and not restored.away, "Resume replaces one session without duplicate actors")
+	require(not restored.arrow_ignored and not restored.afk_name, "Resuming restores arrow collision and removes AFK label")
 	id = multiplayer.get_unique_id()
 	presence.set_hidden(true)
 	await get_tree().create_timer(0.5).timeout
@@ -180,6 +201,8 @@ func _control(action: String) -> void:
 			presence.disconnect_transport(id)
 			return
 	_result.rpc_id(id, {"away": MultiplayerService.presence.is_peer_away(id),
+		"arrow_ignored": Arrow.ignored_rids(get_tree(), -1, Teams.Team.ORANGE if player.team == Teams.Team.BLUE else Teams.Team.BLUE).has(player.get_rid()),
+		"afk_name": player.name_label.text.ends_with(" (AFK)"), "alpha": player.sprite.modulate.a,
 		"shield": player.shield_container.visible, "health": player.health.current,
 		"protection": player.spawn_protection_left, "entry": World.scoreboard.entries[id],
 		"position": player.global_position, "arrows": get_tree().get_nodes_in_group("projectiles").size(),

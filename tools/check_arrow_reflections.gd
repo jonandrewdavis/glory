@@ -107,6 +107,23 @@ func check() -> void:
 	await get_tree().physics_frame
 	travel_until_block()
 	expect(latest._finished and latest.elapsed == 0.0 and latest.global_position.is_equal_approx(START), "Missed return despawns at original launch point")
+	World.projectile_spawner.clear_projectiles()
+	blocker.spawn_protection_left = 0
+	blocker.set_network_away(true)
+	await get_tree().create_timer(0.4).timeout
+	expect(blocker.name_label.text.ends_with(" (AFK)") and is_equal_approx(blocker.sprite.modulate.a, 0.2), "AFK player fades and gains overhead label")
+	before_health = blocker.health.current
+	var afk_arrow := shot()
+	var from := blocker.global_position - Vector2(30, 0)
+	var to := blocker.global_position + Vector2(30, 0)
+	afk_arrow._sweep(from, to)
+	expect(not afk_arrow._finished and blocker.health.current == before_health, "Enemy arrow passes through AFK player without damage or consumption")
+	expect(afk_arrow._hit_body(blocker, true) == Arrow.HitOutcome.NONE, "Direct arrow damage also rejects AFK player")
+	blocker.network_away = false # Same setter used by server-owned replication.
+	await get_tree().create_timer(0.4).timeout
+	expect(not blocker.name_label.text.ends_with(" (AFK)") and is_equal_approx(blocker.sprite.modulate.a, 1.0), "Returning restores normal appearance")
+	afk_arrow._sweep(from, to)
+	expect(afk_arrow._finished and blocker.health.current < before_health, "Returning restores enemy arrow hits")
 	World.clear()
 	print("ARROW_REFLECTIONS_PASSED" if failures == 0 else "ARROW_REFLECTIONS_FAILED")
 	get_tree().quit(1 if failures else 0)

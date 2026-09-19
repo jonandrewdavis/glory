@@ -1,5 +1,24 @@
 # Background networking experiment (PlayFlow / desktop Chrome)
 
+## Feature flag (OFF by default)
+
+`networking/background_resume/enabled=false` in `project.godot` gates the entire
+experiment: JS pump, extra buffer headroom, away state, progress watchdog,
+retained sessions, reconnect/resync, and replacement-ack timeout. With it off,
+clients use ordinary disconnect behavior and do not acquire resume credentials.
+
+Enable the project setting in matching client/server builds, or opt in per run:
+
+- Native/server: add `-- --background-networking` to the command line.
+- Web client: add `?background_networking=1` to the **game iframe** URL.
+- The server must also enable the flag. An opted-in client receives an explicit
+  admission error if the server has it disabled. An enabled server still accepts
+  ordinary, non-opted-in clients without changing their disconnect behavior.
+- The integration harness enables the flag explicitly; the ordinary PlayFlow
+  capacity test continues to test the default-off behavior.
+
+The flag is read at startup; do not toggle it during a live session.
+
 The web export remains single-threaded. `MultiplayerService/WebPresence` installs
 a retained JavaScriptBridge callback. While the document is hidden, it disables
 SceneTree automatic multiplayer polling and requests a JS timer every 250 ms.
@@ -16,7 +35,15 @@ The experiment applies to PlayFlow only; Tube/ENet behavior is unchanged.
 - After 30 seconds hidden, a running callback parks the client transport even
   if polling still works. Polling cannot flush all frame-dependent/deferred
   SceneTree work, so the experiment must not accumulate that work indefinitely.
-- A disconnected actor remains vulnerable and motionless for 120 seconds.
+- Hidden/disconnected actors are AFK: their sprite fades to 20% opacity over
+  0.3 seconds, their overhead name gains ` (AFK)`, and enemy arrows pass through
+  both their body and shield. The server owns this replicated state. World
+  collision stays intact; this is arrow immunity, not immunity to all damage.
+  Returning restores the normal team opacity, name and arrow collision after
+  resynchronization. This remains behind the default-off feature flag.
+  Immediate AFK arrow immunity can be used to dodge attacks by tabbing out;
+  there is currently no combat delay or return-at-spawn restriction.
+- A disconnected actor remains motionless for 120 seconds.
   Shield, charge, movement and firing are disabled. Ordinary deaths, respawns,
   rounds and protection expiration still occur on the server during this grace.
 - Return always reconnects to the same server, resetting transport and Godot
@@ -58,7 +85,8 @@ five seconds (subject to throttling), plus visibility/recovery transitions.
 
 Reports contain no resume credential. Counters are session-process cumulative;
 reload between A/B runs. `?background_poll=0` on the game iframe URL disables the
-JS timer pump but keeps visibility/away handling, allowing a controlled baseline.
+JS timer pump but keeps visibility/away handling, allowing a controlled baseline
+when combined with `background_networking=1`.
 Do not add the query only to the outer itch page and assume it reaches the iframe.
 
 Validate with two actual Chrome players, preferably with DevTools closed during
@@ -115,6 +143,6 @@ instance keeps its old build. This implementation does not publish, restart or
 provision anything. Existing scene RPC changes also require matching clients.
 Thread support and itch SharedArrayBuffer settings do not need to change.
 
-The 30-client capacity harness (`tools/test_playflow.py`) now verifies that an
-abrupt departure reserves its slot, then waits the real two-minute grace before
-checking slot reuse. Reserved actors count toward capacity and team population.
+The 30-client capacity harness (`tools/test_playflow.py`) uses the default-off
+mode and verifies immediate slot reuse. In the opted-in integration harness,
+reserved actors count toward capacity and team population until grace expiry.

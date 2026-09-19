@@ -1,14 +1,38 @@
 [gd_scene format=3 uid="uid://4fyoq8npekf0"]
 
 [ext_resource type="Script" uid="uid://b83omkj4aqsph" path="res://scenes/gameplay/ui/ui_layer.gd" id="1_oq6q8"]
+[ext_resource type="Theme" uid="uid://brfyamk8dn0ef" path="res://resources/theme/theme_casual_pop.tres" id="2_0egqt"]
 [ext_resource type="PackedScene" uid="uid://nbqhuft1wkg8" path="res://scenes/gameplay/ui/controls.tscn" id="2_1aqtp"]
 [ext_resource type="PackedScene" uid="uid://barl4q1kugrmm" path="res://scenes/gameplay/ui/pause-layer/pause-layer.tscn" id="3_n2icj"]
 [ext_resource type="PackedScene" uid="uid://hl64wi1aexpn" path="res://scenes/gameplay/ui/round_hud.tscn" id="4_round"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/ui/player_health_bar.tscn" id="5_health"]
+[ext_resource type="PackedScene" uid="uid://c2ea3ywmo78kv" path="res://scenes/gameplay/ui/player_health_bar.tscn" id="5_health"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/ui/kill_feed.tscn" id="6_feed"]
 
 [node name="UILayer" type="CanvasLayer" unique_id=959767118]
 script = ExtResource("1_oq6q8")
+
+[node name="MarginContainer2" type="MarginContainer" parent="." unique_id=1706351158]
+offset_left = 317.0
+offset_top = 24.0
+offset_right = 317.0
+offset_bottom = 371.0
+theme_override_constants/margin_top = 40
+
+[node name="PlayerHealthBar" parent="MarginContainer2" unique_id=1447929741 instance=ExtResource("5_health")]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1386433855]
+offset_right = 341.0
+offset_bottom = 395.0
+scale = Vector2(0.8, 0.8)
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Controls" parent="MarginContainer" unique_id=1906408976 instance=ExtResource("2_1aqtp")]
+layout_mode = 2
 
 [node name="PlayerUI" type="Control" parent="." unique_id=1254923410]
 layout_mode = 3
@@ -18,27 +42,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="PlayerUI" unique_id=1386433855]
-layout_mode = 1
-offset_right = 225.0
-offset_bottom = 322.0
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
-
-[node name="Controls" parent="PlayerUI/MarginContainer" unique_id=1906408976 instance=ExtResource("2_1aqtp")]
-layout_mode = 2
+theme = ExtResource("2_0egqt")
 
 [node name="HudRoot" type="Control" parent="PlayerUI" unique_id=127916742]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
-[node name="KillFeed" parent="PlayerUI/HudRoot" instance=ExtResource("6_feed")]
+[node name="KillFeed" parent="PlayerUI/HudRoot" unique_id=297798155 instance=ExtResource("6_feed")]
 layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -344.0
@@ -48,16 +66,6 @@ grow_horizontal = 0
 
 [node name="RoundHud" parent="PlayerUI/HudRoot" unique_id=1291643102 instance=ExtResource("4_round")]
 layout_mode = 1
-
-[node name="PlayerHealthBar" parent="PlayerUI/HudRoot" instance=ExtResource("5_health")]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
 
 [node name="PauseLayer" parent="." unique_id=1173719922 instance=ExtResource("3_n2icj")]
 visible = false

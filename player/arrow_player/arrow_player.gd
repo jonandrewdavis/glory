@@ -55,7 +55,19 @@ var has_authoritative_spawn := false
 var spawn_revision := 0
 var spawn_serial := 0
 var spawn_protection_left := 0.0
-var network_away := false
+var network_away := false:
+	set(value):
+		if value == network_away:
+			return
+		if value:
+			_away_position = position
+		network_away = value
+		if is_node_ready():
+			if value:
+				clear_away_actions()
+			_refresh_name()
+			refresh_team_fade()
+var _away_fade: Tween
 var initial_health := -1.0
 var _away_position := Vector2.ZERO
 
@@ -103,10 +115,10 @@ func _ready() -> void:
 	_apply_team_colors()
 	if is_multiplayer_authority():
 		_update_readiness_indicator()
-	name_label.text = MultiplayerService.get_username(peer_id)
+	_refresh_name()
 	MultiplayerService.username_changed.connect(func(id: int) -> void:
 		if id == peer_id:
-			name_label.text = MultiplayerService.get_username(peer_id))
+			_refresh_name())
 	health.died.connect(_on_died)
 	health.respawned.connect(_on_respawned)
 	if multiplayer.is_server():
@@ -120,6 +132,7 @@ func _ready() -> void:
 		_on_died(null)
 	if network_away:
 		_away_position = position
+		clear_away_actions()
 
 	var is_owner := is_multiplayer_authority()
 	z_index = 2 if is_owner else 1
@@ -161,7 +174,14 @@ func _apply_team_colors() -> void:
 func refresh_team_fade() -> void:
 	var local: ArrowPlayer = World.player_spawner.get_player(multiplayer.get_unique_id())
 	var faded := local != null and local != self and local.team == team
-	sprite.modulate.a = 0.7 if faded else 1.0
+	var target_alpha := 0.2 if network_away else (0.7 if faded else 1.0)
+	if _away_fade:
+		_away_fade.kill()
+	_away_fade = create_tween()
+	_away_fade.tween_property(sprite, "modulate:a", target_alpha, 0.3)
+
+func _refresh_name() -> void:
+	name_label.text = MultiplayerService.get_username(peer_id) + (" (AFK)" if network_away else "")
 
 # --- Stuck arrows ----------------------------------------------------------
 
@@ -526,10 +546,8 @@ func _server_check_shield() -> void:
 			area.server_touched_shield(self, area.global_position)
 
 func set_network_away(value: bool) -> void:
-	if value and not network_away:
-		_away_position = position
 	network_away = value
-	if value:
+	if value and is_node_ready():
 		clear_away_actions()
 
 func clear_away_actions() -> void:

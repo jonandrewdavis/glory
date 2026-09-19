@@ -26,10 +26,10 @@ a transport/hosting proof, not an authoritative movement or CTF rules rewrite.
    Cancel stops local work, not the shared instance. Manual dashboard startup
    and `tools/start_playflow.sh` remain available.
 
-Free instances expire after one hour. Transient disconnections attempt to resume
-the same in-memory session for a two-minute grace; server loss eventually returns
-players to the menu, where Play can start a new instance. There is no cross-server
-state persistence. See [background networking](background-networking.md). A full
+Free instances expire after one hour. Expiry/disconnection returns players to
+the menu; Play can start a new instance. There is no state persistence by default.
+An optional, default-off [background networking experiment](background-networking.md)
+adds a two-minute session-resume grace. A full
 server rejects admission without starting another instance. Each click sends
 at most one startup request; ambiguous responses or capacity conflicts trigger
 rediscovery. On paid plans this client flow cannot enforce a global one-server
@@ -63,10 +63,9 @@ the Join panel also accepts the explicit `wss://host:external_port` copied
 from PlayFlow, bypassing discovery.
 
 Validate two clients: both spawn, opposite teams, movement/projectiles and
-scores replicate, abrupt disconnect reserves a vulnerable player, and reconnect works. Then
+scores replicate, disconnect removes the player, and reconnect works. Then
 test 30 clients and a 31st: the last must receive `Server is full`, with no
-extra player or scoreboard entry. Explicitly leave (or wait for an abrupt
-disconnect's two-minute reservation to expire) and retry the rejected client.
+extra player or scoreboard entry. Disconnect one and retry the rejected client.
 Run `GODOT=/path/to/godot python3 tools/test_playflow.py` to automate the
 30-client admission, replicated 15/15 roster, full rejection, and slot-reuse
 checks locally (starts a server and up to 31 client processes).

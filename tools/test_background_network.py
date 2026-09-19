@@ -12,7 +12,12 @@ GODOT = os.environ.get("GODOT", "godot")
 SCENE = "tools/check_background_network.tscn"
 
 
-def launch(*args):
+def launch(*args, experiment=True):
+    args = list(args)
+    if "--" not in args:
+        args.append("--")
+    if experiment:
+        args.append("--background-networking")
     process = subprocess.Popen(
         [GODOT, "--headless", "--path", str(ROOT), SCENE, *args],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
@@ -49,6 +54,10 @@ try:
     server = launch("--", "--playflow-server")
     probes.append(server)
     wait_marker(server, "PlayFlow ready:", 15)
+    default_client = launch("--", "--default-probe", experiment=False)
+    probes.append(default_client)
+    wait_marker(default_client, "BACKGROUND_DEFAULT_PASSED", 15)
+    assert default_client[0].wait(timeout=5) == 0
     observer = launch("--", "--observer")
     probes.append(observer)
     wait_marker(observer, "BACKGROUND_OBSERVER_READY", 15)

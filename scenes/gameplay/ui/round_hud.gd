@@ -6,6 +6,12 @@ extends Control
 var _gates: Dictionary = {}
 var _ram: BatteringRam
 
+@onready var blue_gate_health: ProgressBar = %BlueGateHealth
+@onready var orange_gate_health: ProgressBar = %OrangeGateHealth
+
+@onready var team_label_1: Label = %TeamLabel1
+@onready var team_label_2: Label = %TeamLabel2
+
 func _ready() -> void:
 	World.round_manager.changed.connect(update_labels)
 	World.scoreboard.changed.connect(update_labels)
@@ -50,7 +56,7 @@ func _bind_level() -> void:
 
 func _update_gates(_current: float = 0, _maximum: float = 0) -> void:
 	for team in [Teams.Team.BLUE, Teams.Team.ORANGE]:
-		var bar: ProgressBar = $Siege/Gates/Blue if team == Teams.Team.BLUE else $Siege/Gates/Orange
+		var bar: ProgressBar = blue_gate_health if team == Teams.Team.BLUE else orange_gate_health
 		var g := gate(team)
 		bar.value = g.health.ratio() if is_instance_valid(g) else 0.0
 		bar.self_modulate = Teams.color(team)
@@ -75,6 +81,9 @@ func _process(_delta: float) -> void:
 func update_labels() -> void:
 	var rounds := World.round_manager
 	var viewer := World.scoreboard.get_team(multiplayer.get_unique_id())
+	
+	team_label_1
+	
 	score_label.text = "%s %d - %d %s" % [
 		Teams.display_name(Teams.Team.BLUE, viewer), rounds.wins_for(Teams.Team.BLUE),
 		rounds.wins_for(Teams.Team.ORANGE), Teams.display_name(Teams.Team.ORANGE, viewer)]

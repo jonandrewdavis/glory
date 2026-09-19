@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://ebwkfmyq6xdl"]
 
-[ext_resource type="Script" path="res://scenes/gameplay/ui/score_panel.gd" id="script"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/ui/score_row.tscn" id="row"]
+[ext_resource type="Script" uid="uid://6vbvxsv5a50u" path="res://scenes/gameplay/ui/score_panel.gd" id="script"]
 
 [sub_resource type="StyleBoxFlat" id="Panel"]
 bg_color = Color(0.035, 0.045, 0.065, 0.94)
@@ -12,46 +12,48 @@ border_width_bottom = 1
 border_color = Color(0.3, 0.36, 0.45, 0.6)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
-corner_radius_bottom_left = 4
 corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[node name="ScorePanel" type="VBoxContainer"]
+[node name="ScorePanel" type="VBoxContainer" unique_id=1054080548]
 offset_right = 320.0
 mouse_filter = 2
-theme_override_font_sizes/font_size = 16
 script = ExtResource("script")
 
-[node name="Scoreboard" type="PanelContainer" parent="."]
-theme_override_styles/panel = SubResource("Panel")
+[node name="Scoreboard" type="PanelContainer" parent="." unique_id=573028010]
 layout_mode = 2
+size_flags_vertical = 3
 mouse_filter = 2
+theme_override_styles/panel = SubResource("Panel")
 
-[node name="Margin" type="MarginContainer" parent="Scoreboard"]
+[node name="Margin" type="MarginContainer" parent="Scoreboard" unique_id=1228827543]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_right = 10
 theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 8
 
-[node name="Table" type="VBoxContainer" parent="Scoreboard/Margin"]
+[node name="Table" type="VBoxContainer" parent="Scoreboard/Margin" unique_id=1419916473]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="HeaderMargin" type="MarginContainer" parent="Scoreboard/Margin/Table" unique_id=522604342]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="HeaderMargin" type="MarginContainer" parent="Scoreboard/Margin/Table"]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Header" parent="Scoreboard/Margin/Table/HeaderMargin" instance=ExtResource("row")]
+[node name="Header" parent="Scoreboard/Margin/Table/HeaderMargin" unique_id=1979519561 instance=ExtResource("row")]
 layout_mode = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Scoreboard/Margin/Table"]
+[node name="Scroll" type="ScrollContainer" parent="Scoreboard/Margin/Table" unique_id=1680220530]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 70)
+custom_minimum_size = Vector2(0, 360)
 layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Rows" type="VBoxContainer" parent="Scoreboard/Margin/Table/Scroll"]
+[node name="Rows" type="VBoxContainer" parent="Scoreboard/Margin/Table/Scroll" unique_id=827021899]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

@@ -85,7 +85,7 @@ func _replace_now(id: int) -> void:
 		replacement.set_network_away(MultiplayerService.presence.is_peer_away(id))
 
 func _process(_delta: float) -> void:
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() or not MultiplayerService.presence.enabled():
 		return
 	for id in _replacement_requests.keys():
 		if Time.get_ticks_msec() >= int(_replacement_requests[id].deadline):

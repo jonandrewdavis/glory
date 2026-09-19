@@ -221,7 +221,8 @@ func _on_peer_connected(peer_id: int) -> void:
 func _on_peer_disconnected(peer_id: int) -> void:
 	if multiplayer.is_server():
 		presence.server_disconnected(peer_id)
-	if not presence.keep_peer(peer_id):
+	# Clients cannot see reservations; the scoreboard erases names with entries.
+	if multiplayer.is_server() and not presence.keep_peer(peer_id) or not presence.enabled():
 		usernames.erase(peer_id)
 
 func get_username(peer_id: int) -> String:

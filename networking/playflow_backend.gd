@@ -49,8 +49,9 @@ func host_game(_options: HostOptions) -> void:
 		return
 	_configure_auth()
 	var peer := WebSocketMultiplayerPeer.new()
-	peer.inbound_buffer_size = RECEIVE_BYTES
-	peer.max_queued_packets = RECEIVE_PACKETS
+	if MultiplayerService.presence.experiment_enabled:
+		peer.inbound_buffer_size = RECEIVE_BYTES
+		peer.max_queued_packets = RECEIVE_PACKETS
 	var error := peer.create_server(PORT, "0.0.0.0")
 	if error != OK:
 		join_lobby_failed.emit("Cannot listen on port %d: %s" % [PORT, error_string(error)])
@@ -208,8 +209,9 @@ func _connect_url(url: String) -> void:
 		return
 	_configure_auth()
 	var peer := WebSocketMultiplayerPeer.new()
-	peer.inbound_buffer_size = RECEIVE_BYTES
-	peer.max_queued_packets = RECEIVE_PACKETS
+	if MultiplayerService.presence.experiment_enabled:
+		peer.inbound_buffer_size = RECEIVE_BYTES
+		peer.max_queued_packets = RECEIVE_PACKETS
 	var error := peer.create_client(url)
 	if error != OK:
 		_fail("Could not connect: " + error_string(error))
@@ -221,6 +223,7 @@ func _connect_url(url: String) -> void:
 func _on_authenticating(id: int) -> void:
 	if not api.is_server():
 		api.send_auth(id, JSON.stringify({"protocol": PROTOCOL,
+			"background_resume": MultiplayerService.presence.experiment_enabled,
 			"resume_token": MultiplayerService.presence.resume_token}).to_utf8_buffer())
 
 func _on_auth(id: int, data: PackedByteArray) -> void:
@@ -234,15 +237,24 @@ func _on_auth(id: int, data: PackedByteArray) -> void:
 			message = decoder.data
 		var token := str(message.get("resume_token", "")) if message is Dictionary else ""
 		var presence := MultiplayerService.presence
+		var wants_resume: bool = message is Dictionary and message.get("background_resume", false) == true
+		var retained := 0
+		for state: Dictionary in presence.sessions.values():
+			if state.disconnected and int(state.peer_id) > 0:
+				retained += 1
 		if not message is Dictionary or message.get("protocol", "") != PROTOCOL:
 			reason = "Client/server version mismatch. Refresh the game."
+		elif wants_resume and not presence.experiment_enabled:
+			reason = "Background networking is disabled on this server."
+		elif not wants_resume and not token.is_empty():
+			reason = "Invalid session request."
 		elif not token.is_empty() and not presence.can_resume(token):
 			reason = "Session expired. Please join again."
 		elif not joinable:
 			reason = "Server is loading. Try again shortly."
-		elif token.is_empty() and presence.sessions.size() >= CAPACITY:
+		elif token.is_empty() and api.get_peers().size() + reservations.size() + retained >= CAPACITY:
 			reason = "Server is full (30/30 players)."
-		if reason.is_empty():
+		if reason.is_empty() and wants_resume:
 			token = presence.reserve(id, token)
 			if token.is_empty():
 				reason = "Session is already reconnecting. Try again shortly."
@@ -256,7 +268,7 @@ func _on_auth(id: int, data: PackedByteArray) -> void:
 	elif id == 1 and joining:
 		var decoder := JSON.new()
 		var response: Variant = decoder.data if decoder.parse(data.get_string_from_utf8()) == OK else null
-		if response is Dictionary and response.get("ok", false) and str(response.get("resume_token", "")).length() == 64:
+		if response is Dictionary and response.get("ok", false) and (not MultiplayerService.presence.experiment_enabled or str(response.get("resume_token", "")).length() == 64):
 			MultiplayerService.presence.resume_token = str(response.resume_token)
 			api.complete_auth(id)
 		else:
