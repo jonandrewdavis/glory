@@ -2,12 +2,11 @@
 
 [ext_resource type="TileSet" uid="uid://bin3kwb33d1rx" path="res://assets/sprites/oak_tileset.tres" id="1_qpxgy"]
 [ext_resource type="PackedScene" uid="uid://b270gx3lh8fcq" path="res://entities/fortress_gate.tscn" id="2_qhvww"]
-[ext_resource type="Texture2D" uid="uid://chbqnxxrutwoh" path="res://assets/sprites/oak_woods_tileset.png" id="4_do133"]
 [ext_resource type="PackedScene" uid="uid://i452p60lnj1i" path="res://entities/battering_ram.tscn" id="4_tjucf"]
 [ext_resource type="Shader" uid="uid://cj7n52jac3g6u" path="res://assets/shaders/Fortress2.gdshader" id="4_wir7t"]
 [ext_resource type="Script" uid="uid://h3frprlklkb" path="res://scenes/gameplay/sky_parallax.gd" id="5_skypx"]
+[ext_resource type="Texture2D" uid="uid://cu4w0syhjm8ls" path="res://assets/img/door.png" id="5_tjucf"]
 [ext_resource type="PackedScene" path="res://levels/fortress2_spawn_bands.tscn" id="6_bands"]
-[ext_resource type="Texture2D" uid="uid://cu4w0syhjm8ls" path="res://assets/img/door.png" id="6_tjucf"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_aq2gn"]
 shader = ExtResource("4_wir7t")
@@ -51,550 +50,6 @@ normal = Vector2(-1, 0)
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_4ntca"]
 normal = Vector2(0, 1)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_do133"]
-size = Vector2(48, 96)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7yjib"]
-texture = ExtResource("4_do133")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:0/0 = 0
-1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-2:0/0 = 0
-2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-3:0/0 = 0
-3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-4:0/0 = 0
-4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-5:0/0 = 0
-5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-7:0/0 = 0
-7:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-8:0/next_alternative_id = 3
-8:0/0 = 0
-8:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-8:0/1 = 1
-8:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
-8:0/1/physics_layer_0/polygon_0/one_way = true
-8:0/2 = 2
-8:0/2/physics_layer_1/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
-8:0/2/physics_layer_1/polygon_0/one_way = true
-9:0/next_alternative_id = 3
-9:0/0 = 0
-9:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-9:0/1 = 1
-9:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
-9:0/1/physics_layer_0/polygon_0/one_way = true
-9:0/2 = 2
-9:0/2/physics_layer_1/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
-9:0/2/physics_layer_1/polygon_0/one_way = true
-10:0/next_alternative_id = 3
-10:0/0 = 0
-10:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-10:0/1 = 1
-10:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
-10:0/1/physics_layer_0/polygon_0/one_way = true
-10:0/2 = 2
-10:0/2/physics_layer_1/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, -2, -8, -2)
-10:0/2/physics_layer_1/polygon_0/one_way = true
-11:0/0 = 0
-11:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-12:0/0 = 0
-12:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-13:0/0 = 0
-13:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, 0, 8, -8, 8)
-15:0/0 = 0
-16:0/0 = 0
-18:0/0 = 0
-19:0/0 = 0
-21:0/0 = 0
-22:0/0 = 0
-23:0/0 = 0
-24:0/0 = 0
-25:0/0 = 0
-26:0/0 = 0
-28:0/0 = 0
-29:0/0 = 0
-30:0/0 = 0
-0:1/0 = 0
-0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:1/0 = 0
-1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-2:1/0 = 0
-2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-3:1/0 = 0
-4:1/0 = 0
-5:1/0 = 0
-5:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-7:1/0 = 0
-8:1/0 = 0
-9:1/0 = 0
-10:1/0 = 0
-11:1/0 = 0
-12:1/0 = 0
-13:1/0 = 0
-15:1/0 = 0
-16:1/0 = 0
-18:1/0 = 0
-19:1/0 = 0
-21:1/0 = 0
-22:1/0 = 0
-23:1/0 = 0
-24:1/0 = 0
-25:1/0 = 0
-26:1/0 = 0
-28:1/0 = 0
-29:1/0 = 0
-30:1/0 = 0
-0:2/0 = 0
-0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:2/0 = 0
-2:2/0 = 0
-4:2/0 = 0
-5:2/0 = 0
-5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-21:2/0 = 0
-22:2/0 = 0
-23:2/0 = 0
-25:2/0 = 0
-26:2/0 = 0
-28:2/0 = 0
-29:2/0 = 0
-30:2/0 = 0
-0:3/0 = 0
-0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:3/0 = 0
-4:3/0 = 0
-5:3/0 = 0
-5:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-9:3/0 = 0
-9:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-10:3/0 = 0
-10:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, 0, 8, -8, 8)
-15:3/0 = 0
-15:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:3/0 = 0
-16:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, 0, 8, -8, 8)
-21:3/0 = 0
-22:3/0 = 0
-25:3/0 = 0
-26:3/0 = 0
-28:3/0 = 0
-29:3/0 = 0
-30:3/0 = 0
-0:4/0 = 0
-0:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:4/0 = 0
-2:4/0 = 0
-3:4/0 = 0
-4:4/0 = 0
-5:4/0 = 0
-5:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-7:4/0 = 0
-8:4/0 = 0
-8:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-9:4/0 = 0
-10:4/0 = 0
-11:4/0 = 0
-11:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-13:4/0 = 0
-13:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0.5, 0, 8, 0, 8, 8, 0.5, 8)
-14:4/0 = 0
-14:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-15:4/0 = 0
-16:4/0 = 0
-17:4/0 = 0
-17:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-21:4/0 = 0
-22:4/0 = 0
-23:4/0 = 0
-24:4/0 = 0
-25:4/0 = 0
-26:4/0 = 0
-28:4/0 = 0
-29:4/0 = 0
-30:4/0 = 0
-0:5/0 = 0
-0:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:5/0 = 0
-1:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-2:5/0 = 0
-2:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-3:5/0 = 0
-3:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-4:5/0 = 0
-4:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-5:5/0 = 0
-5:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-7:5/0 = 0
-8:5/0 = 0
-10:5/0 = 0
-11:5/0 = 0
-13:5/0 = 0
-14:5/0 = 0
-14:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:5/0 = 0
-17:5/0 = 0
-17:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-21:5/0 = 0
-22:5/0 = 0
-23:5/0 = 0
-24:5/0 = 0
-25:5/0 = 0
-26:5/0 = 0
-9:6/0 = 0
-10:6/0 = 0
-15:6/0 = 0
-16:6/0 = 0
-2:7/0 = 0
-2:7/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -0.9892216, -8, 8, 8, 8)
-3:7/0 = 0
-3:7/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -0.9892216, 8, 8, -8, 8)
-9:7/0 = 0
-10:7/0 = 0
-15:7/0 = 0
-16:7/0 = 0
-22:7/0 = 0
-23:7/0 = 0
-27:7/0 = 0
-28:7/0 = 0
-29:7/0 = 0
-0:8/0 = 0
-0:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -0.5, -8, 8, 8, 8)
-1:8/0 = 0
-1:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, -8, -0.5, -8, 8, 8, 8)
-2:8/0 = 0
-2:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-3:8/0 = 0
-3:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-4:8/0 = 0
-4:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -0.5, 8, 8, -8, 8)
-5:8/0 = 0
-5:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -0.5, 8, 8, -8, 8)
-9:8/0 = 0
-10:8/0 = 0
-22:8/0 = 0
-23:8/0 = 0
-27:8/0 = 0
-28:8/0 = 0
-29:8/0 = 0
-0:9/0 = 0
-0:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:9/0 = 0
-4:9/0 = 0
-5:9/0 = 0
-5:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-13:9/0 = 0
-13:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:9/0 = 0
-14:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:9/0 = 0
-15:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:9/0 = 0
-16:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-19:9/0 = 0
-19:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-20:9/0 = 0
-20:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-22:9/0 = 0
-23:9/0 = 0
-27:9/0 = 0
-28:9/0 = 0
-29:9/0 = 0
-0:10/0 = 0
-1:10/0 = 0
-2:10/0 = 0
-3:10/0 = 0
-4:10/0 = 0
-5:10/0 = 0
-7:10/0 = 0
-8:10/0 = 0
-8:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-9:10/0 = 0
-9:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-10:10/0 = 0
-10:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-11:10/0 = 0
-11:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-13:10/0 = 0
-13:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:10/0 = 0
-14:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:10/0 = 0
-15:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:10/0 = 0
-16:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-18:10/0 = 0
-19:10/0 = 0
-20:10/0 = 0
-22:10/0 = 0
-23:10/0 = 0
-27:10/0 = 0
-28:10/0 = 0
-29:10/0 = 0
-0:11/0 = 0
-0:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 0.5, -8, 8, 8, 8)
-1:11/0 = 0
-1:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, -8, 0.19784355, -8, 8, 8, 8)
-2:11/0 = 0
-3:11/0 = 0
-4:11/0 = 0
-4:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 0.19784355, 8, 8, -8, 8)
-5:11/0 = 0
-5:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 0.5, 8, 8, -8, 8)
-7:11/0 = 0
-8:11/0 = 0
-8:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-9:11/0 = 0
-9:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-10:11/0 = 0
-10:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-11:11/0 = 0
-11:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-13:11/0 = 0
-13:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:11/0 = 0
-14:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:11/0 = 0
-15:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:11/0 = 0
-16:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-27:11/0 = 0
-28:11/0 = 0
-29:11/0 = 0
-0:12/0 = 0
-1:12/0 = 0
-2:12/0 = 0
-3:12/0 = 0
-4:12/0 = 0
-5:12/0 = 0
-5:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-13:12/0 = 0
-13:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:12/0 = 0
-14:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:12/0 = 0
-15:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:12/0 = 0
-16:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-18:12/0 = 0
-18:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-19:12/0 = 0
-19:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-20:12/0 = 0
-20:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-22:12/0 = 0
-23:12/0 = 0
-24:12/0 = 0
-25:12/0 = 0
-27:12/0 = 0
-28:12/0 = 0
-29:12/0 = 0
-0:13/0 = 0
-1:13/0 = 0
-4:13/0 = 0
-5:13/0 = 0
-7:13/0 = 0
-8:13/0 = 0
-8:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-9:13/0 = 0
-9:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-10:13/0 = 0
-10:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-11:13/0 = 0
-11:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, 8, 8, 0, -8, 0, -8, 8)
-13:13/0 = 0
-13:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:13/0 = 0
-14:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:13/0 = 0
-15:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:13/0 = 0
-16:13/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-18:13/0 = 0
-19:13/0 = 0
-20:13/0 = 0
-22:13/0 = 0
-23:13/0 = 0
-24:13/0 = 0
-25:13/0 = 0
-27:13/0 = 0
-28:13/0 = 0
-29:13/0 = 0
-7:14/0 = 0
-8:14/0 = 0
-9:14/0 = 0
-10:14/0 = 0
-11:14/0 = 0
-13:14/0 = 0
-13:14/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:14/0 = 0
-14:14/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:14/0 = 0
-15:14/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:14/0 = 0
-16:14/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-27:14/0 = 0
-28:14/0 = 0
-29:14/0 = 0
-0:15/0 = 0
-1:15/0 = 0
-2:15/0 = 0
-3:15/0 = 0
-4:15/0 = 0
-5:15/0 = 0
-13:15/0 = 0
-13:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(8, -8, 0, -8, 0, 8, 8, 8)
-14:15/0 = 0
-14:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-15:15/0 = 0
-15:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:15/0 = 0
-16:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0, -8, -0.2967682, 8, -8, 8)
-18:15/0 = 0
-19:15/0 = 0
-20:15/0 = 0
-22:15/0 = 0
-23:15/0 = 0
-27:15/0 = 0
-28:15/0 = 0
-29:15/0 = 0
-0:16/0 = 0
-1:16/0 = 0
-2:16/0 = 0
-3:16/0 = 0
-4:16/0 = 0
-5:16/0 = 0
-7:16/0 = 0
-8:16/0 = 0
-9:16/0 = 0
-10:16/0 = 0
-11:16/0 = 0
-13:16/0 = 0
-14:16/0 = 0
-15:16/0 = 0
-15:16/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-16:16/0 = 0
-18:16/0 = 0
-19:16/0 = 0
-20:16/0 = 0
-22:16/0 = 0
-23:16/0 = 0
-27:16/0 = 0
-28:16/0 = 0
-29:16/0 = 0
-0:17/0 = 0
-1:17/0 = 0
-7:17/0 = 0
-8:17/0 = 0
-9:17/0 = 0
-10:17/0 = 0
-11:17/0 = 0
-22:17/0 = 0
-23:17/0 = 0
-27:17/0 = 0
-28:17/0 = 0
-29:17/0 = 0
-0:18/0 = 0
-1:18/0 = 0
-2:18/0 = 0
-3:18/0 = 0
-4:18/0 = 0
-5:18/0 = 0
-27:18/0 = 0
-28:18/0 = 0
-0:19/0 = 0
-1:19/0 = 0
-2:19/0 = 0
-3:19/0 = 0
-4:19/0 = 0
-5:19/0 = 0
-7:19/0 = 0
-8:19/0 = 0
-9:19/0 = 0
-10:19/0 = 0
-11:19/0 = 0
-12:19/0 = 0
-13:19/0 = 0
-14:19/0 = 0
-15:19/0 = 0
-16:19/0 = 0
-17:19/0 = 0
-18:19/0 = 0
-19:19/0 = 0
-20:19/0 = 0
-21:19/0 = 0
-22:19/0 = 0
-24:19/0 = 0
-25:19/0 = 0
-26:19/0 = 0
-27:19/0 = 0
-28:19/0 = 0
-29:19/0 = 0
-30:19/0 = 0
-0:20/0 = 0
-1:20/0 = 0
-2:20/0 = 0
-3:20/0 = 0
-4:20/0 = 0
-5:20/0 = 0
-7:20/0 = 0
-8:20/0 = 0
-9:20/0 = 0
-10:20/0 = 0
-11:20/0 = 0
-12:20/0 = 0
-13:20/0 = 0
-14:20/0 = 0
-15:20/0 = 0
-16:20/0 = 0
-17:20/0 = 0
-18:20/0 = 0
-19:20/0 = 0
-20:20/0 = 0
-21:20/0 = 0
-22:20/0 = 0
-24:20/0 = 0
-25:20/0 = 0
-26:20/0 = 0
-27:20/0 = 0
-28:20/0 = 0
-29:20/0 = 0
-30:20/0 = 0
-0:21/0 = 0
-1:21/0 = 0
-2:21/0 = 0
-7:21/0 = 0
-8:21/0 = 0
-9:21/0 = 0
-10:21/0 = 0
-11:21/0 = 0
-12:21/0 = 0
-13:21/0 = 0
-14:21/0 = 0
-15:21/0 = 0
-16:21/0 = 0
-17:21/0 = 0
-18:21/0 = 0
-19:21/0 = 0
-27:21/0 = 0
-28:21/0 = 0
-29:21/0 = 0
-30:21/0 = 0
-18:9/0 = 0
-18:9/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSet" id="TileSet_tbwgg"]
-physics_layer_0/collision_layer = 32
-physics_layer_1/collision_layer = 32
-terrain_set_0/mode = 1
-terrain_set_0/terrain_0/name = "Terrain 0"
-terrain_set_0/terrain_0/color = Color(0.5, 0.34375, 0.25, 1)
-sources/0 = SubResource("TileSetAtlasSource_7yjib")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_tbwgg"]
-size = Vector2(48, 96)
 
 [node name="Fortress2" type="Node2D" unique_id=1992471992]
 
@@ -655,190 +110,137 @@ metadata/team = "blue"
 [node name="KeepFacade" type="Polygon2D" parent="Blue/Keep" unique_id=659502691]
 z_index = -2
 color = Color(0.23040001, 0.30449998, 0.39, 1)
-polygon = PackedVector2Array(-1272, -384, -1048, -384, -1048, -160, -1272, -160)
+polygon = PackedVector2Array(-1272, -480, -1088, -480, -1088, -160, -1272, -160)
 
-[node name="Course368" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1348687791]
-points = PackedVector2Array(-1272, -368, -1048, -368)
+[node name="Course464" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1096208841]
+points = PackedVector2Array(-1272, -464, -1088, -464)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Course336" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=897055276]
-points = PackedVector2Array(-1272, -336, -1048, -336)
+[node name="Course432" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1852935564]
+points = PackedVector2Array(-1272, -432, -1088, -432)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Course304" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1745979013]
-points = PackedVector2Array(-1272, -304, -1048, -304)
+[node name="Course400" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1033669137]
+points = PackedVector2Array(-1272, -400, -1088, -400)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Course272" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=670986914]
-points = PackedVector2Array(-1272, -272, -1048, -272)
+[node name="Course368" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1055219749]
+points = PackedVector2Array(-1272, -368, -1088, -368)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Course240" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1226627937]
-points = PackedVector2Array(-1272, -240, -1048, -240)
+[node name="Course336" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1863832081]
+points = PackedVector2Array(-1272, -336, -1088, -336)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Course208" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=734735541]
-points = PackedVector2Array(-1272, -208, -1048, -208)
+[node name="Course304" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=2139918573]
+points = PackedVector2Array(-1272, -304, -1088, -304)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Course176" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=338609461]
-points = PackedVector2Array(-1272, -176, -1048, -176)
+[node name="Course272" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1046271388]
+points = PackedVector2Array(-1272, -272, -1088, -272)
 width = 1.0
 default_color = Color(0.18, 0.2436, 0.3, 1)
 
-[node name="Climb1" type="TileMapLayer" parent="Blue/Keep" unique_id=905147075 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Course240" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=376596487]
+points = PackedVector2Array(-1272, -240, -1088, -240)
+width = 1.0
+default_color = Color(0.18, 0.2436, 0.3, 1)
+
+[node name="Course208" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=1196996110]
+points = PackedVector2Array(-1272, -208, -1088, -208)
+width = 1.0
+default_color = Color(0.18, 0.2436, 0.3, 1)
+
+[node name="Course176" type="Line2D" parent="Blue/Keep/KeepFacade" unique_id=283756174]
+points = PackedVector2Array(-1272, -176, -1088, -176)
+width = 1.0
+default_color = Color(0.18, 0.2436, 0.3, 1)
+
+[node name="Climb1" type="TileMapLayer" parent="Blue/Keep" unique_id=99180652 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
-position = Vector2(-1184, -192)
+position = Vector2(-1200, -192)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
+
+[node name="Climb2" type="TileMapLayer" parent="Blue/Keep" unique_id=93195887 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(0.72, 0.87, 1, 1)
+texture_filter = 1
+position = Vector2(-1272, -224)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb2" type="TileMapLayer" parent="Blue/Keep" unique_id=1791279879 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Climb3" type="TileMapLayer" parent="Blue/Keep" unique_id=947683408 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
-position = Vector2(-1160, -224)
+position = Vector2(-1200, -256)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAIAAAAAgAIAAAAAAAIAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
+
+[node name="Climb4" type="TileMapLayer" parent="Blue/Keep" unique_id=1902412441 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(0.72, 0.87, 1, 1)
+texture_filter = 1
+position = Vector2(-1272, -288)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb3" type="TileMapLayer" parent="Blue/Keep" unique_id=983195184 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Climb5" type="TileMapLayer" parent="Blue/Keep" unique_id=11575199 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
-position = Vector2(-1136, -256)
+position = Vector2(-1272, -320)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb4" type="TileMapLayer" parent="Blue/Keep" unique_id=1952239484 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1224, -288)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Climb5" type="TileMapLayer" parent="Blue/Keep" unique_id=593686313 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1192, -320)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Climb6" type="TileMapLayer" parent="Blue/Keep" unique_id=430498647 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1224, -352)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="CrownParapet" type="Node2D" parent="Blue/Keep" unique_id=1626212407]
-
-[node name="Deck" type="TileMapLayer" parent="Blue/Keep/CrownParapet" unique_id=38248411 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1280, -384)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgANAAAAAAAJAAAAAgAOAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon-112" type="TileMapLayer" parent="Blue/Keep/CrownParapet" unique_id=895705666]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1056, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon-80" type="TileMapLayer" parent="Blue/Keep/CrownParapet" unique_id=1329384242]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1088, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon80" type="TileMapLayer" parent="Blue/Keep/CrownParapet" unique_id=584873024]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1248, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon112" type="TileMapLayer" parent="Blue/Keep/CrownParapet" unique_id=546421223]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1280, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="LowerBalcony" type="TileMapLayer" parent="Blue/Keep" unique_id=1349149561 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-1176, -288)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgANAAAAAAAJAAAAAgAOAAAAAAAKAAAAAgAPAAAAAAAIAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="BalconyLip" type="TileMapLayer" parent="Blue/Keep" unique_id=91440915]
-modulate = Color(0.72, 0.87, 1, 1)
-texture_filter = 1
-position = Vector2(-936, -320)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAAAAAEAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="UpperBalcony" type="TileMapLayer" parent="Blue/Keep" unique_id=1170329802 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Balcony" type="TileMapLayer" parent="Blue/Keep" unique_id=1954916968 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
 position = Vector2(-1272, -352)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgA=")
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgANAAAAAAAJAAAAAgAOAAAAAAAKAAAAAgAPAAAAAAAJAAAAAgARAAAAAAAIAAAAAgAQAAAAAAAJAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="UpperLip1120" type="TileMapLayer" parent="Blue/Keep" unique_id=69223635]
+[node name="Climb6" type="TileMapLayer" parent="Blue/Keep" unique_id=723659319 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
-position = Vector2(-1128, -368)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
+position = Vector2(-1272, -384)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="UpperLip1264" type="TileMapLayer" parent="Blue/Keep" unique_id=1200165785]
+[node name="Climb7" type="TileMapLayer" parent="Blue/Keep" unique_id=349599235 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
-position = Vector2(-1272, -368)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
+position = Vector2(-1200, -416)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="GateWall" type="StaticBody2D" parent="Blue/Keep" unique_id=1052766228]
+[node name="Climb8" type="TileMapLayer" parent="Blue/Keep" unique_id=482105266 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(0.72, 0.87, 1, 1)
+texture_filter = 1
+position = Vector2(-1272, -448)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
 
-[node name="Collision" type="CollisionPolygon2D" parent="Blue/Keep/GateWall" unique_id=1466503144]
-polygon = PackedVector2Array(-1024, -384, -1008, -384, -1008, -320, -1024, -320)
-
-[node name="GateStone" type="Polygon2D" parent="Blue/Keep" unique_id=2019812793]
-visible = false
-color = Color(0.3456, 0.435, 0.51, 1)
-polygon = PackedVector2Array(-1024, -384, -1008, -384, -1008, -320, -1024, -320)
+[node name="Deck" type="TileMapLayer" parent="Blue/Keep" unique_id=1989580379 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(0.72, 0.87, 1, 1)
+texture_filter = 1
+position = Vector2(-1272, -480)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
 
 [node name="FortressGate" parent="Blue/Keep" unique_id=332301694 instance=ExtResource("2_qhvww")]
-position = Vector2(-1006, -208)
+position = Vector2(-1086, -191)
+hitbox_size = Vector2(24, 64)
+blocks_players = true
 
-[node name="FlagPole" type="Line2D" parent="Blue/Keep" unique_id=1601439627]
-visible = false
-points = PackedVector2Array(-1160, -384, -1160, -432)
-width = 2.0
-default_color = Color(0.72, 0.87, 1, 1)
-
-[node name="TeamFlag" type="Polygon2D" parent="Blue/Keep" unique_id=758174276]
-visible = false
-color = Color(0.72, 0.87, 1, 1)
-polygon = PackedVector2Array(-1192, -432, -1160, -432, -1160, -416, -1192, -416)
-
-[node name="GateAccess" type="Node2D" parent="Blue/Keep" unique_id=481481357]
-
-[node name="TimberBarrier" type="StaticBody2D" parent="Blue/Keep/GateAccess" unique_id=1051929919]
-position = Vector2(-1032, -208)
-collision_layer = 32
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Blue/Keep/GateAccess/TimberBarrier" unique_id=411664770]
-shape = SubResource("RectangleShape2D_do133")
+[node name="DoorSprite" type="Sprite2D" parent="Blue/Keep/FortressGate" unique_id=1112354203]
+position = Vector2(-20, -9)
+scale = Vector2(-0.07, 0.07)
+texture = ExtResource("5_tjucf")
 
 [node name="ForwardOutpost" type="Node2D" parent="Blue" unique_id=533562207 groups=["fortress_outposts"]]
 
@@ -898,19 +300,19 @@ position = Vector2(-680, -160)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Merlon-64" type="TileMapLayer" parent="Blue/ForwardOutpost/Lookout" unique_id=1478970839]
+[node name="Merlon-64" type="TileMapLayer" parent="Blue/ForwardOutpost/Lookout" unique_id=1478970839 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
 position = Vector2(-552, -176)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = SubResource("TileSet_tbwgg")
+tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
 
-[node name="Merlon64" type="TileMapLayer" parent="Blue/ForwardOutpost/Lookout" unique_id=1005373772]
+[node name="Merlon64" type="TileMapLayer" parent="Blue/ForwardOutpost/Lookout" unique_id=1005373772 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
 texture_filter = 1
 position = Vector2(-680, -176)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = SubResource("TileSet_tbwgg")
+tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
 
 [node name="FiringShelf" type="TileMapLayer" parent="Blue/ForwardOutpost" unique_id=1932877413 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(0.72, 0.87, 1, 1)
@@ -980,201 +382,138 @@ metadata/team = "orange"
 [node name="KeepFacade" type="Polygon2D" parent="Orange/Keep" unique_id=346658965]
 z_index = -2
 color = Color(0.32, 0.287, 0.2574, 1)
-polygon = PackedVector2Array(1048, -384, 1272, -384, 1272, -160, 1048, -160)
+polygon = PackedVector2Array(1088, -480, 1272, -480, 1272, -160, 1088, -160)
 
-[node name="Course368" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1151242033]
-points = PackedVector2Array(1048, -368, 1272, -368)
+[node name="Course464" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=803305268]
+points = PackedVector2Array(1088, -464, 1272, -464)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Course336" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=110791665]
-points = PackedVector2Array(1048, -336, 1272, -336)
+[node name="Course432" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=851656468]
+points = PackedVector2Array(1088, -432, 1272, -432)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Course304" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=10146900]
-points = PackedVector2Array(1048, -304, 1272, -304)
+[node name="Course400" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=167277721]
+points = PackedVector2Array(1088, -400, 1272, -400)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Course272" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1088668659]
-points = PackedVector2Array(1048, -272, 1272, -272)
+[node name="Course368" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=2074351631]
+points = PackedVector2Array(1088, -368, 1272, -368)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Course240" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1106853111]
-points = PackedVector2Array(1048, -240, 1272, -240)
+[node name="Course336" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1563791361]
+points = PackedVector2Array(1088, -336, 1272, -336)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Course208" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=720440083]
-points = PackedVector2Array(1048, -208, 1272, -208)
+[node name="Course304" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1859598234]
+points = PackedVector2Array(1088, -304, 1272, -304)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Course176" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1945512366]
-points = PackedVector2Array(1048, -176, 1272, -176)
+[node name="Course272" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=2010435472]
+points = PackedVector2Array(1088, -272, 1272, -272)
 width = 1.0
 default_color = Color(0.25, 0.2296, 0.19800001, 1)
 
-[node name="Climb1" type="TileMapLayer" parent="Orange/Keep" unique_id=292501907 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Course240" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=2094729513]
+points = PackedVector2Array(1088, -240, 1272, -240)
+width = 1.0
+default_color = Color(0.25, 0.2296, 0.19800001, 1)
+
+[node name="Course208" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1702848777]
+points = PackedVector2Array(1088, -208, 1272, -208)
+width = 1.0
+default_color = Color(0.25, 0.2296, 0.19800001, 1)
+
+[node name="Course176" type="Line2D" parent="Orange/Keep/KeepFacade" unique_id=1411469030]
+points = PackedVector2Array(1088, -176, 1272, -176)
+width = 1.0
+default_color = Color(0.25, 0.2296, 0.19800001, 1)
+
+[node name="Climb1" type="TileMapLayer" parent="Orange/Keep" unique_id=1278133998 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
 position = Vector2(1088, -192)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
+
+[node name="Climb2" type="TileMapLayer" parent="Orange/Keep" unique_id=1290855493 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(1, 0.82, 0.66, 1)
+texture_filter = 1
+position = Vector2(1176, -224)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb2" type="TileMapLayer" parent="Orange/Keep" unique_id=2083283256 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Climb3" type="TileMapLayer" parent="Orange/Keep" unique_id=985699179 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
-position = Vector2(1064, -224)
+position = Vector2(1088, -256)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgD//wAAAAAJAAAAAgD+/wAAAAAJAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
+
+[node name="Climb4" type="TileMapLayer" parent="Orange/Keep" unique_id=1273968815 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(1, 0.82, 0.66, 1)
+texture_filter = 1
+position = Vector2(1176, -288)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb3" type="TileMapLayer" parent="Orange/Keep" unique_id=1073698192 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Climb5" type="TileMapLayer" parent="Orange/Keep" unique_id=160930395 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
-position = Vector2(1040, -256)
+position = Vector2(1176, -320)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb4" type="TileMapLayer" parent="Orange/Keep" unique_id=430537585 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Balcony" type="TileMapLayer" parent="Orange/Keep" unique_id=146662990 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
-position = Vector2(1128, -288)
+position = Vector2(1016, -352)
+tile_map_data = PackedByteArray("AAAAAAAAAAAKAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgANAAAAAAAJAAAAAgAOAAAAAAAKAAAAAgAPAAAAAAAIAAAAAgD//wAAAAAKAAAAAgD+/wAAAAAIAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
+
+[node name="Climb6" type="TileMapLayer" parent="Orange/Keep" unique_id=1778463722 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(1, 0.82, 0.66, 1)
+texture_filter = 1
+position = Vector2(1176, -384)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb5" type="TileMapLayer" parent="Orange/Keep" unique_id=687337757 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Climb7" type="TileMapLayer" parent="Orange/Keep" unique_id=1548539915 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
-position = Vector2(1096, -320)
+position = Vector2(1088, -416)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
+
+[node name="Climb8" type="TileMapLayer" parent="Orange/Keep" unique_id=1153968280 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+modulate = Color(1, 0.82, 0.66, 1)
+texture_filter = 1
+position = Vector2(1176, -448)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Climb6" type="TileMapLayer" parent="Orange/Keep" unique_id=1712343339 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
+[node name="Deck" type="TileMapLayer" parent="Orange/Keep" unique_id=1744046171 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
-position = Vector2(1128, -352)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
+position = Vector2(1064, -480)
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
-
-[node name="CrownParapet" type="Node2D" parent="Orange/Keep" unique_id=109955142]
-
-[node name="Deck" type="TileMapLayer" parent="Orange/Keep/CrownParapet" unique_id=883185704 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1040, -384)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgANAAAAAAAJAAAAAgAOAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon-112" type="TileMapLayer" parent="Orange/Keep/CrownParapet" unique_id=293496506]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1040, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon-80" type="TileMapLayer" parent="Orange/Keep/CrownParapet" unique_id=895969151]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1072, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon80" type="TileMapLayer" parent="Orange/Keep/CrownParapet" unique_id=331174425]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1232, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Merlon112" type="TileMapLayer" parent="Orange/Keep/CrownParapet" unique_id=366873159]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1264, -400)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="LowerBalcony" type="TileMapLayer" parent="Orange/Keep" unique_id=269386911 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(920, -288)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgAKAAAAAAAJAAAAAgALAAAAAAAKAAAAAgAMAAAAAAAIAAAAAgANAAAAAAAJAAAAAgAOAAAAAAAKAAAAAgAPAAAAAAAIAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="BalconyLip" type="TileMapLayer" parent="Orange/Keep" unique_id=2050523250]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(920, -320)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAAAAAEAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="UpperBalcony" type="TileMapLayer" parent="Orange/Keep" unique_id=783736854 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1112, -352)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="UpperLip1120" type="TileMapLayer" parent="Orange/Keep" unique_id=1389690433]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1112, -368)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="UpperLip1264" type="TileMapLayer" parent="Orange/Keep" unique_id=1191047403]
-modulate = Color(1, 0.82, 0.66, 1)
-texture_filter = 1
-position = Vector2(1256, -368)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="GateWall" type="StaticBody2D" parent="Orange/Keep" unique_id=1986178030]
-
-[node name="Collision" type="CollisionPolygon2D" parent="Orange/Keep/GateWall" unique_id=69868093]
-polygon = PackedVector2Array(1008, -384, 1024, -384, 1024, -320, 1008, -320)
-
-[node name="GateStone" type="Polygon2D" parent="Orange/Keep" unique_id=1085376105]
-visible = false
-color = Color(0.48, 0.41, 0.3366, 1)
-polygon = PackedVector2Array(1008, -384, 1024, -384, 1024, -320, 1008, -320)
 
 [node name="FortressGate" parent="Orange/Keep" unique_id=1379693155 instance=ExtResource("2_qhvww")]
-position = Vector2(1006, -208)
+position = Vector2(1086, -192)
 team = 1
+hitbox_size = Vector2(24, 64)
+blocks_players = true
 
-[node name="FlagPole" type="Line2D" parent="Orange/Keep" unique_id=343255199]
-visible = false
-points = PackedVector2Array(1160, -384, 1160, -432)
-width = 2.0
-default_color = Color(1, 0.82, 0.66, 1)
-
-[node name="TeamFlag" type="Polygon2D" parent="Orange/Keep" unique_id=1987207404]
-visible = false
-color = Color(1, 0.82, 0.66, 1)
-polygon = PackedVector2Array(1160, -432, 1192, -432, 1192, -416, 1160, -416)
-
-[node name="GateAccess" type="Node2D" parent="Orange/Keep" unique_id=1981520899]
-
-[node name="TimberBarrier" type="StaticBody2D" parent="Orange/Keep/GateAccess" unique_id=1939525555]
-position = Vector2(1032, -208)
-collision_layer = 32
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=1973611605]
-shape = SubResource("RectangleShape2D_tbwgg")
-
-[node name="Door" type="Sprite2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=1754105562]
-position = Vector2(-2071, -9.000008)
-scale = Vector2(-0.1, 0.1)
-texture = ExtResource("6_tjucf")
-
-[node name="Door2" type="Sprite2D" parent="Orange/Keep/GateAccess/TimberBarrier" unique_id=9189201]
-position = Vector2(7.999996, -9.000008)
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("6_tjucf")
+[node name="DoorSprite" type="Sprite2D" parent="Orange/Keep/FortressGate" unique_id=1352807160]
+position = Vector2(20, -7)
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("5_tjucf")
 
 [node name="ForwardOutpost" type="Node2D" parent="Orange" unique_id=2095412058 groups=["fortress_outposts"]]
 
@@ -1233,19 +572,19 @@ position = Vector2(536, -160)
 tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
-[node name="Merlon-64" type="TileMapLayer" parent="Orange/ForwardOutpost/Lookout" unique_id=486300847]
+[node name="Merlon-64" type="TileMapLayer" parent="Orange/ForwardOutpost/Lookout" unique_id=486300847 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
 position = Vector2(536, -176)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = SubResource("TileSet_tbwgg")
+tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
 
-[node name="Merlon64" type="TileMapLayer" parent="Orange/ForwardOutpost/Lookout" unique_id=861760270]
+[node name="Merlon64" type="TileMapLayer" parent="Orange/ForwardOutpost/Lookout" unique_id=861760270 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
 texture_filter = 1
 position = Vector2(664, -176)
-tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAAA=")
-tile_set = SubResource("TileSet_tbwgg")
+tile_map_data = PackedByteArray("AAAAAAAAAAAJAAAAAgA=")
+tile_set = ExtResource("1_qpxgy")
 
 [node name="FiringShelf" type="TileMapLayer" parent="Orange/ForwardOutpost" unique_id=1167534174 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 modulate = Color(1, 0.82, 0.66, 1)
@@ -1342,24 +681,12 @@ polygon = PackedVector2Array(50, -120, 62, -120, 62, -24, 50, -24)
 [node name="Climb1" type="TileMapLayer" parent="Center/Tower" unique_id=465769368 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
 texture_filter = 1
 position = Vector2(-64, -56)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Climb2" type="TileMapLayer" parent="Center/Tower" unique_id=39194239 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-texture_filter = 1
-position = Vector2(-32, -88)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgA=")
-tile_set = ExtResource("1_qpxgy")
-
-[node name="Roof" type="TileMapLayer" parent="Center/Tower" unique_id=1707614899 groups=["fortress_arrow_transparent_platforms", "fortress_one_way_platforms"]]
-texture_filter = 1
-position = Vector2(-80, -120)
-tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAJAAAAAgAIAAAAAAAKAAAAAgAJAAAAAAAIAAAAAgA=")
+tile_map_data = PackedByteArray("AAAAAAAAAAAIAAAAAgABAAAAAAAJAAAAAgACAAAAAAAKAAAAAgADAAAAAAAIAAAAAgAEAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAGAAAAAAAIAAAAAgAHAAAAAAAIAAAAAgA=")
 tile_set = ExtResource("1_qpxgy")
 
 [node name="BatteringRam" parent="." unique_id=915215336 instance=ExtResource("4_tjucf")]
 position = Vector2(0.32177734, 96)
-route = PackedVector2Array(-1006, -160, -1008, -160, -864, -32, -800, -32, -752, 0, -704, 0, -656, -32, -512, -32, -432, 32, -352, 96, 0, 96, 352, 96, 440, 36, 512, -32, 656, -32, 704, 0, 752, 0, 800, -32, 864, -32, 1008, -160, 1006, -160)
+route = PackedVector2Array(-1086, -160, -1008, -160, -864, -32, -800, -32, -752, 0, -704, 0, -656, -32, -512, -32, -432, 32, -352, 96, 0, 96, 352, 96, 440, 36, 512, -32, 656, -32, 704, 0, 752, 0, 800, -32, 864, -32, 1008, -160, 1086, -160)
 
 [node name="SpawnPoints" type="Node2D" parent="." unique_id=1340083913]
 
@@ -1367,7 +694,7 @@ route = PackedVector2Array(-1006, -160, -1008, -160, -864, -32, -800, -32, -752,
 position = Vector2(-1216, -176)
 
 [node name="Blue2" type="Marker2D" parent="SpawnPoints" unique_id=631582523 groups=["spawn_blue"]]
-position = Vector2(-1104, -176)
+position = Vector2(-1176, -176)
 
 [node name="Blue3" type="Marker2D" parent="SpawnPoints" unique_id=2129449569 groups=["spawn_blue"]]
 position = Vector2(-640, -48)
@@ -1376,19 +703,19 @@ position = Vector2(-640, -48)
 position = Vector2(-560, -48)
 
 [node name="CreepBlue1" type="Marker2D" parent="SpawnPoints" unique_id=1786578837 groups=["creep_spawn_blue"]]
-position = Vector2(-1006, -176)
+position = Vector2(-1086, -176)
 
 [node name="CreepBlue2" type="Marker2D" parent="SpawnPoints" unique_id=977416172 groups=["creep_spawn_blue"]]
-position = Vector2(-1030, -176)
+position = Vector2(-1110, -176)
 
 [node name="CreepBlue3" type="Marker2D" parent="SpawnPoints" unique_id=315402244 groups=["creep_spawn_blue"]]
-position = Vector2(-1054, -176)
+position = Vector2(-1134, -176)
 
 [node name="Orange1" type="Marker2D" parent="SpawnPoints" unique_id=1838780513 groups=["spawn_orange"]]
 position = Vector2(1216, -176)
 
 [node name="Orange2" type="Marker2D" parent="SpawnPoints" unique_id=1431274391 groups=["spawn_orange"]]
-position = Vector2(1104, -176)
+position = Vector2(1176, -176)
 
 [node name="Orange3" type="Marker2D" parent="SpawnPoints" unique_id=1595454372 groups=["spawn_orange"]]
 position = Vector2(640, -48)
@@ -1397,12 +724,12 @@ position = Vector2(640, -48)
 position = Vector2(560, -48)
 
 [node name="CreepOrange1" type="Marker2D" parent="SpawnPoints" unique_id=1717000840 groups=["creep_spawn_orange"]]
-position = Vector2(1006, -176)
+position = Vector2(1086, -176)
 
 [node name="CreepOrange2" type="Marker2D" parent="SpawnPoints" unique_id=748844156 groups=["creep_spawn_orange"]]
-position = Vector2(1030, -176)
+position = Vector2(1110, -176)
 
 [node name="CreepOrange3" type="Marker2D" parent="SpawnPoints" unique_id=788537843 groups=["creep_spawn_orange"]]
-position = Vector2(1054, -176)
+position = Vector2(1134, -176)
 
 [node name="SpawnBands" parent="." unique_id=309461703 instance=ExtResource("6_bands")]

@@ -18,6 +18,13 @@ through the facade as before. Its HealthComponent has 5000 health, no
 regeneration and no respawn, and belongs to the server; `current` is replicated
 with the same per-peer visibility gating as the ram and creeps.
 
+Two exports size and harden the gate per level. `hitbox_size` (default 48 by 96)
+is the timber rect used by arrows, creeps and `hitbox()`; the root always sits
+2 pixels outside it, halfway up. `blocks_players` (default off) makes the gate
+add a `Barrier` StaticBody2D of the same rect on layer 6 (mask 0), which stops
+players from both sides while creeps and arrows ignore it. Fortress2 uses a
+24-by-64 gate with the barrier on; Fortress1 keeps the defaults.
+
 Damage sources, all validated on the server in `HealthComponent.take_damage`:
 
 - Arrows: the ray sweep includes the gates layer (arrow mask 91). Enemy arrows

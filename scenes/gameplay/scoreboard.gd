@@ -83,7 +83,25 @@ func assign_team(peer_id: int) -> int:
 	_sync_entry.rpc(peer_id, {"team": team, "kills": 0, "deaths": 0, "assists": 0})
 	return team
 
-func record_kill(killer_id: int, victim_id: int, assist_ids: Array[int] = []) -> void:
+## Host only. Deals every player into balanced random teams; the odd player
+## lands on a random side. Callers respawn the players afterwards.
+func shuffle_teams() -> void:
+	if not multiplayer.is_server():
+		return
+	var ids := entries.keys()
+	ids.shuffle()
+	var first: int = Teams.Team.BLUE if randi() % 2 == 0 else Teams.Team.ORANGE
+	var second: int = Teams.Team.ORANGE if first == Teams.Team.BLUE else Teams.Team.BLUE
+	for i in ids.size():
+		var team := first if i % 2 == 0 else second
+		if entries[ids[i]].team == team:
+			continue
+		var entry: Dictionary = entries[ids[i]].duplicate()
+		entry.team = team
+		_forget_attacker(ids[i])
+		_sync_entry.rpc(ids[i], entry)
+
+func record_kill(killer_id: int, victim_id: int, assist_ids: Array[int] = [], reflected := false) -> void:
 	if not multiplayer.is_server() or not entries.has(victim_id):
 		return
 	var updates: Dictionary = {}
@@ -108,7 +126,8 @@ func record_kill(killer_id: int, victim_id: int, assist_ids: Array[int] = []) ->
 		_event_id += 1
 		event = {"id": _event_id, "killer_id": killer_id, "victim_id": victim_id,
 			"killer_name": MultiplayerService.get_username(killer_id),
-			"victim_name": MultiplayerService.get_username(victim_id), "team": get_team(killer_id)}
+			"victim_name": MultiplayerService.get_username(victim_id), "team": get_team(killer_id),
+			"reflected": reflected}
 	_sync_combat.rpc(updates, event)
 
 func _forget_attacker(peer_id: int) -> void:

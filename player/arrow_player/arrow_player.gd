@@ -95,6 +95,7 @@ var _visual_dead := false
 var _shield_event: Dictionary = {}
 const PREVIEW_LAYER := 1 << 20
 var recent_attackers: Array[int] = []
+var last_hit_reflected := false ## Host only. Whether the latest arrow to hit had bounced off a shield.
 
 @onready var sprite: AnimatedSprite2D = %AnimatedSprite2D
 @onready var health: HealthComponent = %HealthComponent
@@ -596,7 +597,8 @@ func _on_respawned() -> void:
 ## Host only.
 func _on_died_server(source: Node) -> void:
 	var killer_id: int = source.peer_id if source is ArrowPlayer else 0
-	World.scoreboard.record_kill(killer_id, peer_id, recent_attackers.slice(1))
+	World.scoreboard.record_kill(killer_id, peer_id, recent_attackers.slice(1), last_hit_reflected)
+	last_hit_reflected = false
 	recent_attackers.clear()
 	World.respawn_manager.schedule(self)
 

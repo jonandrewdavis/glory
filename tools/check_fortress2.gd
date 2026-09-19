@@ -74,7 +74,7 @@ func check_center() -> void:
 		if pawn.position.x > 150:
 			break
 	expect(pawn.is_on_floor() and pawn.position.x > 150 and absf(pawn.position.y + 32) < 1, "Deck walk passes through the tower")
-	await ascent(1, 0, -24, 3, "tower roof")
+	await ascent(1, 0, -24, 1, "tower perch")
 	var arrow: Node = load("res://player/arrow_player/arrow.tscn").instantiate()
 	var arrow_mask: int = arrow.collision_mask
 	arrow.free()
@@ -121,7 +121,7 @@ func _check() -> void:
 				break
 		expect(absf(pawn.position.x) > 992 and pawn.position.y < -162, "Side %d upper ramp" % side)
 		await ascent(side, 608, -32, 4, "outpost")
-		await ascent(side, 1160, -288, 3, "upper keep")
+		await ascent(side, 1188, -160, 10, "keep")
 		await check_gate_access(side)
 		for direction in [-1, 1]:
 			await teleport(Vector2(side * 728, -8))
@@ -150,23 +150,15 @@ func stair_jump(target_x: float, surface_y: float, description: String) -> void:
 func check_gate_access(side: int) -> void:
 	# Same capsule and scale as the playable archer; legacy map checks use unit scale.
 	pawn.scale = player_scale
-	for outside in [true, false]:
-		await teleport(Vector2(side * (984 if outside else 1080), -176))
-		for frame in range(150):
-			await tick(side if outside else -side)
-		expect(absf(pawn.position.x) < 1008 if outside else absf(pawn.position.x) > 1056,
-			"Side %d gate blocks %s" % [side, "entry" if outside else "exit"])
+	# The gate barrier is built by FortressGate at runtime; tools/check_rounds.tscn covers it.
 	# Defenders climb out from inside; attackers have no exterior staircase.
-	await teleport(Vector2(side * 1136, -176))
-	for i in range(3):
-		await stair_jump(side * (1136 - 24 * i), -192 - 32 * i, "Side %d interior stair %d" % [side, i + 1])
-	await stair_jump(side * 1064, -288, "Side %d return balcony" % side)
-	for frame in range(65):
-		await tick(-side)
-	expect(absf(pawn.position.x) < 1000 and pawn.is_on_floor(), "Side %d exits above gate" % side)
-	var barrier := level.get_node(("Blue" if side < 0 else "Orange") + "/Keep/GateAccess/TimberBarrier")
-	expect(not barrier.is_in_group("fortress_one_way_platforms") and not barrier.get_node("CollisionShape2D").one_way_collision,
-		"Side %d timber cannot be dropped through" % side)
+	await teleport(Vector2(side * 1188, -176))
+	for i in range(5):
+		await stair_jump(side * 1188, -192 - 32 * i, "Side %d interior stair %d" % [side, i + 1])
+	await stair_jump(side * 1188, -352, "Side %d balcony" % side)
+	for frame in range(260):
+		await tick(-side if absf(pawn.position.x) > 960 else 0.0)
+	expect(absf(pawn.position.x) < 1088 and pawn.position.y > -180, "Side %d drops off the balcony outside the gate" % side)
 	pawn.scale = Vector2.ONE
 
 func check_defenses() -> void:
@@ -175,29 +167,25 @@ func check_defenses() -> void:
 	var arrow_mask: int = arrow.collision_mask
 	arrow.free()
 	for side in [-1, 1]:
-		for horizontal_speed in [0, side * 100]:
-			var shot_arrow: Node = load("res://player/arrow_player/arrow.tscn").instantiate()
-			level.add_child(shot_arrow)
-			shot_arrow.set_physics_process(false)
-			shot_arrow.setup({"position": Vector2(side * 976, -308), "velocity": Vector2(horizontal_speed, 400), "team": 0})
-			for frame in range(12):
-				shot_arrow._physics_process(DT)
-			expect(not shot_arrow._finished and shot_arrow.position.y > -220, "Side %d real arrow clears murder-hole floor, vx=%d" % [side, horizontal_speed])
-			shot_arrow.free()
-		for x in [952, 976, 992]:
-			var shot := PhysicsRayQueryParameters2D.create(Vector2(side * x, -308), Vector2(side * x, -200), arrow_mask)
-			expect(space.intersect_ray(shot).is_empty(), "Side %d downward murder-hole lane %d" % [side, x])
-		var cover := PhysicsRayQueryParameters2D.create(Vector2(side * 900, -304), Vector2(side * 950, -304), arrow_mask)
-		expect(not space.intersect_ray(cover).is_empty(), "Side %d parapet stops arrows" % side)
+		# The keep is all open platforms: nothing but the gate stops a level shot.
+		for y in range(-472, -224, 8):
+			var lane := PhysicsRayQueryParameters2D.create(Vector2(side * 1000, y), Vector2(side * 1279, y), arrow_mask)
+			lane.collide_with_areas = true
+			expect(space.intersect_ray(lane).is_empty(), "Side %d keep passes level arrows at %d" % [side, y])
+		var drop := PhysicsRayQueryParameters2D.create(Vector2(side * 1188, -500), Vector2(side * 1188, -168), arrow_mask)
+		expect(space.intersect_ray(drop).is_empty(), "Side %d keep floors pass plunging arrows" % side)
+		var timber := PhysicsRayQueryParameters2D.create(Vector2(side * 1040, -192), Vector2(side * 1200, -192), arrow_mask)
+		timber.collide_with_areas = true
+		expect(space.intersect_ray(timber).get("collider") is Area2D, "Side %d gate stops arrows" % side)
 		var ground := PhysicsRayQueryParameters2D.create(Vector2(side * 400, -20), Vector2(side * 400, 200), arrow_mask)
 		expect(not space.intersect_ray(ground).is_empty(), "Side %d ground stops arrows" % side)
 		for y in [-168, -40]:
 			var outpost := PhysicsRayQueryParameters2D.create(Vector2(side * 500, y), Vector2(side * 700, y), arrow_mask)
 			expect(space.intersect_ray(outpost).is_empty(), "Side %d outpost cover passes arrows at %d" % [side, y])
-		await teleport(Vector2(side * 1100, -296))
-		for frame in range(100):
-			await tick(-side)
-		expect(absf(pawn.position.x) < 1000 and pawn.is_on_floor(), "Side %d balcony doorway traversal" % side)
+		await teleport(Vector2(side * 1200, -488))
+		for frame in range(60):
+			await tick(side)
+		expect(pawn.is_on_floor() and pawn.position.y < -480, "Side %d crown has no blocking parapet" % side)
 	var sky := PhysicsRayQueryParameters2D.create(Vector2(0, -500), Vector2(0, -3000), arrow_mask)
 	expect(space.intersect_ray(sky).is_empty(), "Old ceiling and maximum normal shot apex are clear")
 	var upward: Node = load("res://player/arrow_player/arrow.tscn").instantiate()
@@ -224,9 +212,9 @@ func preview() -> void:
 	var error := root.get_texture().get_image().save_png("/tmp/fortress2-overview.png")
 	print("Preview: ", error_string(error), " /tmp/fortress2-overview.png")
 	if "--gate-preview" in OS.get_cmdline_user_args():
-		camera.zoom = Vector2(3, 3)
+		camera.zoom = Vector2(1.8, 1.8)
 		for side in [-1, 1]:
-			camera.position = Vector2(side * 1032, -208)
+			camera.position = Vector2(side * 1160, -320)
 			for frame in range(6):
 				await process_frame
 			await RenderingServer.frame_post_draw

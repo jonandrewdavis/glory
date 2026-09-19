@@ -47,6 +47,7 @@ offset_left = -260.0
 offset_top = 16.0
 offset_right = 260.0
 offset_bottom = 39.0
+grow_horizontal = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
@@ -86,6 +87,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(0.0020647002, 0.0054254164, 0.017223036, 1)
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
@@ -112,6 +115,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(0.0020647002, 0.0054254164, 0.017223036, 1)
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
@@ -136,4 +141,7 @@ offset_bottom = 7.0
 mouse_filter = 2
 
 [node name="RespawnHud" parent="." unique_id=1078571665 instance=ExtResource("respawns")]
+visible = true
 anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2

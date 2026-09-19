@@ -14,7 +14,7 @@ order = 1
 initial_owner = 0
 permanent = true
 bounds = Rect2(-240, -480, 480, 592)
-flag_position = Vector2(-120, -384)
+flag_position = Vector2(-160, -480)
 
 [node name="Points" type="Node2D" parent="Zone1"]
 
@@ -22,7 +22,7 @@ flag_position = Vector2(-120, -384)
 position = Vector2(-176, -176)
 
 [node name="Point2" type="Marker2D" parent="Zone1/Points"]
-position = Vector2(-64, -176)
+position = Vector2(-136, -176)
 
 [node name="Zone2" type="Node2D" parent="."]
 position = Vector2(-600, 0)
@@ -130,7 +130,7 @@ order = 6
 initial_owner = 1
 permanent = true
 bounds = Rect2(-240, -480, 480, 592)
-flag_position = Vector2(120, -384)
+flag_position = Vector2(160, -480)
 
 [node name="Points" type="Node2D" parent="Zone6"]
 
@@ -138,7 +138,7 @@ flag_position = Vector2(120, -384)
 position = Vector2(176, -176)
 
 [node name="Point2" type="Marker2D" parent="Zone6/Points"]
-position = Vector2(64, -176)
+position = Vector2(136, -176)
 
 [node name="SpawnFlag" parent="Zone1" instance=ExtResource("flag")]
 

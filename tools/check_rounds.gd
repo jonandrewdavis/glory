@@ -84,7 +84,7 @@ func check_gates() -> void:
 	expect(blue != null and orange != null and get_nodes_in_group("fortress_gates").size() == 2, "Two fortress gates, one per team")
 	expect(blue.health.current == 5000.0 and orange.health.current == 5000.0 and blue.health.max_value == 5000.0, "Gates start at 5000 HP")
 	expect(blue.collision_layer == FortressGate.LAYER and blue.collision_mask == 0, "Gates sit on the gates layer with no mask")
-	expect(blue.hitbox().has_point(Vector2(-1030, -200)) and not blue.hitbox().has_point(Vector2(-1000, -200)), "Gate hitbox covers the timber facade only")
+	expect(blue.hitbox().has_point(Vector2(-1100, -200)) and not blue.hitbox().has_point(Vector2(-1080, -200)) and not blue.hitbox().has_point(Vector2(-1100, -230)), "Gate hitbox covers the timber facade only")
 	var rounds: RoundManager = world.round_manager
 	expect(rounds.phase == RoundManager.Phase.PLAYING and rounds.round_number == 1 and rounds.wins_for(Teams.Team.BLUE) == 0 and rounds.wins_for(Teams.Team.ORANGE) == 0, "Level load starts round one")
 	# The gate stays walkable: a body that even masks the gates layer passes.
@@ -96,12 +96,24 @@ func check_gates() -> void:
 	pawn.collision_layer = 0
 	pawn.collision_mask = 1 | FortressGate.LAYER
 	add_child(pawn)
-	pawn.global_position = Vector2(990, -176)
+	pawn.global_position = Vector2(1070, -176)
 	for i in range(30):
 		pawn.velocity = Vector2(300, 0)
 		pawn.move_and_slide()
 		await get_tree().physics_frame
-	expect(pawn.global_position.x > 1060, "Bodies walk through the gate facade")
+	expect(pawn.global_position.x > 1150, "Bodies walk through the gate facade")
+	# Players (mask 33) are stopped by the barrier from both sides.
+	pawn.collision_mask = 33
+	for start_x: float in [1070.0, 1140.0]:
+		pawn.global_position = Vector2(start_x, -176)
+		for i in range(30):
+			pawn.velocity = Vector2(300 if start_x < 1100 else -300, 0)
+			pawn.move_and_slide()
+			await get_tree().physics_frame
+		expect(pawn.global_position.x < 1088 if start_x < 1100 else pawn.global_position.x > 1112, "Gate barrier blocks players starting at %d" % start_x)
+	var barrier: StaticBody2D = orange.get_node("Barrier")
+	expect(barrier.collision_layer == FortressGate.BARRIER_LAYER and barrier.collision_mask == 0
+		and not barrier.is_in_group("fortress_one_way_platforms") and not barrier.get_node("CollisionShape2D").one_way_collision, "Gate timber cannot be dropped through")
 	pawn.free()
 
 func check_arrows() -> void:
@@ -117,13 +129,13 @@ func check_arrows() -> void:
 	var listener := func(headshot: bool) -> void: sounds.append(headshot)
 	world.projectile_spawner.hit_sound_played.connect(listener)
 	await ticks(2)
-	var arrow: Arrow = world.projectile_spawner.spawn_arrow({"position": Vector2(960, -208), "velocity": Vector2(600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
+	var arrow: Arrow = world.projectile_spawner.spawn_arrow({"position": Vector2(1040, -200), "velocity": Vector2(600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
 	await ticks(10)
 	expect(orange.health.current == 4965.0 and not is_instance_valid(arrow), "Enemy arrow damages the gate once")
 	expect(orange.stuck_arrows.get_child_count() == 1, "Arrow sticks in the gate")
 	expect(sounds == [false], "Gate hit clicks for the shooter")
 	expect(world.scoreboard.entries[1].kills == 0, "Gate damage grants no kill")
-	world.projectile_spawner.spawn_arrow({"position": Vector2(-960, -208), "velocity": Vector2(-600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
+	world.projectile_spawner.spawn_arrow({"position": Vector2(-1040, -200), "velocity": Vector2(-600, 0), "owner_id": 1, "team": Teams.Team.BLUE, "damage": 35.0})
 	await ticks(10)
 	expect(blue.health.current == 5000.0 and blue.stuck_arrows.get_child_count() == 1, "Friendly arrow is blocked by the friendly gate without damage")
 	expect(sounds == [false], "Friendly gate hit plays no hit click")
@@ -151,10 +163,10 @@ func check_validation() -> void:
 func check_creeps_vs_gate() -> void:
 	var orange := gate(Teams.Team.ORANGE)
 	var before := orange.health.current
-	var attacker := soldier(Teams.Team.BLUE, Vector2(1006, -176), 1006)
+	var attacker := soldier(Teams.Team.BLUE, Vector2(1086, -176), 1086)
 	await ticks(300)
 	expect(attacker._target == orange and orange.health.current < before, "A soldier at the enemy gate strikes it")
-	var defender := soldier(Teams.Team.ORANGE, Vector2(1030, -176), 1030)
+	var defender := soldier(Teams.Team.ORANGE, Vector2(1110, -176), 1110)
 	# A gate-striking soldier only rescans every RETARGET_INTERVAL (0.25s).
 	await ticks(20)
 	expect(attacker._target == defender, "Enemy soldiers take priority over the gate (target %s)" % attacker._target)

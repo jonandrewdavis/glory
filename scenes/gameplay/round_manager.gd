@@ -58,6 +58,8 @@ func _restart_after_banner() -> void:
 	await get_tree().create_timer(BANNER_SECONDS).timeout
 	if token != _generation or session != World.session or not multiplayer.is_server() or phase != Phase.ENDED:
 		return
+	# The fresh level respawns everyone, which picks up the new teams.
+	World.scoreboard.shuffle_teams()
 	World.level_loader.spawn_level(World.level_loader.current_key)
 
 ## Host only. Full re-instance at the team spawn, as team switching does.

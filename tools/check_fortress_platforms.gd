@@ -15,7 +15,7 @@ static func run(check: SceneTree, level: Node2D) -> void:
 		check.expect(valid, "%s platform classification" % path)
 		if tower:
 			converted += 1
-	check.expect(converted == (56 if level.name == "Fortress1" else 46), "All expected platforms converted")
+	check.expect(converted == (56 if level.name == "Fortress1" else 48), "All expected platforms converted")
 	# Isolate the same baked tiles so nearby tower walls cannot mask the result.
 	var limits := level.get_node("StaticBodyLimits") as StaticBody2D
 	var limits_layer := limits.collision_layer

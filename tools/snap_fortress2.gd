@@ -4,8 +4,7 @@ const SCENE := "res://levels/Fortress2.tscn"
 const OUT := "/Users/andrewdavis/godot/glory/fortress2_level.png"
 const WIDTH := 10000
 const REMOVE := ["BatteringRam", "SpawnPoints", "SpawnBands",
-	"Blue/Keep/FortressGate", "Orange/Keep/FortressGate",
-	"Blue/Keep/MainGate", "Orange/Keep/MainGate"]
+	"Blue/Keep/FortressGate", "Orange/Keep/FortressGate"]
 
 func _init() -> void:
 	await process_frame

@@ -221,7 +221,7 @@ func reflect_arrow(arrow: Arrow, blocker: ArrowPlayer, at: Vector2) -> Arrow:
 		"trajectory_time": reflected_time, "flight_direction": -arrow.flight_direction,
 		"travel_time_multiplier": arrow.travel_time_multiplier, "owner_id": blocker.peer_id,
 		"team": blocker.team, "damage": arrow.damage, "scale": arrow.visual_scale,
-		"reflected_from": arrow.projectile_id})
+		"reflected": true, "reflected_from": arrow.projectile_id})
 
 func server_notify_hit(shooter_id: int, headshot: bool) -> void:
 	if multiplayer.is_server():

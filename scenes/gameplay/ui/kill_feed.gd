@@ -16,6 +16,8 @@ func _ready() -> void:
 func _on_player_killed(event: Dictionary) -> void:
 	var line := Label.new()
 	line.text = "%s killed %s" % [event.killer_name, event.victim_name]
+	if event.get("reflected", false):
+		line.text += " (reflected)"
 	line.modulate = Teams.color(int(event.team))
 	line.add_theme_color_override("font_outline_color", Color(0.03, 0.04, 0.06))
 	line.add_theme_constant_override("outline_size", 3)

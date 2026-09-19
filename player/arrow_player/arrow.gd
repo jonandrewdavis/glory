@@ -33,6 +33,7 @@ var velocity := Vector2.ZERO ## Actual world velocity, including slowdown and di
 var elapsed := 0.0 ## Baseline trajectory time; decreases on the return trip.
 var travel_time_multiplier := 1.0
 var flight_direction := 1
+var reflected := false ## Bounced off a shield at least once; drawn white.
 var cosmetic := false
 var predicted := false
 var projectile_id := 0
@@ -64,6 +65,7 @@ func setup(data: Dictionary) -> void:
 	owner_id = data.get("owner_id", 0)
 	team = data.get("team", 0)
 	damage = data.get("damage", 35.0)
+	reflected = data.get("reflected", false)
 	var raw_scale: Variant = data.get("scale", Vector2.ONE)
 	visual_scale = raw_scale if raw_scale is Vector2 else Vector2(float(raw_scale), float(raw_scale))
 	_update_flight_state()
@@ -222,6 +224,9 @@ func _hit_body(body: Node, headshot: bool) -> HitOutcome:
 	if shooter == null or shooter.team != team or not Teams.are_enemies(team, body.get("team")):
 		return HitOutcome.NONE
 	var health := HealthComponent.find_in(body)
+	# Set before damage: a lethal hit emits died synchronously.
+	if body is ArrowPlayer:
+		body.last_hit_reflected = reflected
 	var amount := damage * (shooter.headshot_damage_multiplier if headshot else 1.0)
 	if health and health.take_damage(amount, shooter):
 		hit.emit(body, owner_id, headshot)
@@ -237,7 +242,7 @@ func _finish() -> void:
 	queue_free()
 
 func refresh_colors() -> void:
-	polygon.color = Teams.color(team)
+	polygon.color = Color.WHITE if reflected else Teams.color(team)
 	trail.default_color = Teams.color(team)
 
 func evaluate_visual(time: float) -> void:

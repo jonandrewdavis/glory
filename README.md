@@ -14,8 +14,7 @@ Rewards:
 - ~~Server restart & dump players~~ (warn, hand off, auto-rejoin; see docs/playflow-poc.md)
 - Better Mouse re-capture logic ... ugh
 - Going back to base to heal
-- Fix respawn not swapping teams when Ram retreats
-- Hit sound when you take damage
+7- Hit sound when you take damage
 - A "Mirror" icon show on the arrow 
 - Player Interpolation.
 - Network audit, server CPU

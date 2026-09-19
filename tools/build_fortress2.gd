@@ -207,33 +207,26 @@ func build_keep(parent: Node, side: int, tint: Color) -> void:
 	var keep := branch(parent, "Keep")
 	keep.add_to_group("fortress_keeps", true)
 	keep.set_meta("team", "blue" if side < 0 else "orange")
-	facade(keep, "KeepFacade", side, 1160, -384, -160, 224, tint)
-	climb(keep, side, 1160, -160, 6, tint)
-	battlements(keep, "CrownParapet", side, 1160, -384, 240, tint)
-	platform(keep, "LowerBalcony", side, 1088, -288, 176, tint, true)
-	cover(keep, "BalconyLip", side, 1008, -304, tint)
-	platform(keep, "UpperBalcony", side, 1192, -352, 160, tint, true)
-	for x in [1120, 1264]:
-		cover(keep, "UpperLip%d" % x, side, x, -368, tint)
-	# Solid front wall above the open gate; the wooden gate itself is visual only.
-	var wall := rect_points(mirrored_rect(side, 1008, -384, 16, 128))
-	solid(keep, "GateWall", wall)
-	polygon(keep, "GateStone", wall, Color(0.48, 0.50, 0.51) * tint)
-	build_gate(keep, side, tint)
-	flag(keep, side, 1160, -384, tint)
+	# Tall, narrow tower set back from the crest: every floor is an open
+	# arrow-transparent platform, so the only cover is height.
+	facade(keep, "KeepFacade", side, 1180, -480, -160, 184, tint)
+	for i in range(8):
+		var y := -192 - 32 * i - (32 if i >= 5 else 0)
+		# Steps 1-4 start at the gate and end against the map edge; 5-8 mirror that.
+		var rear := (i % 2 == 1) if i < 4 else (i + (1 if i >= 5 else 0)) % 2 == 0
+		platform(keep, "Climb%d" % (i + 1), side, 1224 if rear else 1144, y, 96 if rear else 112, tint, true)
+	# Projects over the gate so defenders can drop out in front of it.
+	platform(keep, "Balcony", side, 1128, -352, 288, tint, true)
+	platform(keep, "Deck", side, 1168, -480, 208, tint, true)
+	build_gate(keep, side)
 
-func build_gate(parent: Node, side: int, tint: Color) -> void:
-	var gate := branch(parent, "MainGate")
-	var shape := rect_points(mirrored_rect(side, 1008, -256, 48, 96))
-	polygon(gate, "GateTimber", shape, Color(0.39, 0.27, 0.17))
-	for x in range(1016, 1056, 12):
-		line(gate, "Plank%d" % x, PackedVector2Array([Vector2(side * x, -252), Vector2(side * x, -164)]), Color(0.18, 0.14, 0.12), 2)
-	for y in [-240, -184]:
-		polygon(gate, "IronBand%d" % -y, rect_points(mirrored_rect(side, 1008, y, 48, 6)), Color(0.55, 0.57, 0.59) * tint)
-	# The damageable objective is its own scene; MainGate is art only.
+func build_gate(parent: Node, side: int) -> void:
+	# The objective scene is the whole gate: hitbox, player barrier, no art yet.
 	var objective: Node2D = load("res://entities/fortress_gate.tscn").instantiate()
 	objective.team = Teams.Team.BLUE if side < 0 else Teams.Team.ORANGE
-	objective.position = Vector2(side * 1006, -208)
+	objective.hitbox_size = Vector2(24, 64)
+	objective.blocks_players = true
+	objective.position = Vector2(side * 1086, -192)
 	attach(parent, objective, "FortressGate")
 
 func build_outpost(parent: Node, side: int, tint: Color) -> void:
@@ -284,12 +277,12 @@ func build_center() -> void:
 func build_ram() -> void:
 	var ram: Node2D = load("res://entities/battering_ram.tscn").instantiate()
 	ram.route = PackedVector2Array([
-		Vector2(-1006, -160), Vector2(-1008, -160), Vector2(-864, -32),
+		Vector2(-1086, -160), Vector2(-1008, -160), Vector2(-864, -32),
 		Vector2(-800, -32), Vector2(-752, 0), Vector2(-704, 0), Vector2(-656, -32),
 		Vector2(-512, -32), Vector2(-432, 32), Vector2(-352, 96), Vector2(0, 96),
 		Vector2(352, 96), Vector2(440, 36), Vector2(512, -32), Vector2(656, -32),
 		Vector2(704, 0), Vector2(752, 0), Vector2(800, -32), Vector2(864, -32),
-		Vector2(1008, -160), Vector2(1006, -160),
+		Vector2(1008, -160), Vector2(1086, -160),
 	])
 	attach(level, ram, "BatteringRam")
 
@@ -297,7 +290,7 @@ func build_spawns() -> void:
 	var spawns := branch(level, "SpawnPoints")
 	for team in ["Blue", "Orange"]:
 		var side := -1 if team == "Blue" else 1
-		var positions := [Vector2(1216, -176), Vector2(1104, -176), Vector2(640, -48), Vector2(560, -48)]
+		var positions := [Vector2(1216, -176), Vector2(1176, -176), Vector2(640, -48), Vector2(560, -48)]
 		for i in range(4):
 			var marker := Marker2D.new()
 			marker.position = positions[i] * Vector2(side, 1)
@@ -305,6 +298,6 @@ func build_spawns() -> void:
 			attach(spawns, marker, "%s%d" % [team, i + 1])
 		for i in range(3):
 			var marker := Marker2D.new()
-			marker.position = Vector2(side * (1006 + i * 24), -176)
+			marker.position = Vector2(side * (1086 + i * 24), -176)
 			marker.add_to_group("creep_spawn_%s" % team.to_lower(), true)
 			attach(spawns, marker, "Creep%s%d" % [team, i + 1])
