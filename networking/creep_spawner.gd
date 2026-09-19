@@ -49,7 +49,15 @@ func queue_wave() -> void:
 			continue
 		for index in range(wave_size):
 			var marker: Node2D = markers[index % markers.size()]
-			pending.append({"team": team, "position": marker.global_position, "goal_x": goals[0].global_position.x})
+			pending.append({"team": team, "position": marker.global_position, "goal_x": _goal_x(team, goals[0])})
+
+## Soldiers march to the enemy gate's impact point. Spawn markers may sit well
+## behind the gate; the first one is only the goal on maps without gates.
+func _goal_x(team: int, fallback: Node2D) -> float:
+	for gate: Node in get_tree().get_nodes_in_group("fortress_gates"):
+		if gate is FortressGate and Teams.are_enemies(team, gate.team):
+			return gate.global_position.x
+	return fallback.global_position.x
 
 func _flush_pending() -> void:
 	var shape := RectangleShape2D.new()

@@ -703,13 +703,13 @@ position = Vector2(-640, -48)
 position = Vector2(-560, -48)
 
 [node name="CreepBlue1" type="Marker2D" parent="SpawnPoints" unique_id=1786578837 groups=["creep_spawn_blue"]]
-position = Vector2(-1086, -176)
+position = Vector2(-1192, -176)
 
 [node name="CreepBlue2" type="Marker2D" parent="SpawnPoints" unique_id=977416172 groups=["creep_spawn_blue"]]
-position = Vector2(-1110, -176)
+position = Vector2(-1224, -176)
 
 [node name="CreepBlue3" type="Marker2D" parent="SpawnPoints" unique_id=315402244 groups=["creep_spawn_blue"]]
-position = Vector2(-1134, -176)
+position = Vector2(-1256, -176)
 
 [node name="Orange1" type="Marker2D" parent="SpawnPoints" unique_id=1838780513 groups=["spawn_orange"]]
 position = Vector2(1216, -176)
@@ -724,12 +724,12 @@ position = Vector2(640, -48)
 position = Vector2(560, -48)
 
 [node name="CreepOrange1" type="Marker2D" parent="SpawnPoints" unique_id=1717000840 groups=["creep_spawn_orange"]]
-position = Vector2(1086, -176)
+position = Vector2(1192, -176)
 
 [node name="CreepOrange2" type="Marker2D" parent="SpawnPoints" unique_id=748844156 groups=["creep_spawn_orange"]]
-position = Vector2(1110, -176)
+position = Vector2(1224, -176)
 
 [node name="CreepOrange3" type="Marker2D" parent="SpawnPoints" unique_id=788537843 groups=["creep_spawn_orange"]]
-position = Vector2(1134, -176)
+position = Vector2(1256, -176)
 
 [node name="SpawnBands" parent="." unique_id=309461703 instance=ExtResource("6_bands")]

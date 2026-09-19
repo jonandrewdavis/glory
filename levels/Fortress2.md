@@ -31,8 +31,9 @@ a 24-by-64 timber rect at x=1088–1112, y=-224 to -160, root at (1086, -192).
 The gate has no visual yet. With `blocks_players` on, the gate itself adds the
 layer 6 (mask 0) barrier that blocks players from both directions until the
 level resets, without changing arrow damage, creep movement, or ram behavior;
-there are no separate gate wall, barrier or door nodes. The ram route and the
-creep markers (x=1086, 1110, 1134) end at the gate. See `docs/rounds.md`.
+there are no separate gate wall, barrier or door nodes. The ram route and
+enemy creeps end at the gate root; each team's own creep markers sit at the back
+of its keep (x=1192, 1224, 1256), clear of the fighting at the gate. See `docs/rounds.md`.
 
 Defenders climb the interior steps and leave by walking off the balcony, which
 projects 104 pixels past the tower front, just beyond the hill crest, and

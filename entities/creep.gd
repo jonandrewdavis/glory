@@ -20,7 +20,11 @@ const SHEETS := {
 static var _frames: SpriteFrames
 
 @export var walk_speed := 60.0
-@export var melee_reach := 48.0
+@export var melee_reach := 40.0
+## Horizontal gap a soldier keeps behind whoever is ahead. With the front ranks
+## stopping melee_reach apart, anything near or above it leaves the second rank
+## out of reach, so fights stay one-on-one even on slopes.
+@export var queue_spacing := 28.0
 @export var swing_interval_min := 0.8
 @export var swing_interval_max := 1.4
 @export var damage_low := 20.0
@@ -168,7 +172,7 @@ func _creep_ahead() -> bool:
 		if absf(other.global_position.y - global_position.y) > melee_reach:
 			continue
 		var ahead: float = (other.global_position.x - global_position.x) * march_direction
-		if ahead > 0.0 and ahead < BODY_SIZE.x + 3.0:
+		if ahead > 0.0 and ahead < queue_spacing:
 			return true
 	return false
 

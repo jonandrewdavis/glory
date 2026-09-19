@@ -3,16 +3,21 @@
 Each fortress creates three soldiers when its level is ready, then three every
 30 seconds. Fortress1 and Fortress2 both have dedicated `CreepBlue1..3` and
 `CreepOrange1..3` markers under `SpawnPoints`; their builders preserve them.
-Soldiers march through center and hold at the opposing team's first creep
-marker, immediately outside its gate. While holding there they strike the enemy
+Soldiers march through center and hold at the opposing gate's root (its impact
+point, immediately outside the timber); on a map without gates they hold at the
+opposing team's first creep marker. Spawn markers can therefore sit well behind
+the gate, away from the fighting. While holding there they strike the enemy
 gate with their normal melee damage whenever no enemy soldier is in reach; see
 `docs/rounds.md` for gate health and rounds.
 
 ## Behavior and tuning
 
 - `entities/creep.tscn`: 200 health, no regeneration and no respawn.
-- `entities/creep.gd`: 60 px/s, 48-pixel melee radius, independent uniform
+- `entities/creep.gd`: 60 px/s, 40-pixel melee radius, independent uniform
   0.8–1.4-second swing delays, equal odds of 20 or 25 damage.
+- Soldiers keep `queue_spacing` (28 px) behind whoever is ahead. Opposing front
+  ranks stop `melee_reach` (40 px) apart, so the second rank is about 68 px from
+  the enemy and cannot swing; reach stays radial, so duels on ramps still work.
 - `networking/creep_spawner.gd`: wave size 3, interval 30 seconds.
 - All these defaults are editable in the Inspector.
 
@@ -21,7 +26,7 @@ one opposing creep at frame 3 of the six-frame attack animation, after checking
 radial reach again. Creep melee ignores terrain between opponents so soldiers
 can fight across ramp edges and small obstacles. Soldiers use gravity and small
 terrain hops; horizontal space reservations prevent passing or climbing over
-nearby soldiers, but ignore soldiers more than 48 pixels vertically away.
+nearby soldiers, but ignore soldiers more than 40 pixels vertically away.
 Occupied spawn positions retain pending soldiers, including when a soldier is
 airborne above the slot. Waves have no population cap or timeout.
 

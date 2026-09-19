@@ -81,7 +81,7 @@ func _check() -> void:
 			var enemy := get_nodes_in_group("creep_spawn_orange" if team == Teams.Team.BLUE else "creep_spawn_blue")
 			var squad: Array[Creep] = []
 			for marker: Node2D in own:
-				squad.append(soldier(team, marker.global_position, enemy[0].global_position.x))
+				squad.append(soldier(team, marker.global_position, world.creep_spawner._goal_x(team, enemy[0])))
 			var creep := squad[0]
 			var separated := true
 			for i in range(6500):
@@ -136,13 +136,13 @@ func check_ramp_combat() -> void:
 	await ticks(2)
 	expect(not blue._can_hit(orange) and not orange._can_hit(blue), "Vertically distant soldiers remain out of melee reach")
 	expect(not blue._creep_ahead(), "Soldiers on distant elevations do not reserve the lane")
-	orange.position = blue.position + Vector2(48, 0)
-	expect(blue._can_hit(orange), "Melee includes the 48-pixel radius boundary")
+	orange.position = blue.position + Vector2(40, 0)
+	expect(blue._can_hit(orange), "Melee includes the 40-pixel radius boundary")
 	orange.position.x += 0.1
 	expect(not blue._can_hit(orange), "Melee excludes enemies beyond the radius")
-	orange.position = blue.position + Vector2(35, 35)
+	orange.position = blue.position + Vector2(30, 30)
 	expect(not blue._can_hit(orange), "Diagonal range uses a circle rather than a square")
-	orange.position = blue.position + Vector2(14, -40)
+	orange.position = blue.position + Vector2(14, -36)
 	expect(blue._can_hit(orange), "Nearby enemies above a ramp edge remain hittable")
 	await reset_creeps()
 	for side in [-1, 1]:
@@ -203,7 +203,7 @@ func check_queue() -> void:
 	var leader := soldier(Teams.Team.BLUE, Vector2(40, 80), 40)
 	var follower := soldier(Teams.Team.BLUE, Vector2(0, 80), 100)
 	await ticks(240)
-	expect(leader.position.x - follower.position.x >= Creep.BODY_SIZE.x and absf(leader.position.y - follower.position.y) < 1.0,
+	expect(leader.position.x - follower.position.x >= leader.queue_spacing - 1.0 and absf(leader.position.y - follower.position.y) < 1.0,
 		"Friendly creeps queue without overlapping or climbing")
 	var player := CharacterBody2D.new()
 	player.collision_layer = 2

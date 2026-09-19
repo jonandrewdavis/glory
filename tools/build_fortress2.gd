@@ -298,6 +298,6 @@ func build_spawns() -> void:
 			attach(spawns, marker, "%s%d" % [team, i + 1])
 		for i in range(3):
 			var marker := Marker2D.new()
-			marker.position = Vector2(side * (1086 + i * 24), -176)
+			marker.position = Vector2(side * (1192 + i * 32), -176)
 			marker.add_to_group("creep_spawn_%s" % team.to_lower(), true)
 			attach(spawns, marker, "Creep%s%d" % [team, i + 1])
