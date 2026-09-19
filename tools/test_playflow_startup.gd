@@ -12,9 +12,9 @@ class FakeBackend extends PlayFlowBackend:
 		sent.append({"path": path, "method": method, "body": body, "kind": kind})
 	func _connect_url(url: String) -> void:
 		urls.append(url)
-	func _poll_later() -> void:
+	func _poll_later(seconds := POLL_SECONDS) -> void:
 		if real_poll:
-			super._poll_later()
+			super._poll_later(seconds)
 		else:
 			polls += 1
 	func _close_peer() -> void:
@@ -31,9 +31,11 @@ func check(condition: bool, message: String) -> void:
 		failed += 1
 	checks += 1
 
-func backend() -> FakeBackend:
+func backend(rejoin := false, exclude_id := "") -> FakeBackend:
 	var value := FakeBackend.new()
 	add_child(value)
+	value.rejoin = rejoin
+	value.exclude_id = exclude_id
 	value.join_game("auto")
 	return value
 
@@ -103,6 +105,29 @@ func _run() -> void:
 	timeout.deadline = 0
 	timeout._process(0.0)
 	check(timeout.failures.size() == 1 and not timeout.joining, "Enforce entire-operation deadline")
+
+	var restart := backend(true, "test-instance")
+	check(restart.sent.is_empty() and restart.polls == 1, "Rejoin jitters before discovery")
+	restart._poll_server()
+	restart.reply(PlayFlowBackend.RequestKind.LIST, {"servers": [server()]})
+	check(restart.urls.is_empty() and restart.sent[-1].path == "/start", "Rejoin skips the dying instance")
+	restart.reply(PlayFlowBackend.RequestKind.START, {"error": "Active server limit reached"}, 409)
+	restart.reply(PlayFlowBackend.RequestKind.LIST, {"servers": []})
+	check(restart.sent.size() == 3 and restart.sent[-1].path == "/start", "Rejoin retries start once the slot frees")
+	var fresh := server()
+	fresh.instance_id = "new-instance"
+	restart.reply(PlayFlowBackend.RequestKind.START, fresh, 201)
+	restart.reply(PlayFlowBackend.RequestKind.DETAILS, fresh)
+	check(restart.urls.size() == 1, "Rejoin connects to the replacement")
+	var polls := restart.polls
+	restart._on_connection_failed()
+	check(restart.joining and restart.failures.is_empty() and restart.polls == polls + 1 and restart.selected_id.is_empty(), "Rejoin survives a failed connection")
+	restart.reply(PlayFlowBackend.RequestKind.DETAILS, server("stopped"))
+	check(restart.joining and restart.failures.is_empty(), "Rejoin survives a stopped instance")
+	restart._fail_for_attempt("Client/server version mismatch. Refresh the game.", restart.attempt)
+	check(restart.failures.size() == 1, "Rejoin still reports a version mismatch")
+	restart.leave_game()
+	check(not restart.rejoin and restart.exclude_id.is_empty(), "Leaving clears rejoin mode")
 
 	var cancel := backend()
 	var old_token := cancel.attempt

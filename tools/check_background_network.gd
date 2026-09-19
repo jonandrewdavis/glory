@@ -75,7 +75,7 @@ func _run() -> void:
 	await get_tree().create_timer(1.2).timeout
 	var away: Dictionary = await command("state")
 	require(away.away and not away.shield, "Server clears shields and marks hidden player away")
-	require(away.arrow_ignored and away.afk_name and away.alpha < 0.3, "Server AFK player is faded, labeled and transparent to enemy arrows")
+	require(away.arrow_ignored and away.afk_name and not away.fade_tween, "Dedicated AFK player is labeled and transparent without a visual tween")
 	var local_player := World.player_spawner.get_player(id)
 	require(local_player.network_away and local_player.name_label.text.ends_with(" (AFK)") and local_player.sprite.modulate.a < 0.3, "AFK state and appearance replicate to client")
 	await command("fire")
@@ -201,6 +201,7 @@ func _control(action: String) -> void:
 	_result.rpc_id(id, {"away": MultiplayerService.presence.is_peer_away(id),
 		"arrow_ignored": Arrow.ignored_rids(get_tree(), -1, Teams.Team.ORANGE if player.team == Teams.Team.BLUE else Teams.Team.BLUE).has(player.get_rid()),
 		"afk_name": player.name_label.text.ends_with(" (AFK)"), "alpha": player.sprite.modulate.a,
+		"fade_tween": is_instance_valid(player._away_fade),
 		"shield": player.shield_container.visible, "health": player.health.current,
 		"entry": World.scoreboard.entries[id],
 		"position": player.global_position, "arrows": get_tree().get_nodes_in_group("projectiles").size(),

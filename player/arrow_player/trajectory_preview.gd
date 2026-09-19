@@ -3,9 +3,9 @@ extends RefCounted
 ## Sample baseline time: the shared travel-time multiplier changes when an
 ## arrow arrives, but does not change these positions or the preview length.
 
-static func predict(space: PhysicsDirectSpaceState2D, origin: Vector2, velocity: Vector2, excluded: Array[RID], step: float) -> PackedVector2Array:
+static func predict(space: PhysicsDirectSpaceState2D, origin: Vector2, velocity: Vector2, excluded: Array[RID], step: float, mask: int = Arrow.FLIGHT_COLLISION_MASK) -> PackedVector2Array:
 	var points := PackedVector2Array([origin])
-	var query := PhysicsRayQueryParameters2D.create(origin, origin, Arrow.FLIGHT_COLLISION_MASK, excluded)
+	var query := PhysicsRayQueryParameters2D.create(origin, origin, mask, excluded)
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
 	var count := ceili(Arrow.LIFETIME / step)

@@ -16,6 +16,7 @@ def launch(*args, experiment=True):
     args = list(args)
     if "--" not in args:
         args.append("--")
+    args.append("--isolated-settings")
     if experiment:
         args.append("--background-networking")
     process = subprocess.Popen(

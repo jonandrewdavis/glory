@@ -115,7 +115,7 @@ func _run() -> void:
 	expect(is_equal_approx(line.modulate.a, 0.5), "Feed fades during its final second")
 	feed._process(0.6)
 	expect(feed._feed.is_empty(), "Feed expires after eight seconds")
-	expect(not hud.score_label.visible and not hud.get_node("RespawnHud").visible, "Round score and converted respawn UI remain hidden")
+	expect(not hud.get_node("RespawnHud").visible, "Converted respawn UI remains hidden")
 	var respawns := hud.get_node("RespawnHud")
 	expect(respawns.get_node("Zones").get_child_count() == 6, "Hidden respawn UI contains six working node-based zones")
 	for band in World.respawn_manager.bands:
@@ -124,7 +124,7 @@ func _run() -> void:
 	victim.health.take_damage(10, players[1])
 	victim.health.respawn()
 	expect(victim.recent_attackers.is_empty(), "Explicit respawn clears history even while alive")
-	var replication: SceneReplicationConfig = players[1].get_node("MultiplayerSynchronizer").replication_config
+	var replication: SceneReplicationConfig = players[1].get_node("HealthSynchronizer").replication_config
 	expect(not replication.has_property(NodePath("ReadinessIndicator:display_state")), "Charge indicator is local and never replicated")
 	var indicator := players[1].readiness_indicator
 	indicator.display_state = Vector4(2, 1, 0.5, 1)
@@ -147,7 +147,7 @@ func _run() -> void:
 	World.clear()
 	await get_tree().process_frame
 	expect(feed._feed.is_empty(), "Session clear removes feed")
-	expect(not respawns.visible and not hud.score_label.visible, "Reset does not reveal hidden UI")
+	expect(not respawns.visible, "Reset does not reveal hidden respawn UI")
 	canvas.queue_free()
 	await get_tree().process_frame
 	print("KDA checks completed; failures=", failures)

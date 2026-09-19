@@ -1,12 +1,17 @@
 extends Node
 
-enum BackendType {ENET = 0, TUBE = 2, PLAYFLOW = 3}
-const BACKEND_SCRIPTS := {BackendType.PLAYFLOW: preload("res://networking/playflow_backend.gd"), BackendType.TUBE: preload("res://networking/tube_backend.gd"), BackendType.ENET: preload("res://networking/enet_backend.gd")}
-const BACKEND_LABELS := {BackendType.PLAYFLOW: "PlayFlow (Dedicated)", BackendType.TUBE: "Online (Tube P2P)", BackendType.ENET: "ENet (Localhost)"}
-const BACKEND_ADDRESS_HINTS := {BackendType.PLAYFLOW: "auto or WebSocket URL", BackendType.TUBE: "Session code", BackendType.ENET: "IP address"}
+enum BackendType {ENET = 0, PLAYFLOW = 3}
+const BACKEND_SCRIPTS := {BackendType.PLAYFLOW: preload("res://networking/playflow_backend.gd"), BackendType.ENET: preload("res://networking/enet_backend.gd")}
+const BACKEND_LABELS := {BackendType.PLAYFLOW: "PlayFlow (Dedicated)", BackendType.ENET: "ENet (Localhost)"}
+const BACKEND_ADDRESS_HINTS := {BackendType.PLAYFLOW: "auto or WebSocket URL", BackendType.ENET: "IP address"}
 const CONFIG_SECTION := "multiplayer"
 const CONFIG_KEY_BACKEND := "backend"
 const DISCONNECT_REASON := "Disconnected from the host."
+const RESUME_FAILED_REASON := "Could not resume the session. Please join again."
+const RESTART_REASON := "Server is restarting..."
+# Quit this long before the PlayFlow TTL: our uptime clock starts after the instance launch.
+const RESTART_MARGIN_SEC := 120
+const RESTART_NOTICES_SEC: Array[int] = [300, 60]
 const KICK_REASON_KICKED := "You were kicked."
 const KICK_REASON_BANNED := "You are banned from this lobby."
 const MAX_PLAYERS := 30
@@ -21,6 +26,7 @@ signal backend_changed(type: BackendType)
 signal status_changed(text: String)
 signal listing_started
 signal username_changed(peer_id: int)
+signal server_notice(text: String)
 
 var backend: MultiplayerBackend
 var backend_type: BackendType
@@ -32,6 +38,10 @@ var in_lobby := false
 var pending := false
 var leaving := false
 var presence: WebPresence
+## Menu consumes these: rejoin automatically after the server went away.
+var rejoin := false
+var rejoin_exclude_id := ""
+var last_join_address: Variant = "auto"
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -53,6 +63,9 @@ func is_dedicated_server() -> bool:
 	return OS.has_feature("dedicated_server") or "--playflow-server" in OS.get_cmdline_user_args()
 
 func _start_dedicated() -> void:
+	Engine.physics_ticks_per_second = 60
+	Engine.max_fps = 60
+	get_tree().physics_interpolation = false
 	join_lobby_failed.connect(func(reason: String) -> void:
 		push_error(reason)
 		get_tree().quit(1))
@@ -60,6 +73,58 @@ func _start_dedicated() -> void:
 	options.max_players = 30
 	options.lobby_name = "PlayFlow 15 vs 15"
 	host_game(options)
+	_run_restart_clock()
+
+## PlayFlow gives no shutdown notice, so predict the TTL from uptime, warn players, and
+## exit cleanly. Clients then start and rejoin the replacement instance (see rejoin_game).
+func _run_restart_clock() -> void:
+	var lifetime := PlayFlowBackend.SERVER_TTL - RESTART_MARGIN_SEC
+	for arg in OS.get_cmdline_user_args():
+		if OS.is_debug_build() and arg.begins_with("--restart-after="):
+			lifetime = int(arg.trim_prefix("--restart-after="))
+	for notice in RESTART_NOTICES_SEC:
+		if lifetime > notice:
+			await _wait_for_uptime(lifetime - notice)
+			_server_notice.rpc("Server restarts in %s" % ("%d minutes" % (notice / 60) if notice > 60 else "1 minute"))
+	await _wait_for_uptime(lifetime)
+	print("PlayFlow TTL reached; handing players off to a new instance")
+	set_joinable(false)
+	_server_restarting.rpc()
+	await get_tree().create_timer(1.5).timeout
+	get_tree().quit(0)
+
+func _wait_for_uptime(seconds: int) -> void:
+	var remaining := seconds - Time.get_ticks_msec() / 1000.0
+	if remaining > 0:
+		await get_tree().create_timer(remaining).timeout
+
+@rpc("authority", "call_remote", "reliable")
+func _server_notice(text: String) -> void:
+	server_notice.emit(text)
+
+@rpc("authority", "call_remote", "reliable")
+func _server_restarting() -> void:
+	if not in_lobby:
+		return
+	_flag_rejoin(backend.last_instance_id)
+	kick_reason = RESTART_REASON
+	leave_game()
+
+func _flag_rejoin(exclude_id := "") -> void:
+	if backend_type == BackendType.PLAYFLOW and not is_dedicated_server():
+		rejoin = true
+		rejoin_exclude_id = exclude_id
+
+## Called by the menu once after a restart or lost server; polls until a server is up.
+func rejoin_game() -> void:
+	var exclude_id := rejoin_exclude_id
+	rejoin = false
+	rejoin_exclude_id = ""
+	kick_reason = ""
+	set_backend(BackendType.PLAYFLOW, false)
+	backend.rejoin = true
+	backend.exclude_id = exclude_id
+	join_game(last_join_address)
 
 func set_backend(type: BackendType, persist_choice := true) -> void:
 	if in_lobby or pending or not BACKEND_SCRIPTS.has(type):
@@ -72,7 +137,6 @@ func set_backend(type: BackendType, persist_choice := true) -> void:
 	backend.lobby_found.connect(lobby_found.emit)
 	backend.lobby_joined.connect(_on_lobby_joined)
 	backend.join_lobby_failed.connect(_on_join_lobby_failed)
-	backend.lobby_lost.connect(_end_game)
 	backend.status_changed.connect(_on_status_changed)
 	backend.listing_started.connect(listing_started.emit)
 	add_child(backend)
@@ -105,6 +169,7 @@ func join_game(address: Variant) -> void:
 		return
 	kick_reason = ""
 	pending = true
+	last_join_address = address
 	joining_lobby.emit()
 	if str(address).strip_edges().is_empty() or str(address).to_utf8_buffer().size() > 256:
 		_on_join_lobby_failed("Enter a valid " + get_address_hint().to_lower() + ".")
@@ -166,6 +231,9 @@ func _end_game(reason: String) -> void:
 		return
 	if kick_reason.is_empty():
 		kick_reason = reason
+		# Crash, deploy, or operator restart: a restarted instance keeps its id, so exclude nothing.
+		if reason in [DISCONNECT_REASON, RESUME_FAILED_REASON]:
+			_flag_rejoin()
 	leave_game()
 
 func _on_server_disconnected() -> void:

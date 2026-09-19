@@ -5,9 +5,6 @@ extends Node
 signal lobby_found(address: Variant, lobby_name: String, cur_players: int, max_players: int)
 signal lobby_joined
 signal join_lobby_failed(reason: String)
-## Not in upstream. Tube replaces the peer with OfflineMultiplayerPeer in the same frame it closes,
-## so it never fires server_disconnected.
-signal lobby_lost(reason: String)
 signal status_changed(text: String)
 ## Emitted once the lobby list is live; lobby_found follows. May fire synchronously from fetch_lobby_list.
 signal listing_started

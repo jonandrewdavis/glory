@@ -25,7 +25,7 @@ SceneTree automatic multiplayer polling and requests a JS timer every 250 ms.
 The callback polls the **MultiplayerAPI**, not just the WebSocketPeer, and sends
 an application heartbeat after draining messages. Visible tabs return polling
 ownership to SceneTree. Timer frequency is a request, not a browser guarantee.
-The experiment applies to PlayFlow only; Tube/ENet behavior is unchanged.
+The experiment applies to PlayFlow only; ENet behavior is unchanged.
 
 ## Bounds and recovery
 

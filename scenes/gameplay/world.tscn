@@ -14,9 +14,13 @@
 [ext_resource type="AudioStream" uid="uid://cb68uol3xh1wk" path="res://assets/sounds/headshot_ping.mp3" id="10_ping"]
 [ext_resource type="Script" uid="uid://cf51xspf1tie0" path="res://scenes/gameplay/round_manager.gd" id="11_rounds"]
 [ext_resource type="Script" path="res://scenes/gameplay/respawn_manager.gd" id="12_respawns"]
+[ext_resource type="Script" path="res://networking/combat_network.gd" id="13_network"]
 
 [node name="World" type="Node" unique_id=43387356]
 script = ExtResource("1_4np77")
+
+[node name="CombatNetwork" type="Node" parent="."]
+script = ExtResource("13_network")
 
 [node name="LevelLoader" type="Node" parent="." unique_id=808154624]
 unique_name_in_owner = true
@@ -30,9 +34,8 @@ script = ExtResource("2_4np77")
 [node name="Projectiles" type="Node2D" parent="." unique_id=2113283215]
 unique_name_in_owner = true
 
-[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="." unique_id=2125798325]
+[node name="ProjectileSpawner" type="Node" parent="." unique_id=2125798325]
 unique_name_in_owner = true
-spawn_path = NodePath("../Projectiles")
 script = ExtResource("3_proj")
 
 [node name="HitSound" type="AudioStreamPlayer" parent="ProjectileSpawner" unique_id=8059976]

@@ -16,6 +16,10 @@ disconnect_test = False
 
 
 def launch(args):
+    args = list(args)
+    if "--" not in args:
+        args.append("--")
+    args.append("--isolated-settings")
     process = subprocess.Popen(
         [GODOT, "--headless", "--path", str(ROOT), *args],
         cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,

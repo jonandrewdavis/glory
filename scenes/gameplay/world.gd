@@ -10,6 +10,7 @@ extends Node
 var ui_layer: UILayer
 
 var session := 0
+@onready var combat_network: CombatNetwork = $CombatNetwork
 @onready var level_loader: LevelLoader = %LevelLoader
 @onready var player_spawner: PlayerSpawner = %PlayerSpawner
 @onready var projectile_spawner: ProjectileSpawner = %ProjectileSpawner

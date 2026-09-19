@@ -17,7 +17,7 @@ func _ready() -> void:
 	position = direction * radius
 	hide()
 	# Only the owner aims; remote copies and the dedicated server never draw this.
-	if not get_parent().is_multiplayer_authority():
+	if not get_parent().is_inside_tree() or not get_parent().is_multiplayer_authority():
 		set_process(false)
 		set_physics_process(false)
 		set_process_unhandled_input(false)
@@ -56,7 +56,8 @@ func _physics_process(_delta: float) -> void:
 	var player: ArrowPlayer = get_parent()
 	var launch_velocity := direction * player.compute_arrow_speed(player.selected_level)
 	var points := Trajectory.predict(get_world_2d().direct_space_state, player.global_position, launch_velocity,
-		Arrow.ignored_rids(get_tree(), player.peer_id, player.team), 1.0 / Engine.physics_ticks_per_second)
+		ArrowPlayer.preview_exclusions(get_tree(), player), 1.0 / Engine.physics_ticks_per_second,
+		Arrow.FLIGHT_COLLISION_MASK | ArrowPlayer.PREVIEW_LAYER)
 	_trajectory_dots = Trajectory.dots(Trajectory.first_half(points))
 
 func _can_aim() -> bool:

@@ -4,6 +4,8 @@ extends Node
 const CONFIG_FILE_PATH = &"user://settings.cfg"
 
 var config = ConfigFile.new()
+## Test clients never read or overwrite the user's settings file.
+var _ephemeral := "--isolated-settings" in OS.get_cmdline_user_args()
 
 signal ui_scale_changed(value: float)
 signal aim_sensitivity_changed(value: float)
@@ -41,6 +43,10 @@ enum AudioBus {
 const FPS_MAX_HARD_CAP = 400
 
 func _ready() -> void:
+	if _ephemeral:
+		initialize_default_file()
+		_apply_settings()
+		return
 	if FileAccess.file_exists(CONFIG_FILE_PATH):
 		var err = config.load(CONFIG_FILE_PATH)
 		if err != OK:
@@ -57,12 +63,14 @@ func _ready() -> void:
 
 func reset() -> void:
 	initialize_default_file()
-	config.save(CONFIG_FILE_PATH)
+	if not _ephemeral:
+		config.save(CONFIG_FILE_PATH)
 	_apply_settings()
 
 
 func persist() -> void:
-	config.save(CONFIG_FILE_PATH)
+	if not _ephemeral:
+		config.save(CONFIG_FILE_PATH)
 
 
 func revert_to(cfg: ConfigFile) -> void:

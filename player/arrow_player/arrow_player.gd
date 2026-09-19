@@ -1,7 +1,6 @@
 class_name ArrowPlayer
 extends CharacterBody2D
-## Owner-driven archer. The owning peer runs input/physics and replicates
-## state through the MultiplayerSynchronizer; the host judges arrow hits.
+## Owner-driven movement; CombatNetwork publishes accepted server state.
 
 const SPEED_MAX := 100.0
 const JUMP_VELOCITY := -290.0
@@ -84,6 +83,17 @@ var fire_cooldown_left := 0.0
 
 # Host-only bookkeeping.
 var _server_last_fire_msec := -100000
+var network_suspended := false
+var server_blocking := false
+var presentation := PresentationBuffer.new()
+var visual_root: Node2D
+var visual_shield: Node2D
+var preview_body: Area2D
+var preview_shield: Area2D
+var _shot_serial := 0
+var _visual_dead := false
+var _shield_event: Dictionary = {}
+const PREVIEW_LAYER := 1 << 20
 var recent_attackers: Array[int] = []
 
 @onready var sprite: AnimatedSprite2D = %AnimatedSprite2D
@@ -100,7 +110,6 @@ var recent_attackers: Array[int] = []
 @onready var stuck_arrows: Node2D = %StuckArrows
 ## Editor-visible headshot band; no physics layers, tested by Arrow.is_head_point().
 @onready var head_shape: CollisionShape2D = %HeadShape
-@onready var _movement_replication: SceneReplicationConfig = $MultiplayerSynchronizer.replication_config
 
 func _enter_tree() -> void:
 	if peer_id <= 0:
@@ -111,6 +120,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	add_to_group("players")
+	_setup_presentation()
 	if MultiplayerService.is_dedicated_server():
 		sprite.process_mode = Node.PROCESS_MODE_DISABLED
 	_apply_team_colors()
@@ -159,20 +169,22 @@ func _ready() -> void:
 	else:
 		physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	if is_owner and MultiplayerService.presence.blocks_input():
-		$MultiplayerSynchronizer.replication_config = SceneReplicationConfig.new()
+		network_suspended = true
 		clear_away_actions()
 
 func _apply_team_colors() -> void:
 	var color := Teams.color(team)
 	sprite.modulate = color
 	name_label.modulate = color
-	($ArrowContainer/ArrowPolygon2D as Polygon2D).color = color
+	(arrow_container.get_node("ArrowPolygon2D") as Polygon2D).color = color
 	shield_polygon.color = Color(color, 0.9)
 	shield_boss.color = color.darkened(0.4)
 
 ## Same-team peers are drawn slightly translucent so the local player stands
 ## out; enemies and the local player are fully opaque. Sprite only.
 func refresh_team_fade() -> void:
+	if MultiplayerService.is_dedicated_server():
+		return
 	var local: ArrowPlayer = World.player_spawner.get_player(multiplayer.get_unique_id())
 	var faded := local != null and local != self and local.team == team
 	var target_alpha := 0.2 if network_away else (0.7 if faded else 1.0)
@@ -207,12 +219,9 @@ func _physics_process(delta: float) -> void:
 		position = _away_position
 		clear_away_actions()
 	if multiplayer.is_server():
-		# Follows replicated state, so it works for remote copies too.
-		if shield_area.monitoring != shield_container.visible:
-			shield_area.monitoring = shield_container.visible
-		if shield_area.monitoring and health.is_alive():
+		if server_blocking and shield_area.monitoring and health.is_alive():
 			_server_check_shield()
-	if is_multiplayer_authority() and not network_away and not MultiplayerService.presence.blocks_input():
+	if is_multiplayer_authority() and not network_suspended and not network_away and not MultiplayerService.presence.blocks_input():
 		_owner_physics(delta)
 
 func _owner_physics(delta: float) -> void:
@@ -222,7 +231,7 @@ func _owner_physics(delta: float) -> void:
 	fire_cooldown_left = maxf(fire_cooldown_left - delta, 0.0)
 	shield_cooldown_left = maxf(shield_cooldown_left - delta, 0.0)
 
-	var can_act := not is_dead and not _is_paused() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	var can_act: bool = not is_dead and not _is_paused() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and (multiplayer.is_server() or World.combat_network.epoch != 0)
 	var mouse: Vector2 = global_position + aim_reticle.direction * aim_reticle.radius
 
 	if is_blocking:
@@ -421,6 +430,8 @@ func _update_shot_input(delta: float, mouse: Vector2, can_act: bool, held: bool,
 		_cancel_preparation()
 
 func _prepare(delta: float, mouse: Vector2) -> void:
+	if not is_preparing:
+		World.combat_network.command(self, CombatNetwork.CHARGE)
 	is_preparing = true
 	# Do not cap at the current minimum: a later level change keeps all elapsed time.
 	preparation_time += delta
@@ -430,7 +441,9 @@ func _prepare(delta: float, mouse: Vector2) -> void:
 	_update_readiness_indicator()
 	sprite.play("attack")
 
-func _cancel_preparation() -> void:
+func _cancel_preparation(notify_server := true) -> void:
+	if notify_server and is_preparing and is_multiplayer_authority():
+		World.combat_network.command(self, CombatNetwork.CANCEL)
 	is_preparing = false
 	_shot_queued = false
 	preparation_time = 0.0
@@ -442,16 +455,15 @@ func _fire(mouse: Vector2) -> void:
 	if preparation_time < minimum_preparation_time(selected_level):
 		return
 	var aim := (mouse - global_position).normalized()
-	var elapsed := preparation_time
 	var level := selected_level
-	_cancel_preparation()
+	_cancel_preparation(false)
 	fire_cooldown_left = FIRE_COOLDOWN
 	if aim.is_zero_approx():
 		return
-	if multiplayer.is_server():
-		server_fire(aim, level, elapsed)
-	else:
-		request_fire.rpc_id(1, aim, level, elapsed)
+	_shot_serial += 1
+	if not MultiplayerService.is_dedicated_server():
+		World.projectile_spawner.predict(self, _shot_serial, aim, level)
+	World.combat_network.command(self, CombatNetwork.FIRE, _shot_serial)
 
 ## Shot strength depends only on the selected level, never on preparation time.
 func compute_arrow_speed(level: int) -> float:
@@ -467,14 +479,8 @@ func _level_vec(values: Array, level: int, fallback: Vector2) -> Vector2:
 		return fallback
 	return values[clampi(level, 0, values.size() - 1)]
 
-@rpc("any_peer", "call_remote", "reliable")
-func request_fire(aim: Vector2, level: int, elapsed: float) -> void:
-	if not multiplayer.is_server() or multiplayer.get_remote_sender_id() != peer_id:
-		return
-	server_fire(aim, level, elapsed)
-
 ## Host only.
-func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
+func server_fire(aim: Vector2, level: int, elapsed: float, shot_id: int = 0) -> void:
 	if MultiplayerService.presence.is_peer_away(peer_id):
 		return
 	if level < 0 or level >= LEVEL_COUNT or not is_finite(elapsed):
@@ -489,6 +495,7 @@ func server_fire(aim: Vector2, level: int, elapsed: float) -> void:
 	_server_last_fire_msec = now
 	aim = aim.normalized()
 	World.projectile_spawner.spawn_arrow({
+		"shot": shot_id, "shooter_serial": spawn_serial,
 		"position": global_position,
 		"velocity": aim * compute_arrow_speed(level),
 		"owner_id": peer_id,
@@ -515,14 +522,15 @@ func _start_block(mouse: Vector2) -> void:
 	block_time_left = shield_duration
 	shield_container.look_at(mouse)
 	shield_container.show()
-	shield_collision.set_deferred("disabled", false)
+	World.combat_network.command(self, CombatNetwork.SHIELD)
 
 ## Owner only.
 func _end_block() -> void:
 	is_blocking = false
 	block_time_left = 0.0
 	shield_container.hide()
-	shield_collision.set_deferred("disabled", true)
+	if not multiplayer.is_server():
+		shield_collision.set_deferred("disabled", true)
 	shield_cooldown_left = shield_cooldown
 	fire_cooldown_left = maxf(fire_cooldown_left, FIRE_COOLDOWN)
 
@@ -558,15 +566,19 @@ func _on_died(_source: Node) -> void:
 	_clear_drop_through()
 	aim_reticle.hide()
 	readiness_indicator.hide()
-	sprite.play("death")
-	arrow_container.hide()
+	if is_multiplayer_authority():
+		sprite.play("death")
+		arrow_container.hide()
+	if multiplayer.is_server():
+		World.combat_network.queue_event({"kind": "death", "peer": peer_id, "serial": spawn_serial, "position": global_position})
 	if is_multiplayer_authority():
 		# Stop movement packets while dead, before this incarnation is despawned.
-		$MultiplayerSynchronizer.replication_config = SceneReplicationConfig.new()
+		network_suspended = true
 		_cancel_preparation()
 		if is_blocking:
 			_end_block()
 	shield_container.hide()
+	set_server_shield(false, shield_container.rotation)
 
 func _on_respawned() -> void:
 	recent_attackers.clear()
@@ -574,7 +586,9 @@ func _on_respawned() -> void:
 	_clear_stuck_arrows()
 	sprite.play("idle")
 	if is_multiplayer_authority():
-		$MultiplayerSynchronizer.replication_config = _movement_replication
+		network_suspended = false
+		presentation.clear()
+		_visual_dead = false
 		_update_readiness_indicator()
 		_teleport_to_spawn()
 		capture_mouse()
@@ -594,3 +608,107 @@ func _teleport_to_spawn() -> void:
 	reset_physics_interpolation()
 	if World.camera_rig != null:
 		World.camera_rig.reset_for_relocation(self)
+
+func set_server_shield(active: bool, angle: float) -> void:
+	server_blocking = active
+	if multiplayer.is_server():
+		shield_container.rotation = angle
+		shield_collision.set_deferred("disabled", not active)
+		shield_area.set_deferred("monitoring", active)
+
+func present_shield(event: Dictionary) -> void:
+	if is_multiplayer_authority() or visual_shield == null or _visual_dead:
+		return
+	_shield_event = event
+	visual_shield.visible = event.active
+	visual_shield.rotation = event.aim
+
+func _setup_presentation() -> void:
+	if MultiplayerService.is_dedicated_server():
+		set_process(false)
+		return
+	visual_root = Node2D.new()
+	visual_root.name = "Presentation"
+	add_child(visual_root)
+	for node: Node2D in [sprite, arrow_container, stuck_arrows]:
+		node.reparent(visual_root, false)
+	name_label.reparent(visual_root, false)
+	visual_shield = Node2D.new()
+	visual_root.add_child(visual_shield)
+	shield_polygon.reparent(visual_shield, false)
+	shield_boss.reparent(visual_shield, false)
+	# Preview-only areas: authoritative arrow masks do not include this layer.
+	preview_body = Area2D.new()
+	preview_body.collision_layer = PREVIEW_LAYER
+	preview_body.collision_mask = 0
+	preview_body.monitoring = false
+	visual_root.add_child(preview_body)
+	var shape := CollisionShape2D.new()
+	shape.shape = $CollisionShape2D.shape
+	preview_body.add_child(shape)
+	preview_shield = Area2D.new()
+	preview_shield.collision_layer = PREVIEW_LAYER
+	preview_shield.collision_mask = 0
+	preview_shield.monitoring = false
+	visual_shield.add_child(preview_shield)
+	var polygon := CollisionPolygon2D.new()
+	polygon.polygon = shield_collision.polygon
+	preview_shield.add_child(polygon)
+	visual_root.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF if not is_multiplayer_authority() else Node.PHYSICS_INTERPOLATION_MODE_INHERIT
+
+func receive_snapshot(record: Dictionary, sequence: int) -> void:
+	if is_multiplayer_authority() or visual_root == null:
+		return
+	if _visual_dead and not bool(record.flags & 8):
+		return
+	if not multiplayer.is_server() and sequence > presentation.last_sequence:
+		global_position = record.position
+		velocity = record.velocity
+		shield_container.rotation = record.aim
+	presentation.push(record, sequence)
+
+func present_death(at: Vector2) -> void:
+	if is_multiplayer_authority() or visual_root == null:
+		return
+	_visual_dead = true
+	presentation.clear()
+	visual_root.global_position = at
+	sprite.play("death")
+	arrow_container.hide()
+	visual_shield.hide()
+
+func _process(_delta: float) -> void:
+	if visual_root == null:
+		return
+	if is_multiplayer_authority():
+		visual_shield.visible = is_blocking and not is_dead and not network_away
+		visual_shield.rotation = shield_container.rotation
+	elif not _visual_dead:
+		var state := presentation.sample_at(World.combat_network.render_time)
+		if not state.is_empty():
+			visual_root.global_position = state.position
+			sprite.flip_h = bool(state.flags & 1)
+			arrow_container.visible = bool(state.flags & 2)
+			arrow_container.rotation = state.aim
+			arrow_container.scale = _level_vec(level_arrow_scales, state.level, Vector2.ONE)
+			visual_shield.visible = bool(state.flags & 4)
+			visual_shield.rotation = state.aim
+			if not _shield_event.is_empty() and _shield_event.time >= state.time:
+				visual_shield.visible = _shield_event.active
+				visual_shield.rotation = _shield_event.aim
+			if bool(state.flags & 8):
+				present_death(state.position)
+			else:
+				sprite.play("attack" if bool(state.flags & 2) else ("walk" if absf(state.velocity.x) > 5.0 else "idle"))
+	preview_body.collision_layer = PREVIEW_LAYER if not _visual_dead and not network_away else 0
+	preview_shield.collision_layer = PREVIEW_LAYER if visual_shield.visible and not network_away else 0
+
+static func preview_exclusions(tree: SceneTree, shooter: ArrowPlayer) -> Array[RID]:
+	var excluded := Arrow.ignored_rids(tree, shooter.peer_id, shooter.team)
+	for p: ArrowPlayer in tree.get_nodes_in_group("players"):
+		excluded.append(p.get_rid())
+		excluded.append(p.shield_area.get_rid())
+		if p.preview_body and (p == shooter or p.team == shooter.team or p._visual_dead or p.network_away):
+			excluded.append(p.preview_body.get_rid())
+			excluded.append(p.preview_shield.get_rid())
+	return excluded

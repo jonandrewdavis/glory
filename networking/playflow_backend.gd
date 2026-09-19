@@ -5,13 +5,16 @@ extends MultiplayerBackend
 const API_URL := "https://api.computeflow.cloud/api/v3/servers"
 const PORT := 8080
 const CAPACITY := 30
-const PROTOCOL := "glory-playflow-2"
+const PROTOCOL := "glory-playflow-3-batches"
 # Initial experimental headroom: validate against max_queue_packets/poll gaps.
 const RECEIVE_BYTES := 2 * 1024 * 1024
 const RECEIVE_PACKETS := 16384
 const CONFIG = preload("res://networking/playflow_config.tres")
 const JOIN_TIMEOUT_MSEC := 90000
 const POLL_SECONDS := 2.0
+# Shared by the client's /start body and the server's restart clock.
+const SERVER_TTL := 3600
+const REJOIN_TIMEOUT_MSEC := 180000
 enum RequestKind {LIST, START, DETAILS}
 
 var joining := false
@@ -25,6 +28,12 @@ var deadline := 0
 var client_key := ""
 var selected_id := ""
 var start_requested := false
+var last_instance_id := ""
+var literal_url := ""
+## Set by MultiplayerService before join_game: keep polling through a server restart.
+var rejoin := false
+## The shutting-down instance still lists as running until PlayFlow notices the exit.
+var exclude_id := ""
 
 func _ready() -> void:
 	api = multiplayer as SceneMultiplayer
@@ -37,7 +46,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if joining and Time.get_ticks_msec() >= deadline:
-		_fail("Server startup or connection timed out after 90 seconds. Try Play again shortly.")
+		_fail("Server startup or connection timed out. Try Play again shortly.")
 
 func _configure_auth() -> void:
 	api.auth_callback = _on_auth
@@ -65,11 +74,13 @@ func join_game(target: Variant) -> void:
 		return
 	attempt += 1
 	joining = true
-	deadline = Time.get_ticks_msec() + JOIN_TIMEOUT_MSEC
+	deadline = Time.get_ticks_msec() + (REJOIN_TIMEOUT_MSEC if rejoin else JOIN_TIMEOUT_MSEC)
+	literal_url = ""
 	selected_id = ""
 	start_requested = false
 	address = str(target)
 	if address.begins_with("ws://") or address.begins_with("wss://"):
+		literal_url = address
 		_connect_url(address)
 		return
 	client_key = OS.get_environment("PLAYFLOW_CLIENT_KEY")
@@ -80,6 +91,11 @@ func join_game(target: Variant) -> void:
 		return
 	if address != "auto":
 		selected_id = address
+	if rejoin:
+		# Jitter so a full lobby does not POST /start in the same instant.
+		status_changed.emit("Server restarting. Reconnecting...")
+		_poll_later(randf_range(0.0, 3.0))
+		return
 	status_changed.emit("Finding a server...")
 	_poll_server()
 
@@ -109,11 +125,14 @@ func _send_request(path: String, method: int, body: String, kind: RequestKind) -
 		pending_request.queue_free()
 		_on_response.call_deferred(HTTPRequest.RESULT_CANT_CONNECT, 0, PackedByteArray(), kind, token)
 
-func _poll_later() -> void:
+func _poll_later(seconds := POLL_SECONDS) -> void:
 	var token := attempt
-	await get_tree().create_timer(POLL_SECONDS).timeout
+	await get_tree().create_timer(seconds).timeout
 	if joining and token == attempt:
-		_poll_server()
+		if literal_url.is_empty():
+			_poll_server()
+		else:
+			_connect_url(literal_url)
 
 func _on_response(result: int, code: int, body: PackedByteArray, kind: RequestKind, token: int) -> void:
 	if not joining or token != attempt:
@@ -127,6 +146,9 @@ func _on_response(result: int, code: int, body: PackedByteArray, kind: RequestKi
 	if code < 200 or code >= 300:
 		var detail := str(data.get("error", "")).to_lower() if data is Dictionary else ""
 		if kind == RequestKind.START and (code == 409 or "limit" in detail or "active server" in detail):
+			# Rejoin: the old instance still holds the slot; retry the start once it is gone.
+			if rejoin:
+				start_requested = false
 			status_changed.emit("Another player may be starting the server. Waiting...")
 			_poll_later()
 		elif code in [401, 403]:
@@ -156,7 +178,7 @@ func _handle_list(data: Variant) -> void:
 	# Prefer running over launching; never provision because an existing one is full.
 	for state in ["running", "launching"]:
 		for server in data.servers:
-			if server is Dictionary and server.get("status") == state:
+			if server is Dictionary and server.get("status") == state and (exclude_id.is_empty() or str(server.get("instance_id", "")) != exclude_id):
 				selected_id = str(server.get("instance_id", ""))
 				_handle_server(server)
 				return
@@ -167,7 +189,7 @@ func _handle_list(data: Variant) -> void:
 	status_changed.emit("Starting a server...")
 	_send_request("/start", HTTPClient.METHOD_POST, JSON.stringify({
 		"name": "glory", "region": "us-east", "compute_size": "small",
-		"ttl": 3600, "version_tag": "default",
+		"ttl": SERVER_TTL, "version_tag": "default",
 		# Explicit port so the project needs no dashboard port setup; the web client requires TLS.
 		"port_configs": [{"name": "godot_websocket", "internal_port": PORT, "protocol": "tcp", "tls_enabled": true}]
 	}), RequestKind.START)
@@ -184,6 +206,9 @@ func _handle_server(server: Dictionary) -> void:
 			status_changed.emit("Server starting... This usually takes 10–30 seconds.")
 			_poll_later()
 		_:
+			if rejoin:
+				_rediscover()
+				return
 			_fail("Server stopped or failed during startup. Check the PlayFlow server logs, then try Play again.")
 
 static func server_url(server: Dictionary) -> String:
@@ -281,17 +306,35 @@ func _on_auth_failed(id: int) -> void:
 		_fail_for_attempt.call_deferred("PlayFlow admission timed out or the server disconnected.", attempt)
 
 func _fail_for_attempt(reason: String, token: int) -> void:
-	if token == attempt:
+	if token != attempt:
+		return
+	# Rejoin mode: a dead or still-loading server is expected; look again instead of failing.
+	if rejoin and not "mismatch" in reason and not "full" in reason:
+		_rediscover()
+	else:
 		_fail(reason)
+
+func _rediscover() -> void:
+	# Closing the peer can echo an auth failure; a new attempt token drops it.
+	attempt += 1
+	_close_peer()
+	selected_id = ""
+	status_changed.emit("Waiting for the new server...")
+	_poll_later()
 
 func _on_connected() -> void:
 	if joining:
 		joining = false
 		attempt += 1
+		rejoin = false
+		exclude_id = ""
+		last_instance_id = selected_id
 		lobby_joined.emit()
 
 func _on_connection_failed() -> void:
-	if joining:
+	if joining and rejoin:
+		_rediscover()
+	elif joining:
 		_fail("Could not connect to PlayFlow. The free instance may have expired.")
 
 func _fail(reason: String) -> void:
@@ -312,6 +355,8 @@ func leave_game() -> void:
 	joining = false
 	attempt += 1
 	joinable = false
+	rejoin = false
+	exclude_id = ""
 	_cancel_request()
 	_close_peer()
 	if api:

@@ -45,7 +45,7 @@ func _process(_delta: float) -> void:
 		get_tree().quit(1)
 	if multiplayer.is_server():
 		return
-	if stage == 0 and local_player == null and World.level_loader.is_level_ready():
+	if stage == 0 and local_player == null and World.level_loader.is_level_ready() and World.combat_network.epoch != 0:
 		local_player = World.player_spawner.get_player(multiplayer.get_unique_id())
 		if local_player != null:
 			local_player.set_physics_process(false)
@@ -56,7 +56,7 @@ func _prepare_next() -> void:
 	local_player.fire_cooldown_left = 0.0
 	local_player.select_level(stage)
 	local_player._prepare(local_player.minimum_preparation_time(stage), local_player.position + Vector2.RIGHT)
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(local_player.minimum_preparation_time(stage) + 0.1).timeout
 	local_player._fire(local_player.position + Vector2.RIGHT)
 
 func _on_arrow(arrow: Arrow) -> void:

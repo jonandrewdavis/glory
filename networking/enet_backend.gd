@@ -14,6 +14,7 @@ var joining := false
 var joinable := false
 
 func _ready() -> void:
+	(multiplayer as SceneMultiplayer).peer_authenticating.connect(_authenticating)
 	search_peer.set_broadcast_enabled(true)
 	search_peer.set_dest_address(BROADCAST_ADDRESS, SEARCH_PORT)
 	multiplayer.connected_to_server.connect(_on_connected)
@@ -34,6 +35,7 @@ func _process(_delta: float) -> void:
 			lobby_found.emit(address, packet[0], int(packet[1]), int(packet[2]))
 
 func host_game(options: HostOptions) -> void:
+	_configure_auth()
 	max_players = options.max_players
 	lobby_name = options.lobby_name.replace(",", "")
 	var peer := ENetMultiplayerPeer.new()
@@ -46,6 +48,7 @@ func host_game(options: HostOptions) -> void:
 	lobby_joined.emit()
 
 func join_game(address: Variant) -> void:
+	_configure_auth()
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_client(str(address), GAME_PORT)
 	if err != OK:
@@ -58,6 +61,20 @@ func _on_connected() -> void:
 	if joining:
 		joining = false
 		lobby_joined.emit()
+
+func _configure_auth() -> void:
+	var api := multiplayer as SceneMultiplayer
+	api.auth_callback = _authenticate
+	api.auth_timeout = 5.0
+
+func _authenticating(id: int) -> void:
+	(multiplayer as SceneMultiplayer).send_auth(id, CombatNetwork.PROTOCOL.to_utf8_buffer())
+
+func _authenticate(id: int, data: PackedByteArray) -> void:
+	if data == CombatNetwork.PROTOCOL.to_utf8_buffer():
+		(multiplayer as SceneMultiplayer).complete_auth(id)
+	else:
+		multiplayer.multiplayer_peer.disconnect_peer(id)
 
 func _on_connection_failed() -> void:
 	if joining:

@@ -33,6 +33,15 @@ var velocity := Vector2.ZERO ## Actual world velocity, including slowdown and di
 var elapsed := 0.0 ## Baseline trajectory time; decreases on the return trip.
 var travel_time_multiplier := 1.0
 var flight_direction := 1
+var cosmetic := false
+var predicted := false
+var projectile_id := 0
+var launch_data: Dictionary = {}
+var launch_time := 0.0
+var initial_time := 0.0
+var created_at := 0.0
+var correction := Vector2.ZERO
+var correction_left := 0.0
 
 var _finished := false
 var _prev_position := Vector2.ZERO
@@ -42,6 +51,10 @@ var _prev_elapsed := 0.0
 @onready var trail: Line2D = $Trail
 
 func setup(data: Dictionary) -> void:
+	launch_data = data.duplicate()
+	projectile_id = data.get("serial", 0)
+	launch_time = data.get("launch_time", 0.0)
+	initial_time = data.get("trajectory_time", 0.0)
 	origin = data.get("position", Vector2.ZERO)
 	initial_velocity = data.get("velocity", Vector2.ZERO)
 	travel_time_multiplier = valid_travel_time_multiplier(data.get("travel_time_multiplier", 1.0))
@@ -69,9 +82,17 @@ func restore_flight(time: float) -> void:
 	trail.clear_points()
 
 func _ready() -> void:
-	add_to_group("projectiles")
-	polygon.color = Teams.color(team)
-	trail.default_color = Teams.color(team)
+	if not cosmetic:
+		add_to_group("projectiles")
+	else:
+		collision_layer = 0
+		collision_mask = 0
+		monitorable = false
+		set_physics_process(false)
+		physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	set_process(cosmetic)
+	visible = cosmetic
+	refresh_colors()
 	trail.clear_points()
 	if visual_scale != Vector2.ONE:
 		polygon.scale *= visual_scale
@@ -91,7 +112,6 @@ func _physics_process(delta: float) -> void:
 	elapsed = clampf(elapsed + delta * flight_direction / travel_time_multiplier, 0.0, LIFETIME)
 	_prev_position = global_position
 	_update_flight_state()
-	_update_trail()
 	if multiplayer.is_server():
 		_sweep(_prev_position, global_position)
 	if (flight_direction > 0 and elapsed >= LIFETIME) or (flight_direction < 0 and elapsed <= 0.0):
@@ -146,6 +166,7 @@ func _sweep(from: Vector2, to: Vector2) -> void:
 			World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, collider)
 	else:
 		World.projectile_spawner.server_report_impact(result.position, rotation, team, visual_scale.y, null)
+	global_position = result.position
 	_finish()
 
 ## Host only. Called from the ray sweep or from the blocking player's area
@@ -211,4 +232,26 @@ func _finish() -> void:
 	if _finished:
 		return
 	_finished = true
+	if not cosmetic and is_inside_tree():
+		World.projectile_spawner.finish(self)
 	queue_free()
+
+func refresh_colors() -> void:
+	polygon.color = Teams.color(team)
+	trail.default_color = Teams.color(team)
+
+func evaluate_visual(time: float) -> void:
+	elapsed = clampf(initial_time + maxf(0.0, time - launch_time) * flight_direction / travel_time_multiplier, 0.0, LIFETIME)
+	_update_flight_state()
+
+func _process(delta: float) -> void:
+	if not cosmetic:
+		return
+	var time: float = World.combat_network.server_time() if predicted else World.combat_network.render_time
+	visible = predicted or time >= launch_time or correction_left > 0.0
+	evaluate_visual(time)
+	if correction_left > 0.0:
+		correction_left = maxf(0.0, correction_left - delta)
+		global_position += correction * (correction_left / 0.08)
+	if visible:
+		_update_trail()

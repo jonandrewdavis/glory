@@ -40,7 +40,7 @@ var _following_arrow := false
 func _ready() -> void:
 	process_physics_priority = 100 # After player movement, before the host (300).
 	# Sibling lookup: this runs before World's @onready vars are assigned.
-	(%ProjectileSpawner as ProjectileSpawner).arrow_spawned.connect(_on_arrow_spawned)
+	(%ProjectileSpawner as ProjectileSpawner).visual_spawned.connect(_on_arrow_spawned)
 
 ## Called by the owning ArrowPlayer once it is in the tree (also on respawn).
 func set_local_player(player: ArrowPlayer) -> void:

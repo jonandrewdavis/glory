@@ -109,12 +109,6 @@ layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 text = "Play"
 
-[node name="MatchmakeButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=268029676]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"PrimaryButton"
-text = "Matchmake (Tube)"
-
 [node name="HostButton" type="Button" parent="MainContainer/Control/VBoxContainer" unique_id=1994618644]
 unique_name_in_owner = true
 layout_mode = 2

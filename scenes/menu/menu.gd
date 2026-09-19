@@ -4,7 +4,6 @@ extends Control
 const GAMEPLAY_SCENE := "res://scenes/gameplay/ui/ui_layer.tscn"
 const TIMEOUT_DUR := 10.0
 var timeout_token := 0
-var matchmaker: Matchmaker
 
 func _ready() -> void:
 	if MultiplayerService.is_dedicated_server():
@@ -40,11 +39,6 @@ func _ready() -> void:
 		%MainContainer.hide()
 		%Help.hide()
 		%JoinPanel.open())
-	matchmaker = Matchmaker.new()
-	add_child(matchmaker)
-	matchmaker.progress.connect(func(text: String) -> void: %PendingLabel.text = text)
-	matchmaker.finished.connect(_on_matchmake_finished)
-	%MatchmakeButton.pressed.connect(_start_matchmake)
 	%PlayFlowButton.pressed.connect(func() -> void:
 		MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
 		MultiplayerService.join_game("auto"))
@@ -67,17 +61,19 @@ func _ready() -> void:
 	if is_shipping_menu():
 		# Shipped builds only expose the dedicated PlayFlow flow and settings.
 		MultiplayerService.set_backend(MultiplayerService.BackendType.PLAYFLOW, false)
-		for node in [%ServiceRow, %MatchmakeButton, %HostButton, %JoinButton]:
+		for node in [%ServiceRow, %HostButton, %JoinButton]:
 			node.hide()
 		# Debug web exports keep Join for local ws://127.0.0.1 server testing.
 		%JoinButton.visible = OS.has_feature("web") and OS.is_debug_build()
 	_focus_default()
-	if not MultiplayerService.kick_reason.is_empty():
+	if MultiplayerService.rejoin:
+		MultiplayerService.rejoin_game()
+	elif not MultiplayerService.kick_reason.is_empty():
 		_show_failure(MultiplayerService.kick_reason)
 		MultiplayerService.kick_reason = ""
 	
 
-## Web and release exports hide the developer backends (ENet, Tube, Host/Join).
+## Web and release exports hide the developer backends (ENet, Host/Join).
 static func is_shipping_menu() -> bool:
 	return OS.has_feature("web") or not OS.is_debug_build()
 
@@ -87,57 +83,24 @@ func _commit_username(_text: String = "") -> void:
 	GGT_GameConfig.persist()
 
 func _focus_default() -> void:
-	if %MatchmakeButton.visible:
-		%MatchmakeButton.grab_focus()
-	else:
-		%PlayFlowButton.grab_focus()
+	%PlayFlowButton.grab_focus()
 
 func _restore_main() -> void:
-	if matchmaker.running:
-		return
 	%MainContainer.show()
 	%Help.show()
 	_focus_default()
 
 func _cancel_pending() -> void:
-	if matchmaker.running:
-		matchmaker.cancel()
-		return
 	timeout_token += 1
 	MultiplayerService.leave_game()
 	%CancelButton.hide()
 	%PendingOverlay.hide()
 	_restore_main()
 
-func _start_matchmake() -> void:
-	timeout_token += 1
-	%MainContainer.hide()
-	%Help.hide()
-	%PendingLabel.text = "Searching for matches..."
-	%FailedLabel.hide()
-	%FailedButton.hide()
-	%CancelButton.show()
-	%PendingOverlay.show()
-	%CancelButton.grab_focus()
-	matchmaker.run()
-
-func _on_matchmake_finished(success: bool, reason: String) -> void:
-	%CancelButton.hide()
-	if success:
-		return
-	if reason.is_empty():
-		%PendingOverlay.hide()
-		_restore_main()
-	else:
-		_show_failure(reason)
-
 func _on_join_lobby_failed(reason: String) -> void:
-	if not matchmaker.running:
-		_show_failure(reason)
+	_show_failure(reason)
 
 func _show_pending(text: String) -> void:
-	if matchmaker.running:
-		return
 	timeout_token += 1
 	var token := timeout_token
 	%MainContainer.hide()

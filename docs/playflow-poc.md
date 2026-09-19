@@ -80,10 +80,30 @@ validation, not account authentication.
 Measure CPU, memory, and gameplay responsiveness on the actual small instance
 before claiming 30-player performance. WebSockets are ordered/reliable TCP;
 loss can delay subsequent movement updates even when RPCs request unreliable
-delivery. Tube remains available for existing sessions, but the PlayFlow button
-does not use Tube, WebRTC, STUN, or TURN.
+delivery. PlayFlow connects straight to a dedicated server: no peer-to-peer
+relay, WebRTC, STUN, or TURN is involved.
 
 References:
 - https://docs.playflowcloud.com/quickstart/godot
 - https://docs.playflowcloud.com/guides/webgl-deployments
 - https://docs.playflowcloud.com/api-reference/servers/list-servers
+
+## Server restarts
+
+PlayFlow sends no shutdown notice (no webhook, signal, or expiry field), so the
+dedicated server predicts the TTL from its own uptime (`PlayFlowBackend.SERVER_TTL`,
+also sent in the client's `/start` body). `MultiplayerService._run_restart_clock`
+broadcasts notices at 5 and 1 minutes, then 120 seconds before the TTL sends
+`_server_restarting` and exits so PlayFlow frees the instance slot.
+
+Clients return to the menu, which calls `MultiplayerService.rejoin_game()` once:
+the normal discovery flow in rejoin mode (180 second deadline, random start
+jitter, skips the exiting instance id, retries `/start` after a 409, and re-polls
+instead of failing on a dead or loading server). The first client to see an empty
+list starts the replacement; the rest poll until it is running. An unannounced
+drop (crash, `tools/restart_playflow.sh` after a deploy) takes the same path
+without an excluded id, because a restarted instance keeps its id but gets a new
+host and port.
+
+Local check: run the server with `-- --playflow-server --restart-after=75`
+(debug builds only), join `ws://127.0.0.1:8080`, then start a second server.

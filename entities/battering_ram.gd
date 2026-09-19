@@ -136,6 +136,9 @@ func _set_attack(state: AttackState) -> void:
 	attack_progress = 0.0
 
 func _process(delta: float) -> void:
+	if MultiplayerService.is_dedicated_server():
+		set_process(false)
+		return
 	_display_position = _display_position.lerp(position, 1.0 - exp(-18.0 * delta))
 	var lunge := 0.0
 	if attack_state == AttackState.STRIKE:

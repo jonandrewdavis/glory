@@ -258,35 +258,6 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_player"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath("AnimatedSprite2D:flip_h")
-properties/1/spawn = true
-properties/1/replication_mode = 2
-properties/2/path = NodePath("AnimatedSprite2D:animation")
-properties/2/spawn = true
-properties/2/replication_mode = 2
-properties/3/path = NodePath("ArrowContainer:visible")
-properties/3/spawn = true
-properties/3/replication_mode = 2
-properties/4/path = NodePath("ArrowContainer:rotation")
-properties/4/spawn = true
-properties/4/replication_mode = 1
-properties/5/path = NodePath("ShieldContainer:visible")
-properties/5/spawn = true
-properties/5/replication_mode = 2
-properties/6/path = NodePath("ShieldContainer:rotation")
-properties/6/spawn = true
-properties/6/replication_mode = 1
-properties/7/path = NodePath("ShieldContainer/ShieldArea/ShieldCollision:disabled")
-properties/7/spawn = true
-properties/7/replication_mode = 2
-properties/8/path = NodePath("ArrowContainer:scale")
-properties/8/spawn = true
-properties/8/replication_mode = 2
-
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_health"]
 properties/0/path = NodePath("HealthComponent:current")
 properties/0/spawn = true
@@ -339,10 +310,6 @@ script = ExtResource("3_health")
 auto_respawn = false
 networked = true
 regen_enabled = false
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=347798596]
-replication_interval = 0.033
-replication_config = SubResource("SceneReplicationConfig_player")
 
 [node name="HealthSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=337667337]
 replication_interval = 0.1

@@ -68,7 +68,8 @@ func check() -> void:
 	legacy_config.set_value("controls", "aim_sensitivity", 0.09)
 	expect(is_equal_approx(GGT_GameConfig.get_aim_sensitivity(legacy_config), 0.09), "Maximum of the current range is kept")
 	settings.free()
-	var config: SceneReplicationConfig = player.get_node("MultiplayerSynchronizer").replication_config
+	expect(player.get_node_or_null("MultiplayerSynchronizer") == null, "Owner state cannot broadcast through a movement synchronizer")
+	var config: SceneReplicationConfig = player.get_node("HealthSynchronizer").replication_config
 	for property in config.get_properties():
 		var node_path := NodePath(String(property).get_slice(":", 0))
 		expect(player.get_node_or_null(node_path) != null, "Replication target resolves: " + String(property))

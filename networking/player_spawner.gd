@@ -111,6 +111,10 @@ func restore_session(old_id: int, new_id: int) -> void:
 		"health": player.health.current, "away": true}
 	var attackers := player.recent_attackers.duplicate()
 	var last_fire := player._server_last_fire_msec
+	var fire_wait := player.fire_cooldown_left
+	var shield_wait := player.shield_cooldown_left
+	if World.combat_network._states.has(old_id):
+		shield_wait = maxf(shield_wait, World.combat_network._states[old_id].shield_ready - CombatNetwork.now())
 	World.respawn_manager.cancel(old_id)
 	_replacement_requests.erase(old_id)
 	remove_child(player)
@@ -120,6 +124,8 @@ func restore_session(old_id: int, new_id: int) -> void:
 	var restored := spawn(data) as ArrowPlayer
 	restored.recent_attackers.assign(attackers)
 	restored._server_last_fire_msec = last_fire
+	restored.fire_cooldown_left = fire_wait
+	restored.shield_cooldown_left = shield_wait
 	if not restored.health.is_alive() and World.round_manager.phase == RoundManager.Phase.PLAYING:
 		World.respawn_manager.pending[new_id] = {"player": restored, "remaining": remaining}
 	for arrow in get_tree().get_nodes_in_group("projectiles"):
@@ -131,7 +137,7 @@ func _prepare_replacement(serial: int, revision: int) -> void:
 	var player := get_player(multiplayer.get_unique_id())
 	if player == null or player.spawn_serial != serial:
 		return
-	player.get_node("MultiplayerSynchronizer").replication_config = SceneReplicationConfig.new()
+	player.network_suspended = true
 	player.set_physics_process(false)
 	player.hide()
 	_replacement_ready.rpc_id(1, serial, revision)

@@ -1,161 +1,273 @@
 class_name ProjectileSpawner
-extends MultiplayerSpawner
-## Host spawns arrows through spawn(); every peer instantiates them via the
-## custom spawn function from the same data, so flight is deterministic.
-
+extends Node
+## Server simulation and client presentation have independent lifetimes.
 signal arrow_spawned(arrow: Arrow)
-## Local hit feedback fired on the shooting peer; also a test hook.
+signal visual_spawned(arrow: Arrow)
 signal hit_sound_played(headshot: bool)
-
 const ARROW_SCENE := preload("res://player/arrow_player/arrow.tscn")
 const STUCK_ARROW_SCENE := preload("res://player/arrow_player/stuck_arrow.tscn")
 const GROUND_ARROW_CAP := 64
-const SINK := 3.0 ## px the tip is pushed into a body so it reads as embedded
-
-## Real travel time divided by baseline time. Changes timing, never the arc.
-## Captured by the host at launch; reflections retain the launch value.
+const SINK := 3.0
 @export_range(0.1, 5.0, 0.05, "or_greater") var arrow_travel_time_multiplier := 1.5
-
 var _serial := 0
 var _ground_arrows: Node2D
-
+var _simulation: Dictionary = {}
+var _visuals: Dictionary = {}
+var _ghosts: Dictionary = {}
+var _terminated: Dictionary = {}
+var _reflections: Dictionary = {}
 @onready var hit_sound: AudioStreamPlayer = $HitSound
 @onready var headshot_sound: AudioStreamPlayer = $HeadshotSound
 
 func _ready() -> void:
-	spawn_function = _spawn_arrow
-	get_node("../LevelLoader").level_clearing.connect(_on_level_clearing)
+	get_node("../LevelLoader").level_clearing.connect(clear_projectiles)
 
-## Ground-stuck arrows and in-flight arrows belong to the old level's terrain.
-func _on_level_clearing() -> void:
-	if is_instance_valid(_ground_arrows):
-		_ground_arrows.queue_free()
-	_ground_arrows = null
-	if multiplayer.is_server():
-		for arrow in get_tree().get_nodes_in_group("projectiles"):
-			arrow.queue_free()
+func _key(peer: int, serial: int, shot: int) -> String:
+	return "%d:%d:%d" % [peer, serial, shot]
 
-# --- Hit feedback (shooter only, host-announced) ----------------------------
+func _instantiate(data: Dictionary, visual: bool) -> Arrow:
+	var arrow: Arrow = ARROW_SCENE.instantiate()
+	arrow.cosmetic = visual
+	arrow.name = ("Visual" if visual else "Arrow") + str(data.get("serial", 0))
+	arrow.setup(data)
+	get_node("../Projectiles").add_child(arrow, true)
+	if visual:
+		visual_spawned.emit(arrow)
+	else:
+		arrow_spawned.emit(arrow)
+	return arrow
 
-## Host only. Tells the shooting peer a damaging arrow landed so it can play
-## the click (body) or the ping (headshot). Nobody else hears it.
-func server_notify_hit(shooter_id: int, headshot: bool) -> void:
-	if not multiplayer.is_server():
-		return
-	if shooter_id == multiplayer.get_unique_id():
-		_play_hit_sound(headshot)
-	elif multiplayer.get_peers().has(shooter_id):
-		_play_hit_sound.rpc_id(shooter_id, headshot)
-
-@rpc("authority", "call_remote", "reliable")
-func _play_hit_sound(headshot: bool) -> void:
-	(headshot_sound if headshot else hit_sound).play()
-	hit_sound_played.emit(headshot)
-
-## Host only. position/velocity describe the original baseline trajectory.
-## Optional trajectory_time/flight_direction resume that curve after a block.
 func spawn_arrow(data: Dictionary) -> Arrow:
 	if not multiplayer.is_server():
 		return null
 	_serial += 1
+	data = data.duplicate()
 	data.serial = _serial
-	data.travel_time_multiplier = Arrow.valid_travel_time_multiplier(
-		data.get("travel_time_multiplier", arrow_travel_time_multiplier))
-	return spawn(data) as Arrow
-
-func _spawn_arrow(data: Variant) -> Node:
-	var arrow: Arrow = ARROW_SCENE.instantiate()
-	arrow.name = "Arrow%d" % data.get("serial", 0)
-	arrow.setup(data)
-	if multiplayer.is_server():
-		arrow.blocked.connect(_on_arrow_blocked)
-	arrow_spawned.emit(arrow)
+	data.launch_time = World.combat_network.server_time()
+	data.travel_time_multiplier = Arrow.valid_travel_time_multiplier(data.get("travel_time_multiplier", arrow_travel_time_multiplier))
+	var arrow := _instantiate(data, false)
+	_simulation[_serial] = arrow
+	World.combat_network.queue_event({"kind": "launch", "data": data})
 	return arrow
 
-func clear_projectiles() -> void:
-	var container := get_node_or_null(spawn_path)
-	if container == null:
+func predict(player: ArrowPlayer, shot: int, aim: Vector2, level: int) -> Arrow:
+	var data := {"position": player.global_position, "velocity": aim * player.compute_arrow_speed(level),
+		"owner_id": player.peer_id, "shooter_serial": player.spawn_serial, "shot": shot,
+		"team": player.team, "damage": 0.0, "scale": player._level_vec(player.level_arrow_scales, level, Vector2.ONE),
+		"travel_time_multiplier": arrow_travel_time_multiplier, "launch_time": World.combat_network.server_time()}
+	var key := _key(player.peer_id, player.spawn_serial, shot)
+	if _ghosts.has(key):
+		return _ghosts[key]
+	var arrow := _instantiate(data, true)
+	arrow.predicted = true
+	arrow.created_at = CombatNetwork.now()
+	_ghosts[key] = arrow
+	return arrow
+
+func _process(_delta: float) -> void:
+	for key: String in _ghosts.keys():
+		var arrow: Arrow = _ghosts[key]
+		if not is_instance_valid(arrow):
+			_ghosts.erase(key)
+		elif CombatNetwork.now() - arrow.created_at >= 1.0:
+			_ghosts.erase(key)
+			_fade_ghost(arrow)
+			World.combat_network.request_baseline()
+	for id: int in _terminated.keys():
+		if CombatNetwork.now() - float(_terminated[id]) > 10.0:
+			_terminated.erase(id)
+
+func _fade_ghost(arrow: Arrow) -> void:
+	var tween := arrow.create_tween()
+	tween.tween_property(arrow, "modulate:a", 0.0, 0.05)
+	tween.tween_callback(arrow.queue_free)
+
+## Handoff is immediate. Terminal effects wait for presentation time.
+func receive_event(event: Dictionary) -> void:
+	if event.kind == "launch":
+		if event.data.has("reflected_from"):
+			_reflections[int(event.data.reflected_from)] = event.data
+		else:
+			_confirm(event.data)
+	elif event.kind == "result" and event.peer == multiplayer.get_unique_id():
+		if event.result == "rejected":
+			var key := _key(event.peer, event.serial, event.shot)
+			if _ghosts.has(key):
+				_fade_ghost(_ghosts[key])
+				_ghosts.erase(key)
+			if int(event.action) == CombatNetwork.SHIELD:
+				var p: ArrowPlayer = World.player_spawner.get_player(event.peer)
+				if p and p.spawn_serial == event.serial:
+					p._end_block()
+
+func _confirm(data: Dictionary) -> void:
+	var id: int = data.serial
+	if _visuals.has(id) or _terminated.has(id):
 		return
-	for child in container.get_children():
-		container.remove_child(child)
+	var key := _key(data.owner_id, data.get("shooter_serial", 0), data.get("shot", 0))
+	var arrow: Arrow = _ghosts.get(key)
+	if is_instance_valid(arrow):
+		_ghosts.erase(key)
+		var previous := arrow.global_position
+		arrow.setup(data)
+		arrow.predicted = false
+		arrow.evaluate_visual(World.combat_network.render_time)
+		arrow.correction = previous - arrow.global_position
+		arrow.correction_left = 0.08
+		if arrow.correction.length() > 96.0:
+			arrow.correction = Vector2.ZERO
+			arrow.trail.clear_points()
+		arrow.global_position += arrow.correction
+	else:
+		arrow = _instantiate(data, true)
+	_visuals[id] = arrow
+	if not multiplayer.is_server():
+		arrow_spawned.emit(arrow)
+
+func present_event(event: Dictionary) -> void:
+	match event.kind:
+		"launch":
+			if event.data.has("reflected_from"):
+				var old: int = event.data.reflected_from
+				var arrow: Arrow = _visuals.get(old)
+				if is_instance_valid(arrow):
+					_visuals.erase(old)
+					arrow.setup(event.data)
+					arrow.refresh_colors()
+					arrow.trail.clear_points()
+					_visuals[int(event.data.serial)] = arrow
+					if not multiplayer.is_server():
+						arrow_spawned.emit(arrow)
+				else:
+					_confirm(event.data)
+				_reflections.erase(old)
+		"terminal":
+			var id: int = event.projectile
+			var arrow: Arrow = _visuals.get(id)
+			if is_instance_valid(arrow):
+				arrow.global_position = event.position
+				if not _reflections.has(id):
+					arrow.queue_free()
+			if not _reflections.has(id):
+				_visuals.erase(id)
+			_terminated[id] = CombatNetwork.now()
+		"impact":
+			var pos: Vector2 = event.position
+			var victim := World.get_node_or_null(NodePath(event.victim)) if not str(event.victim).is_empty() else null
+			if victim is ArrowPlayer and victim.visual_root:
+				pos = victim.visual_root.to_global(event.local_position)
+			elif victim is Node2D:
+				pos = victim.to_global(event.local_position)
+			_spawn_stuck_arrow(pos, event.rotation, event.team, event.scale, NodePath(event.victim))
+		"hit":
+			if event.peer == multiplayer.get_unique_id():
+				_play_hit_sound(event.headshot)
+		"death":
+			var p: ArrowPlayer = World.player_spawner.get_player(event.peer)
+			if p and p.spawn_serial == event.serial:
+				p.present_death(event.position)
+		"shield":
+			var p: ArrowPlayer = World.player_spawner.get_player(event.peer)
+			if p and p.spawn_serial == event.serial:
+				p.present_shield(event)
+
+func finish(arrow: Arrow) -> void:
+	_simulation.erase(arrow.projectile_id)
+	World.combat_network.queue_event({"kind": "terminal", "projectile": arrow.projectile_id, "position": arrow.global_position})
+
+func baseline() -> Array:
+	var result: Array = []
+	for arrow: Arrow in _simulation.values():
+		if is_instance_valid(arrow) and not arrow._finished:
+			var data := arrow.launch_data.duplicate()
+			data.owner_id = arrow.owner_id
+			data.erase("reflected_from")
+			result.append(data)
+	return result
+
+func install_baseline(arrows: Array) -> void:
+	var live := {}
+	_reflections.clear()
+	for data: Dictionary in arrows:
+		live[data.serial] = true
+		_confirm(data)
+	for id: int in _visuals.keys():
+		if not live.has(id):
+			if is_instance_valid(_visuals[id]):
+				_visuals[id].queue_free()
+			_visuals.erase(id)
+
+func clear_projectiles() -> void:
+	for child in get_node("../Projectiles").get_children():
 		child.queue_free()
+	_simulation.clear()
+	_visuals.clear()
+	_ghosts.clear()
+	_terminated.clear()
+	_reflections.clear()
 	_ground_arrows = null
 
 func remove_owned_projectiles(peer_id: int) -> void:
-	if not multiplayer.is_server():
-		return
-	for arrow in get_tree().get_nodes_in_group("projectiles"):
-		if arrow.owner_id == peer_id:
-			arrow.queue_free()
+	if multiplayer.is_server():
+		for arrow: Arrow in _simulation.values():
+			if is_instance_valid(arrow) and arrow.owner_id == peer_id:
+				arrow._finish()
 
-## Host only. Reverse the same trajectory without resetting its bounds or speed.
 func reflect_arrow(arrow: Arrow, blocker: ArrowPlayer, at: Vector2) -> Arrow:
-	return spawn_arrow({
-		"position": arrow.origin,
-		"velocity": arrow.initial_velocity,
-		"trajectory_time": arrow.trajectory_time_at(at),
-		"flight_direction": -arrow.flight_direction,
-		"travel_time_multiplier": arrow.travel_time_multiplier,
-		"owner_id": blocker.peer_id,
-		"team": blocker.team,
-		"damage": arrow.damage,
-		"scale": arrow.visual_scale,
-	})
+	var reflected_time := arrow.trajectory_time_at(at)
+	arrow.global_position = at
+	arrow._finish()
+	return spawn_arrow({"position": arrow.origin, "velocity": arrow.initial_velocity,
+		"trajectory_time": reflected_time, "flight_direction": -arrow.flight_direction,
+		"travel_time_multiplier": arrow.travel_time_multiplier, "owner_id": blocker.peer_id,
+		"team": blocker.team, "damage": arrow.damage, "scale": arrow.visual_scale,
+		"reflected_from": arrow.projectile_id})
 
-func _on_arrow_blocked(_arrow: Arrow, _blocker: Node) -> void:
-	pass
+func server_notify_hit(shooter_id: int, headshot: bool) -> void:
+	if multiplayer.is_server():
+		World.combat_network.queue_event({"kind": "hit", "peer": shooter_id, "headshot": headshot})
 
-# --- Stuck arrows (local visuals, host-announced) ---------------------------
+func _play_hit_sound(headshot: bool) -> void:
+	(headshot_sound if headshot else hit_sound).play()
+	hit_sound_played.emit(headshot)
 
-## Host only. victim null means the arrow hit the world; otherwise it is any
-## node with attach_stuck_arrow() (players, creeps) that MultiplayerSpawner
-## names identically on every peer, so its World-relative path resolves everywhere.
-## Body arrows persist until the victim dies (players clear on respawn, creeps
-## are freed with the corpse); ground arrows are capped and cleared on reset.
 func server_report_impact(pos: Vector2, rot: float, team: int, scale: float, victim: Node) -> void:
 	if multiplayer.is_server():
-		var path := World.get_path_to(victim) if victim != null else NodePath()
-		_spawn_stuck_arrow.rpc(pos, rot, team, scale, path)
+		World.combat_network.queue_event({"kind": "impact", "position": pos, "rotation": rot,
+			"team": team, "scale": scale, "victim": str(World.get_path_to(victim)) if victim != null else "",
+			"local_position": victim.to_local(pos) if victim is Node2D else pos})
 
-@rpc("authority", "call_local", "reliable")
 func _spawn_stuck_arrow(pos: Vector2, rot: float, team: int, scale: float, victim_path: NodePath) -> void:
+	if MultiplayerService.is_dedicated_server():
+		return
 	var stuck: StuckArrow = STUCK_ARROW_SCENE.instantiate()
 	if victim_path.is_empty():
-		var container := _ensure_ground_container()
-		if container == null:
-			stuck.free()
-			return
-		container.add_child(stuck)
+		_ensure_ground_container().add_child(stuck)
 		stuck.global_position = pos
 		stuck.global_rotation = rot
 		stuck.reset_physics_interpolation()
 		stuck.setup(team, scale)
-		_enforce_ground_cap(container)
+		_enforce_ground_cap()
 		return
 	var victim := World.get_node_or_null(victim_path)
-	if victim == null or not victim.is_inside_tree() or not victim.has_method("attach_stuck_arrow"):
+	if victim == null or not victim.has_method("attach_stuck_arrow"):
 		stuck.free()
 		return
 	victim.attach_stuck_arrow(stuck, pos, rot)
 	stuck.setup(team, scale)
 
 func _ensure_ground_container() -> Node2D:
-	if is_instance_valid(_ground_arrows):
-		return _ground_arrows
-	var parent := get_node_or_null(spawn_path)
-	if parent == null:
-		return null
-	_ground_arrows = Node2D.new()
-	_ground_arrows.name = "StuckArrows"
-	_ground_arrows.z_index = -1
-	parent.add_child(_ground_arrows)
+	if not is_instance_valid(_ground_arrows):
+		_ground_arrows = Node2D.new()
+		_ground_arrows.name = "StuckArrows"
+		_ground_arrows.z_index = -1
+		get_node("../Projectiles").add_child(_ground_arrows)
 	return _ground_arrows
 
-func _enforce_ground_cap(container: Node2D) -> void:
+func _enforce_ground_cap() -> void:
 	var live: Array[StuckArrow] = []
-	for child in container.get_children():
+	for child in _ground_arrows.get_children():
 		if child is StuckArrow and not child.is_fading():
 			live.append(child)
-	var excess := live.size() - GROUND_ARROW_CAP
-	for i in range(maxi(excess, 0)):
+	for i in maxi(live.size() - GROUND_ARROW_CAP, 0):
 		live[i].fade_out()

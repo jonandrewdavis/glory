@@ -21,6 +21,21 @@ func expect(condition: bool, description: String) -> void:
 func ticks(count: int) -> void:
 	for i in range(count):
 		await get_tree().physics_frame
+	pump()
+
+## Hit clicks and stuck arrows reach the host through combat-network events,
+## which only present once render_time (wall clock minus the delay buffer)
+## catches up. These checks run physics far faster than real time, so advance
+## presentation by hand instead of waiting out the buffer.
+func pump() -> void:
+	var net: CombatNetwork = World.combat_network
+	if not net._events.is_empty():
+		var batch: Array = net._events.duplicate()
+		net._events.clear()
+		net._install_events(batch)
+	net.render_time = CombatNetwork.now()
+	while not net._presentation_events.is_empty() and float(net._presentation_events[0].time) <= net.render_time:
+		World.projectile_spawner.present_event(net._presentation_events.pop_front())
 
 func soldier(team: int, at: Vector2, goal: float = 0.0) -> Creep:
 	_serial += 1
@@ -140,7 +155,8 @@ func check_creeps_vs_gate() -> void:
 	await ticks(300)
 	expect(attacker._target == orange and orange.health.current < before, "A soldier at the enemy gate strikes it")
 	var defender := soldier(Teams.Team.ORANGE, Vector2(1030, -176), 1030)
-	await ticks(10)
+	# A gate-striking soldier only rescans every RETARGET_INTERVAL (0.25s).
+	await ticks(20)
 	expect(attacker._target == defender, "Enemy soldiers take priority over the gate (target %s)" % attacker._target)
 	await reset_creeps()
 

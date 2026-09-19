@@ -11,7 +11,7 @@ Rewards:
 
 ## Phase 2:
 
-- Server restart & dump players
+- ~~Server restart & dump players~~ (warn, hand off, auto-rejoin; see docs/playflow-poc.md)
 - Better Mouse re-capture logic ... ugh
 - Going back to base to heal
 - Fix respawn not swapping teams when Ram retreats

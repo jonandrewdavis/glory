@@ -4,6 +4,7 @@ class_name UILayer
 const MENU_SCENE := "res://scenes/menu/menu.tscn"
 var exiting := false
 var _resume_label: Label
+var _notice_until := 0
 
 func _ready() -> void:
 	# World is our Global link.
@@ -24,6 +25,9 @@ func _ready() -> void:
 	_apply_ui_scale()
 
 	MultiplayerService.game_exited.connect(_on_game_exited)
+	MultiplayerService.server_notice.connect(func(text: String) -> void:
+		_resume_label.text = text
+		_notice_until = Time.get_ticks_msec() + 6000)
 	if DebugMenu != null:
 		DebugMenu.update_settings_label()
 	if GGT.is_changing_scene():
@@ -54,7 +58,10 @@ func is_paused() -> bool:
 	return $PauseLayer.visible
 
 func _process(_delta: float) -> void:
-	_resume_label.visible = MultiplayerService.presence.recovering
+	if MultiplayerService.presence.recovering:
+		_resume_label.text = "Resuming session..."
+		_notice_until = 0
+	_resume_label.visible = MultiplayerService.presence.recovering or Time.get_ticks_msec() < _notice_until
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and not is_paused() and not MultiplayerService.presence.blocks_input():

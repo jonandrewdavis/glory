@@ -48,8 +48,9 @@ func check() -> void:
 	World.projectile_spawner.arrow_spawned.connect(on_arrow)
 	var shooter := pawn(11, Teams.Team.BLUE, START)
 	var blocker := pawn(22, Teams.Team.ORANGE, Arrow.flight_position(START, LAUNCH, 0.6))
-	shooter._start_block(START + LAUNCH)
-	blocker._start_block(blocker.position - (LAUNCH + Arrow.GRAVITY * 0.6))
+	# This fixture drives authoritative collision directly; command timing has its own checks.
+	shooter.set_server_shield(true, LAUNCH.angle())
+	blocker.set_server_shield(true, (-(LAUNCH + Arrow.GRAVITY * 0.6)).angle())
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var original := shot()
@@ -73,7 +74,7 @@ func check() -> void:
 	expect(spawned == 7, "Six consecutive shield reflections succeed")
 	expect(shooter.health.current == shooter.health.max_value and blocker.health.current == blocker.health.max_value, "Timed shields prevent body damage")
 	World.projectile_spawner.clear_projectiles()
-	shooter._end_block()
+	shooter.set_server_shield(false, 0.0)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var before_health := shooter.health.current
@@ -90,14 +91,14 @@ func check() -> void:
 	returning._physics_process(0.1)
 	expect(returning.elapsed == 0.0 and shooter.health.current == before_health - 25.0, "Body collision is resolved before endpoint expiration")
 	World.projectile_spawner.clear_projectiles()
-	shooter._start_block(START + LAUNCH)
+	shooter.set_server_shield(true, LAUNCH.angle())
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	returning = World.projectile_spawner.spawn_arrow(endpoint_data.duplicate())
 	returning._physics_process(0.1)
 	expect(returning.elapsed == 0.0 and latest != returning and latest.flight_direction == 1 and not latest._finished, "Shield can reflect on the endpoint tick before expiration")
 	World.projectile_spawner.clear_projectiles()
-	shooter._end_block()
+	shooter.set_server_shield(false, 0.0)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	shot()

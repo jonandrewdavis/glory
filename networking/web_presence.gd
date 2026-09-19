@@ -21,17 +21,17 @@ const JS := """
   window.gloryBackground = {
     start(cb) {
       callback = cb;
-      document.addEventListener('visibilitychange', visibility);
-      document.addEventListener('freeze', freeze);
-      window.addEventListener('pagehide', pagehide);
-      timer = setInterval(() => { if (document.hidden && !disabled) dispatch('tick'); }, 250);
+	  document.addEventListener('visibilitychange', visibility);
+	  document.addEventListener('freeze', freeze);
+	  window.addEventListener('pagehide', pagehide);
+	  timer = setInterval(() => { if (document.hidden && !disabled) dispatch('tick'); }, 250);
       visibility();
     },
     stop() {
       clearInterval(timer);
-      document.removeEventListener('visibilitychange', visibility);
-      document.removeEventListener('freeze', freeze);
-      window.removeEventListener('pagehide', pagehide);
+	  document.removeEventListener('visibilitychange', visibility);
+	  document.removeEventListener('freeze', freeze);
+	  window.removeEventListener('pagehide', pagehide);
       callback = undefined;
     },
     report(json) { window.gloryNetworkDiagnostics = JSON.parse(json); }
@@ -122,7 +122,8 @@ func _clear_local_input() -> void:
 	var player: ArrowPlayer = World.player_spawner.get_player(multiplayer.get_unique_id())
 	if player:
 		player.clear_away_actions()
-		player.get_node("MultiplayerSynchronizer").replication_config = SceneReplicationConfig.new()
+		player.network_suspended = true
+		World.combat_network.suspend()
 
 func _poll_background() -> void:
 	if _polling or recovering or (not MultiplayerService.in_lobby and not MultiplayerService.pending) or not multiplayer.has_multiplayer_peer():
@@ -167,7 +168,7 @@ func _process(_delta: float) -> void:
 		return
 	var now := Time.get_ticks_msec()
 	if now >= _recovery_deadline:
-		MultiplayerService._end_game("Could not resume the session. Please join again.")
+		MultiplayerService._end_game(MultiplayerService.RESUME_FAILED_REASON)
 		return
 	if _retry_at > 0 and now >= _retry_at:
 		_retry_at = 0
@@ -343,14 +344,12 @@ func _request_snapshot(revision: int) -> void:
 	if Time.get_ticks_msec() - int(state.get("snapshot_at", -2000)) < 1000:
 		return
 	state.snapshot_at = Time.get_ticks_msec()
-	var arrows := {}
-	for arrow in get_tree().get_nodes_in_group("projectiles"):
-		arrows[str(arrow.get_path())] = arrow.elapsed
+	World.combat_network.send_baseline(id)
 	_receive_snapshot.rpc_id(id, {"revision": revision, "entries": World.scoreboard.entries,
 		"names": MultiplayerService.usernames, "wins": World.round_manager.wins,
 		"phase": World.round_manager.phase, "winner": World.round_manager.winner,
 		"round": World.round_manager.round_number, "owners": World.respawn_manager.owners,
-		"waits": World.respawn_manager._wait_snapshot(), "arrows": arrows,
+		"waits": World.respawn_manager._wait_snapshot(),
 		"switch_ms": maxi(0, int(World.scoreboard._switch_deadlines.get(id, 0)) - Time.get_ticks_msec())})
 
 @rpc("authority", "call_remote", "reliable")
@@ -371,16 +370,13 @@ func _finish_recovery() -> void:
 	World.round_manager._sync_round(_snapshot.wins, _snapshot.phase, _snapshot.winner, _snapshot.round)
 	World.respawn_manager._sync_state(_snapshot.revision, _snapshot.owners, _snapshot.waits)
 	World.scoreboard.local_switch_deadline = Time.get_ticks_msec() + int(_snapshot.switch_ms)
-	for path: String in _snapshot.arrows:
-		var arrow := get_node_or_null(path) as Arrow
-		if arrow:
-			arrow.restore_flight(float(_snapshot.arrows[path]) + (Time.get_ticks_msec() - _snapshot_at) / 1000.0 * arrow.flight_direction / arrow.travel_time_multiplier)
 	_snapshot.clear()
 	recovering = false
 	var player: ArrowPlayer = World.player_spawner.get_player(multiplayer.get_unique_id())
 	player.set_network_away(false)
 	if player.health.is_alive():
-		player.get_node("MultiplayerSynchronizer").replication_config = player._movement_replication
+		player.network_suspended = false
+	World.combat_network.resume()
 	_send_heartbeat(true)
 	MultiplayerService._on_status_changed("Session restored. Click to play.")
 	_report("restored")
